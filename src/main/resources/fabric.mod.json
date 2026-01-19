@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "spotlight",
+  "version": "${version}",
+  "name": "spotlight",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/spotlight/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.drypted.spotlight.client.SpotlightEntryClient"
+    ],
+    "main": [
+      "com.drypted.spotlight.SpotlightEntry"
+    ]
+  },
+  "mixins": [
+    "spotlight.mixins.json",
+    {
+      "config": "spotlight.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
