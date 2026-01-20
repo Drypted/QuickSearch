@@ -96,7 +96,7 @@ public class SearchBarWidget extends AbstractWidget
         }
 
         return false;
-    }`
+    }
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput)
