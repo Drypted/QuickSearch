@@ -10,6 +10,8 @@ public class SpotlightScreen extends Screen
 {
     private static final int DISTANCE_FRON_CENTER = 20;
 
+    private SearchBarWidget searchBarWidget;
+
     public SpotlightScreen()
     {
         super(Component.literal("Spotlight Menu"));
@@ -25,9 +27,11 @@ public class SpotlightScreen extends Screen
         int x = (this.width - buttonWidth) / 2;
         int y = (this.height - buttonHeight) / 2 - DISTANCE_FRON_CENTER;
 
-        SearchBarWidget searchBarWidget = SearchBarWidget.builder(x, y, buttonWidth, buttonHeight).build();
+        searchBarWidget = SearchBarWidget.builder(x, y, buttonWidth, buttonHeight).build();
 
         this.addRenderableWidget(searchBarWidget);
+
+        this.setFocused(searchBarWidget);
     }
 
     @Override
@@ -56,7 +60,8 @@ public class SpotlightScreen extends Screen
     @Override
     public boolean mouseClicked(double d, double e, int i)
     {
-        this.onClose(); // close on any mouse click
+        if (!searchBarWidget.isMouseOver(d, e))
+            this.onClose(); // close on any mouse click outside of search bar
         return super.mouseClicked(d, e, i);
     }
 }

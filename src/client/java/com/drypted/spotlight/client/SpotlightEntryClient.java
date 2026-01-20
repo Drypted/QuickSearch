@@ -31,7 +31,6 @@ public class SpotlightEntryClient implements ClientModInitializer
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (categoryKeyBinding.consumeClick())
             {
-                LOGGER.info("categoryKeyBinding.consumeClick()");
                 client.setScreen(new SpotlightScreen());
             }
         });

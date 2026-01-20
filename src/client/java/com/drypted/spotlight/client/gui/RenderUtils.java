@@ -56,27 +56,27 @@ public final class RenderUtils
                 g.fill(
                         startPosX + outlineThickness,
                         startPosY + outlineThickness,
-                        startPosX + 2,
-                        startPosY + 2,
+                        startPosX + (2 * outlineThickness),
+                        startPosY + (2 * outlineThickness),
                         outlineColor.asInt()
                 ); // top-left
                 g.fill(
-                        endPosX - 2,
+                        endPosX - (2 * outlineThickness),
                         startPosY + outlineThickness,
                         endPosX - outlineThickness,
-                        startPosY + 2,
+                        startPosY + (2 * outlineThickness),
                         outlineColor.asInt()
                 ); // top-right
                 g.fill(
                         startPosX + outlineThickness,
-                        endPosY - 2,
-                        startPosX + 2,
+                        endPosY - (2 * outlineThickness),
+                        startPosX + (2 * outlineThickness),
                         endPosY - outlineThickness,
                         outlineColor.asInt()
                 ); // bottom-left
                 g.fill(
-                        endPosX - 2,
-                        endPosY - 2,
+                        endPosX - (2 * outlineThickness),
+                        endPosY - (2 * outlineThickness),
                         endPosX - outlineThickness,
                         endPosY - outlineThickness,
                         outlineColor.asInt()

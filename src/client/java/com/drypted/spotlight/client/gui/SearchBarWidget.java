@@ -2,10 +2,13 @@ package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.utils.Color;
 import com.drypted.spotlight.client.utils.Colors;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
+import org.lwjgl.glfw.GLFW;
 
 public class SearchBarWidget extends AbstractWidget
 {
@@ -13,6 +16,9 @@ public class SearchBarWidget extends AbstractWidget
     private final int outlineThickness;
     private final Color backgroundColor;
     private final Color outlineColor;
+
+    private String text = "";
+    private boolean canType = true;
 
     public SearchBarWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor)
     {
@@ -25,8 +31,9 @@ public class SearchBarWidget extends AbstractWidget
 
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int i, int j, float f)
+    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
+        // background
         RenderUtils.fillRectangle(
                 guiGraphics,
                 this.getX(),
@@ -39,7 +46,57 @@ public class SearchBarWidget extends AbstractWidget
                 this.backgroundColor,
                 this.outlineColor
         );
+
+        int textX = this.getX() + 6;
+        int textY = this.getY() + (this.getHeight() - 8) / 2;
+
+        // text
+        guiGraphics.drawString(Minecraft.getInstance().font, this.text, textX, textY, Colors.iWHITE, false);
+
+        // caret
+        if ((System.currentTimeMillis() / 500) % 2 == 0)
+        {
+            int caretX = textX + Minecraft.getInstance().font.width(this.text);
+            guiGraphics.fill(caretX, textY, caretX + 1, textY + 8, canType ? Colors.iWHITE : Colors.iYELLOW);
+        }
     }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers)
+    {
+        if (!this.canType)
+            return false;
+
+        if (StringUtil.isAllowedChatCharacter(codePoint))
+        {
+            this.text += codePoint;
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    {
+        // use tab to toggle selecting a entry
+        if (keyCode == GLFW.GLFW_KEY_TAB)
+        {
+            this.canType = !this.canType;
+            return true;
+        }
+
+        if (this.canType)
+        {
+            if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !this.text.isEmpty())
+            {
+                this.text = this.text.substring(0, this.text.length() - 1);
+                return true;
+            }
+        }
+
+        return false;
+    }`
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput)
