@@ -44,35 +44,12 @@ public class ScrollBoxWidget extends AbstractWidget
 
     /* Children */
 
-    public void addChildRow(AbstractWidget widget, int id)
+    public int addChildRow(AbstractWidget widget)
     {
-        if (lastId > 0)
-            System.out.println("Warning: Mixing auto ID and manual ID in ScrollBoxWidget may lead to ID conflicts.");
-
-        int contentY = margin;
-        if (!children.isEmpty())
-        {
-            WidgetEntry lastEntry = children.getLast();
-            contentY = lastEntry.contentY + lastEntry.widget.getHeight() + spacing;
-        }
-        this.children.add(new WidgetEntry(widget, margin, contentY, id));
+        this.children.add(new WidgetEntry(widget, lastId++));
+        return lastId;
     }
 
-    public void addChildRowAutoID(AbstractWidget widget)
-    {
-        int contentY = margin;
-        if (!children.isEmpty())
-        {
-            WidgetEntry lastEntry = children.getLast();
-            contentY = lastEntry.contentY + lastEntry.widget.getHeight() + spacing;
-        }
-        this.children.add(new WidgetEntry(widget, margin, contentY, lastId++));
-    }
-
-    public void addChildAt(AbstractWidget widget, int contentX, int contentY, int id)
-    {
-        this.children.add(new WidgetEntry(widget, contentX, contentY, id));
-    }
 
     @Nullable
     public AbstractWidget getChild(int id)
@@ -112,13 +89,16 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private int contentHeight()
     {
-        int max = 0;
+        int height = margin;
+
         for (WidgetEntry e : children)
         {
-            max = Math.max(max, e.contentY + e.widget.getHeight());
+            height += e.widget.getHeight() + spacing;
         }
-        return max + margin;
+
+        return height - spacing + margin;
     }
+
 
     private double scrollRate()
     {
@@ -144,7 +124,7 @@ public class ScrollBoxWidget extends AbstractWidget
         final float rawScrollerHeight = (float) (viewportHeight * viewportHeight) / (float) totalContentHeight;
 
         final int minScrollerHeight = 32;
-        final int maxScrollerHeight = viewportHeight - 8;
+        final int maxScrollerHeight = viewportHeight;
 
         return Mth.clamp((int) rawScrollerHeight, minScrollerHeight, maxScrollerHeight);
     }
@@ -184,38 +164,52 @@ public class ScrollBoxWidget extends AbstractWidget
     /* Mouse Scroll Logic */
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
-        if (!visible)
-        {
-            return false;
-        }
-
-        final double scrollDelta = scrollY * scrollRate();
-        final double newScrollAmount = scrollAmount - scrollDelta;
-
-        setScrollAmount(newScrollAmount);
-        return true;
-    }
-
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button)
     {
         // Check scrollbar first
         if (scrollbarVisible() && isValidClickButton(button) && isOverScrollbar(mouseX, mouseY))
         {
             this.scrolling = true;
+            this.setFocused(true);
             return true;
         }
 
         // Check children (in reverse order for proper z-order)
-        for (int i = children.size() - 1; i >= 0; i--)
+        if (isMouseOver(mouseX, mouseY))
         {
-            AbstractWidget w = children.get(i).widget;
-            if (w.mouseClicked(mouseX, mouseY, button)) return true;
+            for (int i = children.size() - 1; i >= 0; i--)
+            {
+                AbstractWidget w = children.get(i).widget;
+                if (w.mouseClicked(mouseX, mouseY, button)) return true;
+            }
         }
 
         return false;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        this.scrolling = false;
+        this.setFocused(false);
+
+        for (WidgetEntry entry : children)
+        {
+            entry.widget.mouseReleased(mouseX, mouseY, button);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    {
+        if (!visible || !isMouseOver(mouseX, mouseY))
+        {
+            return false;
+        }
+
+        setScrollAmount(scrollAmount - scrollY * scrollRate());
+        return true;
     }
 
     @Override
@@ -236,31 +230,18 @@ public class ScrollBoxWidget extends AbstractWidget
             }
             else
             {
-                final double maxScroll = Math.max(1.0, maxScrollAmount());
                 final int scrollerHeight = scrollerHeight();
                 final int trackHeight = height - scrollerHeight;
 
-                final double scrollScale = Math.max(1.0, maxScroll / trackHeight);
-                final double newScrollAmount = scrollAmount + deltaY * scrollScale;
+                final double mouseOffset = mouseY - getY() - scrollerHeight / 2.0;
+                final double scrollRatio = Mth.clamp(mouseOffset / trackHeight, 0.0, 1.0);
 
-                setScrollAmount(newScrollAmount);
+                setScrollAmount(scrollRatio * maxScrollAmount());
             }
             return true;
         }
 
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
-    {
-        this.scrolling = false;
-
-        for (WidgetEntry entry : children)
-        {
-            entry.widget.mouseReleased(mouseX, mouseY, button);
-        }
-        return false;
     }
 
     public int getMaxWidth()
@@ -288,12 +269,18 @@ public class ScrollBoxWidget extends AbstractWidget
     private void layoutChildren()
     {
         int scroll = (int) scrollAmount;
+        int yOffset = margin;
 
         for (WidgetEntry entry : children)
         {
-            entry.widget.setPosition(getX() + entry.contentX, getY() + entry.contentY - scroll);
+            AbstractWidget widget = entry.widget;
+
+            widget.setPosition(getX() + margin, getY() + yOffset - scroll);
+
+            yOffset += widget.getHeight() + spacing;
         }
     }
+
 
     private void drawBackground(GuiGraphics g, int x1, int y1, int x2, int y2)
     {
@@ -437,7 +424,7 @@ public class ScrollBoxWidget extends AbstractWidget
         }
     }
 
-    private record WidgetEntry(AbstractWidget widget, int contentX, int contentY, int id)
+    private record WidgetEntry(AbstractWidget widget, int id)
     {
         @Override
         public boolean equals(Object obj)

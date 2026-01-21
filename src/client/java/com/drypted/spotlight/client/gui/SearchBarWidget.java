@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -34,7 +35,6 @@ public class SearchBarWidget extends AbstractWidget
     private int resultsBoxHeight;
     private final ScrollBoxWidget resultsWidget;
 
-
     private static final List<Block> BLOCK_IDS = BuiltInRegistries.BLOCK.stream().toList();
 
     public SearchBarWidget(int x, int y, int width, int searchBoxHeight, int resultsBoxHeight, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor)
@@ -50,7 +50,6 @@ public class SearchBarWidget extends AbstractWidget
         // calculate text position
         TextX = this.getX() + TEXT_PADDING_X;
         TextY = this.getY() + (searchBoxHeight - FONT.lineHeight) / 2;
-
 
         // create results box
         resultsWidget = ScrollBoxWidget.builder(
@@ -112,15 +111,16 @@ public class SearchBarWidget extends AbstractWidget
             return;
         }
 
+        int i = 0;
         for (Block block : BLOCK_IDS)
         {
-            String blockName = BuiltInRegistries.BLOCK.getKey(block).getPath().toLowerCase();
+            String blockName = BuiltInRegistries.BLOCK.getKey(block).toString();
 
             if (blockName.contains(searchText))
             {
-                this.resultsWidget.addChildRowAutoID(SearchResultWidget.builder(0, 0, blockName)
-                                                             .width(resultsWidget.getMaxWidth())
-                                                             .build());
+                this.resultsWidget.addChildRow(SearchResultWidget.builder(0, 0, block, block.getName().getString(), blockName)
+                                                       .width(resultsWidget.getMaxWidth())
+                                                       .build());
             }
         }
     }
@@ -207,6 +207,17 @@ public class SearchBarWidget extends AbstractWidget
     public String getText()
     {
         return text;
+    }
+
+    /* Forwarding events */
+    @Override
+    public boolean mouseScrolled(double d, double e, double f, double g)
+    {
+        if (resultsWidget.mouseScrolled(d, e, f, g))
+        {
+            return true;
+        }
+        return super.mouseScrolled(d, e, f, g);
     }
 
     /* Builder */
