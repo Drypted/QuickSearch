@@ -3,6 +3,7 @@ package com.drypted.spotlight.client.gui;
 import com.drypted.spotlight.client.utils.Color;
 import com.drypted.spotlight.client.utils.Colors;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -20,6 +21,11 @@ public class SearchBarWidget extends AbstractWidget
     private String text = "";
     private boolean canType = true;
 
+    private static final Font FONT = Minecraft.getInstance().font;
+    private static final int TEXT_PADDING_X = 6;
+    private final int TextX;
+    private final int TextY;
+
     public SearchBarWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor)
     {
         super(x, y, width, height, Component.empty());
@@ -27,6 +33,10 @@ public class SearchBarWidget extends AbstractWidget
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
         this.outlineColor = outlineColor;
+
+        // calculate text position
+        TextX = this.getX() + TEXT_PADDING_X;
+        TextY = this.getY() + (this.getHeight() - FONT.lineHeight) / 2;
     }
 
 
@@ -47,25 +57,26 @@ public class SearchBarWidget extends AbstractWidget
                 this.outlineColor
         );
 
-        int textX = this.getX() + 6;
-        int textY = this.getY() + (this.getHeight() - 8) / 2;
-
         // text
-        guiGraphics.drawString(Minecraft.getInstance().font, this.text, textX, textY, Colors.iWHITE, false);
+        guiGraphics.drawString(Minecraft.getInstance().font, this.text, TextX, TextY, Colors.iWHITE, false);
 
         // caret
+        drawCaret(guiGraphics);
+    }
+
+    private void drawCaret(GuiGraphics guiGraphics)
+    {
         if ((System.currentTimeMillis() / 500) % 2 == 0)
         {
-            int caretX = textX + Minecraft.getInstance().font.width(this.text);
-            guiGraphics.fill(caretX, textY, caretX + 1, textY + 8, canType ? Colors.iWHITE : Colors.iYELLOW);
+            int caretX = TextX + Minecraft.getInstance().font.width(this.text);
+            guiGraphics.fill(caretX, TextY, caretX + 1, TextY + 8, canType ? Colors.iWHITE : Colors.iYELLOW);
         }
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers)
     {
-        if (!this.canType)
-            return false;
+        if (!this.canType) return false;
 
         if (StringUtil.isAllowedChatCharacter(codePoint))
         {
@@ -96,6 +107,16 @@ public class SearchBarWidget extends AbstractWidget
         }
 
         return false;
+    }
+
+    public String getValue()
+    {
+        return text;
+    }
+
+    public int getOutlineThickness()
+    {
+        return outlineThickness;
     }
 
     @Override

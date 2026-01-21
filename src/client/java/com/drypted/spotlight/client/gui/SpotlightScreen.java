@@ -9,8 +9,10 @@ import static com.drypted.spotlight.client.SpotlightEntryClient.categoryKeyBindi
 public class SpotlightScreen extends Screen
 {
     private static final int DISTANCE_FRON_CENTER = 20;
+    private static final int RESULTS_BOX_HEIGHT = 100;
 
     private SearchBarWidget searchBarWidget;
+    private ScrollBoxWidget resultsWidget;
 
     public SpotlightScreen()
     {
@@ -22,16 +24,35 @@ public class SpotlightScreen extends Screen
     {
         super.init();
 
-        int buttonWidth = 200;
-        int buttonHeight = 20;
-        int x = (this.width - buttonWidth) / 2;
-        int y = (this.height - buttonHeight) / 2 - DISTANCE_FRON_CENTER;
+        int searchBarWidth = 200;
+        int searchBarHeight = 20;
+        int searchBarX = (this.width - searchBarWidth) / 2;
+        int searchBarY = (this.height - searchBarHeight) / 2 - DISTANCE_FRON_CENTER;
 
-        searchBarWidget = SearchBarWidget.builder(x, y, buttonWidth, buttonHeight).build();
+        this.searchBarWidget = SearchBarWidget.builder(searchBarX, searchBarY, searchBarWidth, searchBarHeight).build();
+        this.resultsWidget = ScrollBoxWidget.builder(
+                searchBarWidget.getX(),
+                searchBarWidget.getBottom() - searchBarWidget.getOutlineThickness(),
+                searchBarWidget.getWidth(),
+                RESULTS_BOX_HEIGHT
+        ).showScrollerAlways(true).build();
+
+        addEntries();
 
         this.addRenderableWidget(searchBarWidget);
-
+        this.addRenderableWidget(resultsWidget);
         this.setFocused(searchBarWidget);
+    }
+
+    private void addEntries()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            resultsWidget.addChildRow(
+                    ButtonWidget.builder(0, 0, "Button " + (i + 1)).width(resultsWidget.getMaxWidth()).build(),
+                    i
+            );
+        }
     }
 
     @Override
@@ -60,8 +81,7 @@ public class SpotlightScreen extends Screen
     @Override
     public boolean mouseClicked(double d, double e, int i)
     {
-        if (!searchBarWidget.isMouseOver(d, e))
-            this.onClose(); // close on any mouse click outside of search bar
+        if (!searchBarWidget.isMouseOver(d, e)) this.onClose(); // close on any mouse click outside of search bar
         return super.mouseClicked(d, e, i);
     }
 }
