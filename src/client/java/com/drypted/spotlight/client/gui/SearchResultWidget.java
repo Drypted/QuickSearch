@@ -8,10 +8,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Block;
 
 import java.util.function.BiConsumer;
 
-public class ButtonWidget extends AbstractWidget
+public class SearchResultWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
 
@@ -35,7 +36,7 @@ public class ButtonWidget extends AbstractWidget
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public ButtonWidget(int x, int y, int padding, boolean isRounded, String text, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, float scale)
+    public SearchResultWidget(int x, int y, int padding, boolean isRounded, String text, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, float scale)
     {
         super(x, y, 0, 0, Component.empty());
         this.text = text;
@@ -145,7 +146,7 @@ public class ButtonWidget extends AbstractWidget
     {
     }
 
-    // GETTERS & SETTERS --------------------------------------------------------------------------
+    /* GETTERS & SETTERS */
 
     public void setOnClick(BiConsumer<MouseButtonClick, Boolean> onClickCallback)
     {
@@ -262,7 +263,7 @@ public class ButtonWidget extends AbstractWidget
         this.scale = scale;
     }
 
-    // BUILDER ------------------------------------------------------------------------------------
+    /* Builder */
 
     public static Builder builder(int x, int y, String text)
     {
@@ -391,9 +392,9 @@ public class ButtonWidget extends AbstractWidget
             return this;
         }
 
-        public ButtonWidget build()
+        public SearchResultWidget build()
         {
-            ButtonWidget button = new ButtonWidget(
+            SearchResultWidget button = new SearchResultWidget(
                     x,
                     y,
                     padding,

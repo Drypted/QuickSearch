@@ -28,6 +28,8 @@ public class ScrollBoxWidget extends AbstractWidget
     private double scrollAmount;
     private boolean scrolling;
 
+    private int lastId = 0;
+
     public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
     {
         super(x, y, width, height, Component.empty());
@@ -40,10 +42,13 @@ public class ScrollBoxWidget extends AbstractWidget
         this.scrollerColor = scrollerColor;
     }
 
-    /* ---------------- Children ---------------- */
+    /* Children */
 
     public void addChildRow(AbstractWidget widget, int id)
     {
+        if (lastId > 0)
+            System.out.println("Warning: Mixing auto ID and manual ID in ScrollBoxWidget may lead to ID conflicts.");
+
         int contentY = margin;
         if (!children.isEmpty())
         {
@@ -51,6 +56,17 @@ public class ScrollBoxWidget extends AbstractWidget
             contentY = lastEntry.contentY + lastEntry.widget.getHeight() + spacing;
         }
         this.children.add(new WidgetEntry(widget, margin, contentY, id));
+    }
+
+    public void addChildRowAutoID(AbstractWidget widget)
+    {
+        int contentY = margin;
+        if (!children.isEmpty())
+        {
+            WidgetEntry lastEntry = children.getLast();
+            contentY = lastEntry.contentY + lastEntry.widget.getHeight() + spacing;
+        }
+        this.children.add(new WidgetEntry(widget, margin, contentY, lastId++));
     }
 
     public void addChildAt(AbstractWidget widget, int contentX, int contentY, int id)
@@ -86,7 +102,13 @@ public class ScrollBoxWidget extends AbstractWidget
         children.removeIf(entry -> entry.widget == widget);
     }
 
-    /* ---------------- Scroll Logic ---------------- */
+    public void removeAllChildren()
+    {
+        children.clear();
+        setScrollAmount(0.0);
+    }
+
+    /* Scroll Logic */
 
     private int contentHeight()
     {
@@ -149,7 +171,6 @@ public class ScrollBoxWidget extends AbstractWidget
         return topY + scrollerOffset;
     }
 
-
     private void setScrollAmount(double amount)
     {
         this.scrollAmount = Mth.clamp(amount, 0.0, (double) maxScrollAmount());
@@ -160,7 +181,94 @@ public class ScrollBoxWidget extends AbstractWidget
         return mouseX >= scrollBarX() && mouseX <= scrollBarX() + SCROLLBAR_WIDTH && mouseY >= getY() && mouseY < getBottom();
     }
 
-    /* ---------------- Render ---------------- */
+    /* Mouse Scroll Logic */
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
+    {
+        if (!visible)
+        {
+            return false;
+        }
+
+        final double scrollDelta = scrollY * scrollRate();
+        final double newScrollAmount = scrollAmount - scrollDelta;
+
+        setScrollAmount(newScrollAmount);
+        return true;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        // Check scrollbar first
+        if (scrollbarVisible() && isValidClickButton(button) && isOverScrollbar(mouseX, mouseY))
+        {
+            this.scrolling = true;
+            return true;
+        }
+
+        // Check children (in reverse order for proper z-order)
+        for (int i = children.size() - 1; i >= 0; i--)
+        {
+            AbstractWidget w = children.get(i).widget;
+            if (w.mouseClicked(mouseX, mouseY, button)) return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY)
+    {
+        if (scrolling)
+        {
+            final int topY = getY();
+            final int bottomY = getBottom();
+
+            if (mouseY < topY)
+            {
+                setScrollAmount(0.0);
+            }
+            else if (mouseY > bottomY)
+            {
+                setScrollAmount(maxScrollAmount());
+            }
+            else
+            {
+                final double maxScroll = Math.max(1.0, maxScrollAmount());
+                final int scrollerHeight = scrollerHeight();
+                final int trackHeight = height - scrollerHeight;
+
+                final double scrollScale = Math.max(1.0, maxScroll / trackHeight);
+                final double newScrollAmount = scrollAmount + deltaY * scrollScale;
+
+                setScrollAmount(newScrollAmount);
+            }
+            return true;
+        }
+
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        this.scrolling = false;
+
+        for (WidgetEntry entry : children)
+        {
+            entry.widget.mouseReleased(mouseX, mouseY, button);
+        }
+        return false;
+    }
+
+    public int getMaxWidth()
+    {
+        return this.width - (margin * 2) - (scrollbarVisible() ? SCROLLBAR_WIDTH : 0);
+    }
+
+    /* Render */
 
     @Override
     protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float delta)
@@ -239,101 +347,7 @@ public class ScrollBoxWidget extends AbstractWidget
         // }
     }
 
-    /* ---------------- Input ---------------- */
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
-    {
-        if (!visible)
-        {
-            return false;
-        }
-
-        final double scrollDelta = scrollY * scrollRate();
-        final double newScrollAmount = scrollAmount - scrollDelta;
-
-        setScrollAmount(newScrollAmount);
-        return true;
-    }
-
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
-    {
-        // Check scrollbar first
-        if (scrollbarVisible() && isValidClickButton(button) && isOverScrollbar(mouseX, mouseY))
-        {
-            this.scrolling = true;
-            return true;
-        }
-
-        // Check children (in reverse order for proper z-order)
-        for (int i = children.size() - 1; i >= 0; i--)
-        {
-            AbstractWidget w = children.get(i).widget;
-            if (w.mouseClicked(mouseX, mouseY, button)) return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY)
-    {
-        if (scrolling)
-        {
-            final int topY = getY();
-            final int bottomY = getBottom();
-
-            if (mouseY < topY)
-            {
-                setScrollAmount(0.0);
-            }
-            else if (mouseY > bottomY)
-            {
-                setScrollAmount(maxScrollAmount());
-            }
-            else
-            {
-                final double maxScroll = Math.max(1.0, maxScrollAmount());
-                final int scrollerHeight = scrollerHeight();
-                final int trackHeight = height - scrollerHeight;
-
-                final double scrollScale = Math.max(1.0, maxScroll / trackHeight);
-                final double newScrollAmount = scrollAmount + deltaY * scrollScale;
-
-                setScrollAmount(newScrollAmount);
-            }
-            return true;
-        }
-
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
-
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
-    {
-        this.scrolling = false;
-
-        for (WidgetEntry entry : children)
-        {
-            entry.widget.mouseReleased(mouseX, mouseY, button);
-        }
-        return false;
-    }
-
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput narration)
-    {
-    }
-
-    public int getMaxWidth()
-    {
-        return this.width - (margin * 2) - (scrollbarVisible() ? SCROLLBAR_WIDTH : 0);
-    }
-
-    /* ---------------- Builder ---------------- */
+    /* Builder */
 
     public static Builder builder(int x, int y, int width, int height)
     {
@@ -433,5 +447,10 @@ public class ScrollBoxWidget extends AbstractWidget
             WidgetEntry other = (WidgetEntry) obj;
             return this.id == other.id;
         }
+    }
+
+    @Override
+    protected void updateWidgetNarration(NarrationElementOutput narration)
+    {
     }
 }

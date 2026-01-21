@@ -9,10 +9,8 @@ import static com.drypted.spotlight.client.SpotlightEntryClient.categoryKeyBindi
 public class SpotlightScreen extends Screen
 {
     private static final int DISTANCE_FRON_CENTER = 20;
-    private static final int RESULTS_BOX_HEIGHT = 100;
 
     private SearchBarWidget searchBarWidget;
-    private ScrollBoxWidget resultsWidget;
 
     public SpotlightScreen()
     {
@@ -30,29 +28,9 @@ public class SpotlightScreen extends Screen
         int searchBarY = (this.height - searchBarHeight) / 2 - DISTANCE_FRON_CENTER;
 
         this.searchBarWidget = SearchBarWidget.builder(searchBarX, searchBarY, searchBarWidth, searchBarHeight).build();
-        this.resultsWidget = ScrollBoxWidget.builder(
-                searchBarWidget.getX(),
-                searchBarWidget.getBottom() - searchBarWidget.getOutlineThickness(),
-                searchBarWidget.getWidth(),
-                RESULTS_BOX_HEIGHT
-        ).showScrollerAlways(true).build();
-
-        addEntries();
 
         this.addRenderableWidget(searchBarWidget);
-        this.addRenderableWidget(resultsWidget);
         this.setFocused(searchBarWidget);
-    }
-
-    private void addEntries()
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            resultsWidget.addChildRow(
-                    ButtonWidget.builder(0, 0, "Button " + (i + 1)).width(resultsWidget.getMaxWidth()).build(),
-                    i
-            );
-        }
     }
 
     @Override
