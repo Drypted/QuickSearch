@@ -1,5 +1,6 @@
 package com.drypted.spotlight.client.gui;
 
+import com.drypted.spotlight.client.records.RoundedCorners;
 import com.drypted.spotlight.client.utils.Color;
 import com.drypted.spotlight.client.utils.Colors;
 import net.minecraft.client.Minecraft;
@@ -14,7 +15,7 @@ import java.util.function.BiConsumer;
 
 import static com.drypted.spotlight.client.RendererUtils.drawScaledItem;
 
-public class SearchResultWidget extends AbstractWidget
+public class SearchResultsWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
 
@@ -43,7 +44,7 @@ public class SearchResultWidget extends AbstractWidget
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public SearchResultWidget(int x, int y, int width, ItemStack icon, String title, String subtitle, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
+    public SearchResultsWidget(int x, int y, int width, ItemStack icon, String title, String subtitle, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
     {
         super(x, y, width, 0, Component.empty());
         this.icon = icon;
@@ -87,7 +88,7 @@ public class SearchResultWidget extends AbstractWidget
                 startPosY,
                 endPosX,
                 endPosY,
-                this.isRounded,
+                RoundedCorners.fromSingle(this.isRounded),
                 this.outlineThickness,
                 renderOutline,
                 this.backgroundColor,
@@ -362,9 +363,9 @@ public class SearchResultWidget extends AbstractWidget
             return this;
         }
 
-        public SearchResultWidget build()
+        public SearchResultsWidget build()
         {
-            SearchResultWidget button = new SearchResultWidget(
+            SearchResultsWidget button = new SearchResultsWidget(
                     this.x,
                     this.y,
                     this.width,

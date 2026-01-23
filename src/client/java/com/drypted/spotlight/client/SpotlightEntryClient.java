@@ -34,7 +34,6 @@ public class SpotlightEntryClient implements ClientModInitializer
                 KeyMapping.CATEGORY_MISC
         );
 
-
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openSpotlightKeyMapping.consumeClick())
             {
