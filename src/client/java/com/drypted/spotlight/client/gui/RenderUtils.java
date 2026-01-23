@@ -122,4 +122,14 @@ public final class RenderUtils
             }
         }
     }
+
+    public static void drawHorizontalLine(GuiGraphics g, int startPosX, int endPosX, int posY, int thickness, Color color)
+    {
+        g.fill(startPosX, posY, endPosX, posY + thickness, color.asInt());
+    }
+
+    public static void drawVerticalLine(GuiGraphics g, int posX, int startPosY, int endPosY, int thickness, Color color)
+    {
+        g.fill(posX, startPosY, posX + thickness, endPosY, color.asInt());
+    }
 }

@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.BiConsumer;
 
@@ -18,7 +18,7 @@ public class SearchResultWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
 
-    private Block icon;
+    private ItemStack icon;
     private String title;
     private String subtitle;
 
@@ -43,7 +43,7 @@ public class SearchResultWidget extends AbstractWidget
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public SearchResultWidget(int x, int y, int width, Block icon, String title, String subtitle, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
+    public SearchResultWidget(int x, int y, int width, ItemStack icon, String title, String subtitle, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
     {
         super(x, y, width, 0, Component.empty());
         this.icon = icon;
@@ -98,7 +98,7 @@ public class SearchResultWidget extends AbstractWidget
         int iconX = startPosX + padding;
         int iconY = startPosY + padding;
 
-        drawScaledItem(g, this.icon.asItem().getDefaultInstance(), iconX, iconY, ICON_SIZE);
+        drawScaledItem(g, this.icon, iconX, iconY, ICON_SIZE);
 
         // title
         int titleX = iconX + ICON_SIZE + ICON_PADDING;
@@ -136,7 +136,10 @@ public class SearchResultWidget extends AbstractWidget
     {
         this.pressed = false;
         MouseButtonClick clickPoint = new MouseButtonClick(x, y);
-        if (isMouseInButton(clickPoint)) onClickCallback.accept(clickPoint, pressed);
+        if (isMouseInButton(clickPoint))
+        {
+            onClickCallback.accept(clickPoint, pressed);
+        }
     }
 
     private boolean isMouseInButton(MouseButtonClick clickPoint)
@@ -173,12 +176,12 @@ public class SearchResultWidget extends AbstractWidget
         this.onClickCallback = onClickCallback;
     }
 
-    public Block getIcon()
+    public ItemStack getIcon()
     {
         return icon;
     }
 
-    public void setIcon(Block icon)
+    public void setIcon(ItemStack icon)
     {
         this.icon = icon;
     }
@@ -255,9 +258,9 @@ public class SearchResultWidget extends AbstractWidget
 
     /* Builder */
 
-    public static Builder builder(int x, int y, Block icon, String title, String subtitle)
+    public static Builder builder(int x, int y, SearchResultData data)
     {
-        return new Builder(x, y, icon, title, subtitle);
+        return new Builder(x, y, data.getIcon(), data.getName(), data.getIdentifier());
     }
 
     public static final class Builder
@@ -265,7 +268,7 @@ public class SearchResultWidget extends AbstractWidget
         private final int x;
         private final int y;
         private int width = 0;
-        private final Block icon;
+        private final ItemStack icon;
         private final String title;
         private final String subtitle;
 
@@ -283,7 +286,7 @@ public class SearchResultWidget extends AbstractWidget
         private BiConsumer<MouseButtonClick, Boolean> onClick = (e, pressed) -> {
         };
 
-        private Builder(int x, int y, Block icon, String title, String subtitle)
+        private Builder(int x, int y, ItemStack icon, String title, String subtitle)
         {
             this.x = x;
             this.y = y;

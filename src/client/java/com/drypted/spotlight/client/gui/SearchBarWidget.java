@@ -6,15 +6,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.level.block.Block;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class SearchBarWidget extends AbstractWidget
 {
@@ -28,6 +28,9 @@ public class SearchBarWidget extends AbstractWidget
 
     private static final Font FONT = Minecraft.getInstance().font;
     private static final int TEXT_PADDING_X = 6;
+    /// Padding between hotbar slots above the search box
+    private static final int HOTBAR_PADDING = 4;
+
     private final int TextX;
     private final int TextY;
 
@@ -35,7 +38,13 @@ public class SearchBarWidget extends AbstractWidget
     private int resultsBoxHeight;
     private final ScrollBoxWidget resultsWidget;
 
-    private static final List<Block> BLOCK_IDS = BuiltInRegistries.BLOCK.stream().toList();
+
+    private static final List<SearchResultData> SEARCH_DATA;
+
+    static
+    {
+        SEARCH_DATA = BuiltInRegistries.ITEM.stream().map(SearchResultData::fromItem).toList();
+    }
 
     public SearchBarWidget(int x, int y, int width, int searchBoxHeight, int resultsBoxHeight, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor)
     {
@@ -60,6 +69,8 @@ public class SearchBarWidget extends AbstractWidget
                 )
                 .showScrollerAlways(true)
                 .build();
+
+        refreshResults();
     }
 
     @Override
@@ -85,8 +96,42 @@ public class SearchBarWidget extends AbstractWidget
         // caret
         drawCaret(guiGraphics);
 
+        // hotbar items
+        drawHotbarSlots(guiGraphics);
+
         // render results box
         this.resultsWidget.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    private void drawHotbarSlots(GuiGraphics g)
+    {
+        final int slots = 9;
+
+        // width = slots * iconSize + (slots + 1) * padding
+        // => iconSize = (width - (slots + 1) * padding) / slots
+        final float iconSize = (this.getWidth() - HOTBAR_PADDING * (slots + 1)) / (float) slots;
+
+        final int endY = this.getY() + outlineThickness;
+        final int startY = (int) Math.ceil(endY - iconSize);
+
+        float cursor = this.getX() + HOTBAR_PADDING;
+        for (int i = 0; i < slots; i++)
+        {
+            RenderUtils.fillRectangle(
+                    g,
+                    (int) Math.ceil(cursor),
+                    startY,
+                    (int) Math.ceil(cursor + iconSize),
+                    endY,
+                    true,
+                    1,
+                    true,
+                    backgroundColor,
+                    outlineColor
+            );
+
+            cursor += iconSize + HOTBAR_PADDING;
+        }
     }
 
     /* Draw */
@@ -111,18 +156,27 @@ public class SearchBarWidget extends AbstractWidget
             return;
         }
 
-        int i = 0;
-        for (Block block : BLOCK_IDS)
+        for (SearchResultData result : SEARCH_DATA)
         {
-            String blockName = BuiltInRegistries.BLOCK.getKey(block).toString();
-
-            if (blockName.contains(searchText))
+            if (result.getName().contains(searchText) || result.getIdentifier().contains(searchText))
             {
-                this.resultsWidget.addChildRow(SearchResultWidget.builder(0, 0, block, block.getName().getString(), blockName)
+                this.resultsWidget.addChildRow(SearchResultWidget.builder(0, 0, result)
                                                        .width(resultsWidget.getMaxWidth())
+                                                       .onClick(onResultClicked(result))
                                                        .build());
             }
         }
+    }
+
+    private BiConsumer<MouseButtonClick, Boolean> onResultClicked(SearchResultData block)
+    {
+        return (mouseButtonClick, isDoubleClick) -> {
+            // give the player the result they clicked on
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player == null) return;
+
+            player.connection.sendCommand(block.getCommandString());
+        };
     }
 
     /* Meta (Stuff to make it functional) */
@@ -220,6 +274,26 @@ public class SearchBarWidget extends AbstractWidget
         return super.mouseScrolled(d, e, f, g);
     }
 
+    @Override
+    public boolean mouseClicked(double d, double e, int i)
+    {
+        if (resultsWidget.mouseClicked(d, e, i))
+        {
+            return true;
+        }
+        return super.mouseClicked(d, e, i);
+    }
+
+    @Override
+    public boolean mouseReleased(double d, double e, int i)
+    {
+        if (resultsWidget.mouseReleased(d, e, i))
+        {
+            return true;
+        }
+        return super.mouseReleased(d, e, i);
+    }
+
     /* Builder */
 
     public static Builder builder(int x, int y, int width, int searchBoxHeight)
@@ -302,14 +376,14 @@ public class SearchBarWidget extends AbstractWidget
         {
             return new SearchBarWidget(
                     x,
-                                       y,
-                                       width,
-                                       searchBoxHeight,
-                                       resultsBoxHeight,
-                                       isRounded,
-                                       outlineThickness,
-                                       backgroundColor,
-                                       outlineColor
+                    y,
+                    width,
+                    searchBoxHeight,
+                    resultsBoxHeight,
+                    isRounded,
+                    outlineThickness,
+                    backgroundColor,
+                    outlineColor
             );
         }
     }
