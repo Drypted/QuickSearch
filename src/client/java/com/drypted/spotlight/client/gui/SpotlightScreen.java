@@ -4,7 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import static com.drypted.spotlight.client.SpotlightEntryClient.categoryKeyBinding;
+import static com.drypted.spotlight.client.SpotlightEntryClient.closeSpotlightKeyMapping;
 
 public class SpotlightScreen extends Screen
 {
@@ -48,7 +48,7 @@ public class SpotlightScreen extends Screen
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        if (categoryKeyBinding.matches(keyCode, scanCode))
+        if (closeSpotlightKeyMapping.matches(keyCode, scanCode))
         {
             this.onClose();
             return true;

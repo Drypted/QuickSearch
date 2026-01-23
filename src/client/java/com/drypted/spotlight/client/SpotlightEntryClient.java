@@ -14,22 +14,29 @@ public class SpotlightEntryClient implements ClientModInitializer
     public static final String MOD_ID = "spotlight";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static KeyMapping categoryKeyBinding;
+    public static KeyMapping openSpotlightKeyMapping;
+    public static KeyMapping closeSpotlightKeyMapping;
 
     @Override
     public void onInitializeClient()
     {
         // register keybind
-        categoryKeyBinding = new KeyMapping(
+        openSpotlightKeyMapping = new KeyMapping(
                 "key.spotlight.toggle",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_Y,
                 KeyMapping.CATEGORY_MISC
         );
+        closeSpotlightKeyMapping = new KeyMapping(
+                "key.spotlight.close",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_ESCAPE,
+                KeyMapping.CATEGORY_MISC
+        );
 
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (categoryKeyBinding.consumeClick())
+            while (openSpotlightKeyMapping.consumeClick())
             {
                 client.setScreen(new SpotlightScreen());
             }
