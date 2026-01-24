@@ -17,6 +17,12 @@ import java.util.function.Consumer;
 
 public class SearchInputWidget extends AbstractWidget
 {
+    private static final Font FONT = Minecraft.getInstance().font;
+    private static final int TEXT_PADDING_X = 6;
+
+    private static final int INDICATOR_PADDING_RIGHT = 4;
+    private static final float STATUS_TRANSITION_TIME_MS = 200f;
+
     private final boolean isRounded;
     private final int outlineThickness;
     private final Color backgroundColor;
@@ -25,12 +31,14 @@ public class SearchInputWidget extends AbstractWidget
     private String text = "";
     private boolean canType = true;
 
-    private static final Font FONT = Minecraft.getInstance().font;
-    private static final int TEXT_PADDING_X = 6;
-
     private final int TextX;
     private final int TextY;
 
+    private SearchStatus searchStatus = SearchStatus.IDLE;
+    /// /// For transition animations; Disabled for now
+    /// private long StatusChangeTime = 0L;
+
+    /// Callbacks for when text is typed
     private final ArrayList<Consumer<String>> onTypeCallbacks = new ArrayList<>();
 
     public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor)
@@ -68,18 +76,42 @@ public class SearchInputWidget extends AbstractWidget
 
         // caret
         drawCaret(guiGraphics);
-    }
 
+        switch (this.searchStatus)
+        {
+            case IDLE:
+                // do nothing
+                break;
+            case SEARCHING:
+                drawLoadingAtEnd(guiGraphics);
+                break;
+        }
+    }
 
     /* Draw */
 
     private void drawCaret(GuiGraphics guiGraphics)
     {
-        if ((System.currentTimeMillis() / 500) % 2 == 0)
+        final int blinkTimeMs = 500;
+
+        if (System.currentTimeMillis() % (blinkTimeMs * 2) < blinkTimeMs)
         {
             int caretX = TextX + Minecraft.getInstance().font.width(this.text);
             guiGraphics.fill(caretX, TextY, caretX + 1, TextY + 8, canType ? Colors.iWHITE : Colors.iYELLOW);
         }
+    }
+
+    private void drawLoadingAtEnd(GuiGraphics guiGraphics)
+    {
+        /// long elapsed = System.currentTimeMillis() - StatusChangeTime;
+        /// float fadeIn = Math.min(1.0f, elapsed / STATUS_TRANSITION_TIME_MS); // 200ms fade-in
+
+        int size = this.height - (2 * INDICATOR_PADDING_RIGHT);
+        int loadingX = this.getX() + this.getWidth() - INDICATOR_PADDING_RIGHT - size;
+        int loadingY = this.getY() + INDICATOR_PADDING_RIGHT;
+
+        /// Color loadingColor = Colors.INFO_BLUE.withAlpha((int) (255 * fadeIn));
+        RenderUtils.drawThreeDotPulseSpinner(guiGraphics, loadingX, loadingY, size, Colors.INFO_BLUE, System.currentTimeMillis());
     }
 
     /* Meta (Stuff to make it functional) */
@@ -154,6 +186,20 @@ public class SearchInputWidget extends AbstractWidget
     public String getText()
     {
         return text;
+    }
+
+    public SearchStatus getSearchStatus()
+    {
+        return searchStatus;
+    }
+
+    public void setSearchStatus(SearchStatus searchStatus)
+    {
+        /// if (this.searchStatus != searchStatus)
+        /// {
+        ///     this.StatusChangeTime = System.currentTimeMillis();
+        /// }
+        this.searchStatus = searchStatus;
     }
 
     /* Methods */
@@ -238,5 +284,11 @@ public class SearchInputWidget extends AbstractWidget
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput)
     {
+    }
+
+    public enum SearchStatus
+    {
+        IDLE,
+        SEARCHING,
     }
 }

@@ -20,4 +20,10 @@ public class Colors
     public static final int iBLUE = Colors.BLUE.asInt();
     public static final int iYELLOW = Colors.YELLOW.asInt();
     public static final int iGRAY = Colors.GRAY.asInt();
+
+    // More refined colors for UI indicators
+    public static final Color SUCCESS_GREEN = Color.fromRGBA(34, 197, 94, 255);   // Modern green
+    public static final Color WARNING_YELLOW = Color.fromRGBA(234, 179, 8, 255);  // Modern yellow
+    public static final Color ERROR_RED = Color.fromRGBA(239, 68, 68, 255);       // Modern red
+    public static final Color INFO_BLUE = Color.fromRGBA(59, 130, 246, 255);      // Modern blue
 }

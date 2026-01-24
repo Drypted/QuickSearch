@@ -83,7 +83,7 @@ public class SearchHotbarWidget extends AbstractWidget
         private final int width;
         private final int height;
 
-        private int iconPadding = 4;
+        private int iconPadding = 2;
         private RoundedCorners roundedCorners = RoundedCorners.all();
         private int outlineThickness = 1;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();

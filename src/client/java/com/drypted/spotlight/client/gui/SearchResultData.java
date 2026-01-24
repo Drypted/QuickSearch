@@ -3,6 +3,7 @@ package com.drypted.spotlight.client.gui;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 
 public final class SearchResultData
@@ -31,6 +32,17 @@ public final class SearchResultData
         this.commandString = commandString;
     }
 
+    public boolean isNotEmpty()
+    {
+        return this != EMPTY;
+    }
+
+    public boolean containsText(String text)
+    {
+        final String lowerText = text.toLowerCase();
+        return name.toLowerCase().contains(lowerText) || identifier.toLowerCase().contains(lowerText);
+    }
+
     public static SearchResultData fromBlock(Block block)
     {
         final ItemStack icon = block.asItem().getDefaultInstance();
@@ -43,6 +55,9 @@ public final class SearchResultData
 
     public static SearchResultData fromItem(Item item)
     {
+        if (item == null || item == ItemStack.EMPTY.getItem() || item == Items.AIR)
+            return SearchResultData.EMPTY;
+
         final ItemStack stack = item.getDefaultInstance();
 
         final String name = item.getName(stack).getString();
@@ -50,11 +65,6 @@ public final class SearchResultData
         final int maxStackSize = item.getDefaultMaxStackSize();
 
         return new SearchResultData(stack, name, identifier, maxStackSize);
-    }
-
-    public boolean isNotEmpty()
-    {
-        return this != EMPTY;
     }
 
     /* GETTERS & SETTERS */
