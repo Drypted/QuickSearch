@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.records;
 
-public record RoundedCorners(boolean topLeft, boolean topRight, boolean bottomLeft, boolean bottomRight)
+public record RoundedCorners(boolean topLeft, boolean topRight, boolean bottomLeft,
+                             boolean bottomRight)
 {
     public static RoundedCorners from(boolean topLeft, boolean topRight, boolean bottomLeft, boolean bottomRight)
     {

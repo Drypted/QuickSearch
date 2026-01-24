@@ -40,7 +40,8 @@ public final class SearchResultData
     public boolean containsText(String text)
     {
         final String lowerText = text.toLowerCase();
-        return name.toLowerCase().contains(lowerText) || identifier.toLowerCase().contains(lowerText);
+        return name.toLowerCase().contains(lowerText) || identifier.toLowerCase()
+                                                                   .contains(lowerText);
     }
 
     public static SearchResultData fromBlock(Block block)

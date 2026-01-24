@@ -29,7 +29,6 @@ public class SearchResultsWidget extends AbstractWidget
     private Color hoverColor;
     private Color clickColor;
     private boolean pressed;
-    private boolean highlighted;
 
     private Color outlineColor = Colors.CLEAR;
 
@@ -81,7 +80,7 @@ public class SearchResultsWidget extends AbstractWidget
         else
             outlineColor = this.isHovered ? hoverColor : backgroundColor;
 
-        boolean renderOutline = this.isHovered() || this.isPressed() || this.isHighlighted();
+        boolean renderOutline = this.isHovered() || this.isPressed();
 
         RenderUtils.fillRectangle(
                 g,
@@ -164,11 +163,6 @@ public class SearchResultsWidget extends AbstractWidget
     public boolean isPressed()
     {
         return pressed;
-    }
-
-    public boolean isHighlighted()
-    {
-        return highlighted;
     }
 
     /* GETTERS & SETTERS */

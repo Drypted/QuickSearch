@@ -88,7 +88,13 @@ public final class RenderUtils
         }
         else
         {
-            g.fill(startPosX, startPosY, startPosX + outlineThickness, startPosY + outlineThickness, outlineColor.asInt());
+            g.fill(
+                    startPosX,
+                    startPosY,
+                    startPosX + outlineThickness,
+                    startPosY + outlineThickness,
+                    outlineColor.asInt()
+            );
         }
 
         if (corners.topRight())
@@ -103,7 +109,13 @@ public final class RenderUtils
         }
         else
         {
-            g.fill(endPosX - outlineThickness, startPosY, endPosX, startPosY + outlineThickness, outlineColor.asInt());
+            g.fill(
+                    endPosX - outlineThickness,
+                    startPosY,
+                    endPosX,
+                    startPosY + outlineThickness,
+                    outlineColor.asInt()
+            );
         }
 
         if (corners.bottomLeft())
@@ -118,7 +130,13 @@ public final class RenderUtils
         }
         else
         {
-            g.fill(startPosX, endPosY - outlineThickness, startPosX + outlineThickness, endPosY, outlineColor.asInt());
+            g.fill(
+                    startPosX,
+                    endPosY - outlineThickness,
+                    startPosX + outlineThickness,
+                    endPosY,
+                    outlineColor.asInt()
+            );
         }
 
         if (corners.bottomRight())
@@ -133,7 +151,13 @@ public final class RenderUtils
         }
         else
         {
-            g.fill(endPosX - outlineThickness, endPosY - outlineThickness, endPosX, endPosY, outlineColor.asInt());
+            g.fill(
+                    endPosX - outlineThickness,
+                    endPosY - outlineThickness,
+                    endPosX,
+                    endPosY,
+                    outlineColor.asInt()
+            );
         }
     }
 
@@ -220,10 +244,26 @@ public final class RenderUtils
         int longArmEndY = posY + (int) (size * 0.3f);
 
         // Draw short arm (with thickness)
-        drawThickLine(guiGraphics, shortArmStartX, shortArmStartY, shortArmEndX, shortArmEndY, thickness, color);
+        drawThickLine(
+                guiGraphics,
+                shortArmStartX,
+                shortArmStartY,
+                shortArmEndX,
+                shortArmEndY,
+                thickness,
+                color
+        );
 
         // Draw long arm (with thickness)
-        drawThickLine(guiGraphics, longArmStartX, longArmStartY, longArmEndX, longArmEndY, thickness, color);
+        drawThickLine(
+                guiGraphics,
+                longArmStartX,
+                longArmStartY,
+                longArmEndX,
+                longArmEndY,
+                thickness,
+                color
+        );
     }
 
     /**
@@ -297,11 +337,11 @@ public final class RenderUtils
             // Each dot starts its animation with a delay
             int dotDelay = i * (animationCycle / dotCount);
             long adjustedTime = (currentTimeMs + dotDelay) % animationCycle;
-            float progress = adjustedTime / (float)animationCycle;
+            float progress = adjustedTime / (float) animationCycle;
 
             // Calculate opacity using sine wave (0.3 to 1.0)
-            float alpha = 0.3f + 0.7f * (float)Math.abs(Math.sin(progress * Math.PI * 2));
-            Color dotColor = color.withAlpha((int)(255 * alpha));
+            float alpha = 0.3f + 0.7f * (float) Math.abs(Math.sin(progress * Math.PI * 2));
+            Color dotColor = color.withAlpha((int) (255 * alpha));
 
             // Draw dot
             int dotX = startX + (i * spacing);
@@ -335,23 +375,23 @@ public final class RenderUtils
         {
             int dotDelay = i * (animationCycle / dotCount);
             long adjustedTime = (currentTimeMs + dotDelay) % animationCycle;
-            float progress = adjustedTime / (float)animationCycle;
-            float waveValue = (float)Math.sin(progress * Math.PI * 2);
+            float progress = adjustedTime / (float) animationCycle;
+            float waveValue = (float) Math.sin(progress * Math.PI * 2);
 
             // Bounce effect
             float bounce = Math.abs(waveValue) * bounceHeight;
 
             // Scale effect (dots get slightly bigger when at peak)
             float scale = 1.0f + Math.abs(waveValue) * 0.3f;
-            int dotSize = (int)(baseDotSize * scale);
+            int dotSize = (int) (baseDotSize * scale);
 
             // Opacity effect
             float alpha = 0.5f + 0.5f * Math.abs(waveValue);
-            Color dotColor = color.withAlpha((int)(255 * alpha));
+            Color dotColor = color.withAlpha((int) (255 * alpha));
 
             // Draw dot
             int dotX = startX + (i * spacing) - (dotSize - baseDotSize) / 2;
-            int dotY = centerY - (int)bounce - dotSize / 2;
+            int dotY = centerY - (int) bounce - dotSize / 2;
 
             guiGraphics.fill(dotX, dotY, dotX + dotSize, dotY + dotSize, dotColor.asInt());
         }

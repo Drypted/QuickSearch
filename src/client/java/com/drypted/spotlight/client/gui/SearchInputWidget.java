@@ -72,7 +72,14 @@ public class SearchInputWidget extends AbstractWidget
         );
 
         // text
-        guiGraphics.drawString(Minecraft.getInstance().font, this.text, TextX, TextY, Colors.iWHITE, false);
+        guiGraphics.drawString(
+                Minecraft.getInstance().font,
+                this.text,
+                TextX,
+                TextY,
+                Colors.iWHITE,
+                false
+        );
 
         // caret
         drawCaret(guiGraphics);
@@ -97,7 +104,13 @@ public class SearchInputWidget extends AbstractWidget
         if (System.currentTimeMillis() % (blinkTimeMs * 2) < blinkTimeMs)
         {
             int caretX = TextX + Minecraft.getInstance().font.width(this.text);
-            guiGraphics.fill(caretX, TextY, caretX + 1, TextY + 8, canType ? Colors.iWHITE : Colors.iYELLOW);
+            guiGraphics.fill(
+                    caretX,
+                    TextY,
+                    caretX + 1,
+                    TextY + 8,
+                    canType ? Colors.iWHITE : Colors.iYELLOW
+            );
         }
     }
 
@@ -111,7 +124,14 @@ public class SearchInputWidget extends AbstractWidget
         int loadingY = this.getY() + INDICATOR_PADDING_RIGHT;
 
         /// Color loadingColor = Colors.INFO_BLUE.withAlpha((int) (255 * fadeIn));
-        RenderUtils.drawThreeDotPulseSpinner(guiGraphics, loadingX, loadingY, size, Colors.INFO_BLUE, System.currentTimeMillis());
+        RenderUtils.drawThreeDotPulseSpinner(
+                guiGraphics,
+                loadingX,
+                loadingY,
+                size,
+                Colors.INFO_BLUE,
+                System.currentTimeMillis()
+        );
     }
 
     /* Meta (Stuff to make it functional) */
@@ -277,7 +297,10 @@ public class SearchInputWidget extends AbstractWidget
 
         public SearchInputWidget build()
         {
-            return new SearchInputWidget(x, y, width, height, isRounded, outlineThickness, backgroundColor, outlineColor);
+            return new SearchInputWidget(
+                    x, y, //
+                    width, height, isRounded, outlineThickness, backgroundColor, outlineColor
+            );
         }
     }
 

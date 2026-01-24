@@ -50,7 +50,6 @@ public class ScrollBoxWidget extends AbstractWidget
         return lastId;
     }
 
-
     @Nullable
     public AbstractWidget getChild(int id)
     {
@@ -99,7 +98,6 @@ public class ScrollBoxWidget extends AbstractWidget
         return height - spacing + margin;
     }
 
-
     private double scrollRate()
     {
         return 10.0;
@@ -112,7 +110,8 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private boolean scrollbarVisible()
     {
-        if (showScrollerAlways) return true;
+        if (showScrollerAlways)
+            return true;
         return (maxScrollAmount() > 0);
     }
 
@@ -180,7 +179,8 @@ public class ScrollBoxWidget extends AbstractWidget
             for (int i = children.size() - 1; i >= 0; i--)
             {
                 AbstractWidget w = children.get(i).widget;
-                if (w.mouseClicked(mouseX, mouseY, button)) return true;
+                if (w.mouseClicked(mouseX, mouseY, button))
+                    return true;
             }
         }
 
@@ -281,7 +281,6 @@ public class ScrollBoxWidget extends AbstractWidget
         }
     }
 
-
     private void drawBackground(GuiGraphics g, int x1, int y1, int x2, int y2)
     {
         // Background
@@ -302,7 +301,8 @@ public class ScrollBoxWidget extends AbstractWidget
         for (WidgetEntry e : children)
         {
             AbstractWidget child = e.widget;
-            if (!child.visible) continue;
+            if (!child.visible)
+                continue;
             child.render(g, mouseX, mouseY, delta);
         }
 
@@ -429,8 +429,10 @@ public class ScrollBoxWidget extends AbstractWidget
         @Override
         public boolean equals(Object obj)
         {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
+            if (this == obj)
+                return true;
+            if (obj == null || getClass() != obj.getClass())
+                return false;
             WidgetEntry other = (WidgetEntry) obj;
             return this.id == other.id;
         }

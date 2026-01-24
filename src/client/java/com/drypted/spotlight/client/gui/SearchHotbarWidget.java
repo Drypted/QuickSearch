@@ -130,8 +130,15 @@ public class SearchHotbarWidget extends AbstractWidget
         public SearchHotbarWidget build()
         {
             return new SearchHotbarWidget(
-                    x, y, //
-                    width, height, iconPadding, roundedCorners, outlineThickness, backgroundColor, outlineColor
+                    x,
+                    y, //
+                    width,
+                    height,
+                    iconPadding,
+                    roundedCorners,
+                    outlineThickness,
+                    backgroundColor,
+                    outlineColor
             );
         }
     }
