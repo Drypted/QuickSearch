@@ -52,6 +52,11 @@ public final class SearchResultData
         return new SearchResultData(stack, name, identifier, maxStackSize);
     }
 
+    public boolean isNotEmpty()
+    {
+        return this != EMPTY;
+    }
+
     /* GETTERS & SETTERS */
 
     public ItemStack getIcon()
@@ -78,4 +83,8 @@ public final class SearchResultData
     {
         return maxStackSize;
     }
+
+    /* Predefined */
+
+    public static final SearchResultData EMPTY = new SearchResultData(ItemStack.EMPTY, "", "", 0);
 }

@@ -8,7 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -19,13 +19,14 @@ public class SpotlightScreen extends Screen
     private static final int SEARCH_BAR_WIDTH = 200;
     private static final int SEARCH_BAR_HEIGHT = 20;
 
-    private static final int DISTANCE_FRON_CENTER = 20;
     private static final int HOTBAR_SLOT_PADDING = 4;
+
+    private static final int DISTANCE_FRON_CENTER = 20;
     private static final int RESULTS_HEIGHT = 100;
 
     private SearchInputWidget searchInputWidget;
     private ScrollBoxWidget searchResultsWidget;
-    private final ArrayList<SearchHotbarWidget> searchHotbarWidgets = new ArrayList<>();
+    private final HashMap<Integer, SearchHotbarWidget> searchHotbarWidgets = new HashMap<>();
 
     private static final List<SearchResultData> SEARCH_DATA;
 
@@ -57,11 +58,12 @@ public class SpotlightScreen extends Screen
 
         this.searchInputWidget.subscribeToTypeCallback(this::onType);
 
-        searchHotbarWidgets.forEach(this::addRenderableWidget);
+        searchHotbarWidgets.forEach((id, widget) -> this.addRenderableWidget(widget));
         this.addRenderableWidget(searchInputWidget);
         this.addRenderableWidget(searchResultsWidget);
 
         this.setFocused(searchInputWidget);
+        this.searchResultsWidget.visible = false;
     }
 
     private void generateHotbarWidgets(int searchBarY, int searchBarX)
@@ -78,12 +80,15 @@ public class SpotlightScreen extends Screen
         float cursor = searchBarX + HOTBAR_SLOT_PADDING;
         for (int i = 0; i < slots; i++)
         {
-            this.searchHotbarWidgets.add(SearchHotbarWidget.builder(
-                    (int) Math.ceil(cursor),
-                    startY,
-                    (int) Math.ceil(iconSize),
-                    (int) Math.ceil(iconSize)
-            ).build());
+            this.searchHotbarWidgets.put(
+                    i,
+                    SearchHotbarWidget.builder(
+                            (int) Math.ceil(cursor),
+                            startY,
+                            (int) Math.ceil(iconSize),
+                            (int) Math.ceil(iconSize)
+                    ).build()
+            );
             cursor += iconSize + HOTBAR_SLOT_PADDING;
         }
     }
@@ -93,6 +98,7 @@ public class SpotlightScreen extends Screen
     private void onType(String text)
     {
         this.searchResultsWidget.removeAllChildren();
+        searchHotbarWidgets.values().forEach(widget -> widget.setSearchResultData(null));
 
         String searchText = text.toLowerCase();
 
@@ -101,15 +107,32 @@ public class SpotlightScreen extends Screen
             return;
         }
 
+        int matchCount = 0;
         for (SearchResultData result : SEARCH_DATA)
         {
-            if (result.getName().contains(searchText) || result.getIdentifier().contains(searchText))
+            // no match
+            if (!result.getName().contains(searchText) && !result.getIdentifier().contains(searchText))
+                continue;
+
+            // show in hotbar
+            if (matchCount < 9)
             {
-                this.searchResultsWidget.addChildRow(SearchResultsWidget.builder(0, 0, result)
-                                                                        .width(searchResultsWidget.getMaxWidth())
-                                                                        .onClick(onResultClicked(result)).build());
+                SearchHotbarWidget widget = searchHotbarWidgets.get(matchCount);
+                if (widget != null)
+                    widget.setSearchResultData(result);
+                matchCount++;
+                continue;
             }
+
+            matchCount++;
+
+            // show in results
+            this.searchResultsWidget.addChildRow(SearchResultsWidget.builder(0, 0, result)
+                                                                    .width(searchResultsWidget.getMaxWidth())
+                                                                    .onClick(onResultClicked(result)).build());
         }
+
+        this.searchResultsWidget.visible = matchCount > 9;
     }
 
     private BiConsumer<MouseButtonClick, Boolean> onResultClicked(SearchResultData block)
@@ -133,18 +156,41 @@ public class SpotlightScreen extends Screen
     {
         if (closeSpotlightKeyMapping.matches(keyCode, scanCode))
         {
+            if (searchInputWidget.hasText())
+            {
+                searchInputWidget.clearText();
+                return true;
+            }
             this.onClose();
             return true;
         }
+
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null)
+            return super.keyPressed(keyCode, scanCode, modifiers);
+
+        // hotbar keybinds
+        for (int i = 0; i < 9; i++)
+        {
+            if (keyCode == Minecraft.getInstance().options.keyHotbarSlots[i].getDefaultKey().getValue())
+            {
+                SearchHotbarWidget hotbarWidget = searchHotbarWidgets.get(i);
+                if (hotbarWidget != null && hotbarWidget.getSearchResultData() != null)
+                {
+                    SearchResultData result = hotbarWidget.getSearchResultData();
+                    player.connection.sendCommand(result.getCommandString());
+                }
+            }
+        }
+
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean mouseClicked(double d, double e, int i)
     {
-        if (!searchInputWidget.isMouseOver(d, e) //
-                && !searchResultsWidget.isMouseOver(d, e) //
-                && searchHotbarWidgets.stream().noneMatch(widget -> widget.isMouseOver(d, e)))
+        if (!searchInputWidget.isMouseOver(d, e) && !searchResultsWidget.isMouseOver(d, e) //
+                && searchHotbarWidgets.values().stream().noneMatch(widget -> widget.isMouseOver(d, e)))
             this.onClose(); // close on any mouse click outside of search bar
         return super.mouseClicked(d, e, i);
     }

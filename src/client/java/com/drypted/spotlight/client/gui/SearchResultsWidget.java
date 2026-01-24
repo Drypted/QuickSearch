@@ -13,8 +13,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.function.BiConsumer;
 
-import static com.drypted.spotlight.client.RendererUtils.drawScaledItem;
-
 public class SearchResultsWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
@@ -76,9 +74,12 @@ public class SearchResultsWidget extends AbstractWidget
         final int endPosY = startPosY + height;
 
         Color outlineColor;
-        if (this.getOutlineColor() != Colors.CLEAR) outlineColor = this.getOutlineColor();
-        else if (this.pressed) outlineColor = clickColor;
-        else outlineColor = this.isHovered ? hoverColor : backgroundColor;
+        if (this.getOutlineColor() != Colors.CLEAR)
+            outlineColor = this.getOutlineColor();
+        else if (this.pressed)
+            outlineColor = clickColor;
+        else
+            outlineColor = this.isHovered ? hoverColor : backgroundColor;
 
         boolean renderOutline = this.isHovered() || this.isPressed() || this.isHighlighted();
 
@@ -99,7 +100,7 @@ public class SearchResultsWidget extends AbstractWidget
         int iconX = startPosX + padding;
         int iconY = startPosY + padding;
 
-        drawScaledItem(g, this.icon, iconX, iconY, ICON_SIZE);
+        RenderUtils.drawScaledItemSize(g, this.icon, iconX, iconY, ICON_SIZE);
 
         // title
         int titleX = iconX + ICON_SIZE + ICON_PADDING;
@@ -356,7 +357,6 @@ public class SearchResultsWidget extends AbstractWidget
             return this;
         }
 
-
         public Builder onClick(BiConsumer<MouseButtonClick, Boolean> onClick)
         {
             this.onClick = onClick;
@@ -386,7 +386,8 @@ public class SearchResultsWidget extends AbstractWidget
 
             button.pressed = this.pressed;
 
-            if (this.width > 0) button.setWidth(this.width);
+            if (this.width > 0)
+                button.setWidth(this.width);
 
             return button;
         }

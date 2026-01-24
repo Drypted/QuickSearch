@@ -156,6 +156,18 @@ public class SearchInputWidget extends AbstractWidget
         return text;
     }
 
+    /* Methods */
+
+    public void clearText()
+    {
+        this.text = "";
+    }
+
+    public boolean hasText()
+    {
+        return !this.text.isEmpty();
+    }
+
     public void subscribeToTypeCallback(Consumer<String> onTypeCallback)
     {
         this.onTypeCallbacks.add(onTypeCallback);

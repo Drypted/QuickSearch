@@ -10,14 +10,18 @@ import net.minecraft.network.chat.Component;
 
 public class SearchHotbarWidget extends AbstractWidget
 {
+    private final int iconPadding;
     private final RoundedCorners roundedCorners;
     private final int outlineThickness;
     private final Color backgroundColor;
     private final Color outlineColor;
 
-    public SearchHotbarWidget(int x, int y, int width, int height, RoundedCorners roundedCorners, int outlineThickness, Color backgroundColor, Color outlineColor)
+    private SearchResultData searchResultData = SearchResultData.EMPTY;
+
+    public SearchHotbarWidget(int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, Color backgroundColor, Color outlineColor)
     {
         super(x, y, width, height, Component.empty());
+        this.iconPadding = iconPadding;
         this.roundedCorners = roundedCorners;
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
@@ -39,9 +43,34 @@ public class SearchHotbarWidget extends AbstractWidget
                 this.backgroundColor,
                 this.outlineColor
         );
+
+        if (searchResultData != null && searchResultData.isNotEmpty())
+        {
+            int iconSize = this.getHeight() - 2 * iconPadding;
+            RenderUtils.drawScaledItemSize(
+                    guiGraphics,
+                    searchResultData.getIcon(),
+                    this.getX() + iconPadding,
+                    this.getY() + iconPadding,
+                    iconSize
+            );
+        }
+    }
+
+    /* Getters and Setters */
+
+    public SearchResultData getSearchResultData()
+    {
+        return searchResultData;
+    }
+
+    public void setSearchResultData(SearchResultData searchResultData)
+    {
+        this.searchResultData = searchResultData;
     }
 
     /* Builder */
+
     public static Builder builder(int x, int y, int width, int height)
     {
         return new Builder(x, y, width, height);
@@ -54,6 +83,7 @@ public class SearchHotbarWidget extends AbstractWidget
         private final int width;
         private final int height;
 
+        private int iconPadding = 4;
         private RoundedCorners roundedCorners = RoundedCorners.all();
         private int outlineThickness = 1;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
@@ -65,6 +95,12 @@ public class SearchHotbarWidget extends AbstractWidget
             this.y = y;
             this.width = width;
             this.height = height;
+        }
+
+        public Builder iconPadding(int iconPadding)
+        {
+            this.iconPadding = iconPadding;
+            return this;
         }
 
         public Builder isRounded(RoundedCorners roundedCorners)
@@ -93,7 +129,10 @@ public class SearchHotbarWidget extends AbstractWidget
 
         public SearchHotbarWidget build()
         {
-            return new SearchHotbarWidget(x, y, width, height, roundedCorners, outlineThickness, backgroundColor, outlineColor);
+            return new SearchHotbarWidget(
+                    x, y, //
+                    width, height, iconPadding, roundedCorners, outlineThickness, backgroundColor, outlineColor
+            );
         }
     }
 
