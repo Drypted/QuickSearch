@@ -1,5 +1,6 @@
 package com.drypted.spotlight.client.gui;
 
+import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.SearchHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,8 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import static com.drypted.spotlight.client.SpotlightEntryClient.closeSpotlightKeyMapping;
-
 public class SpotlightScreen extends Screen
 {
     private static final int SEARCH_BAR_WIDTH = 200;
@@ -20,14 +19,13 @@ public class SpotlightScreen extends Screen
 
     private static final int HOTBAR_SLOT_PADDING = 2;
 
-    private static final int DISTANCE_FRON_CENTER = 20;
+    private static final int DISTANCE_FROM_CENTER = 20;
     private static final int RESULTS_HEIGHT = 100;
+    private static final int HOTBAR_SLOTS = 9;
 
     private SearchInputWidget searchInputWidget;
     private ScrollBoxWidget searchResultsWidget;
     private final HashMap<Integer, SearchHotbarWidget> searchHotbarWidgets = new HashMap<>();
-
-    private Thread currentSearchThread;
 
     public SpotlightScreen()
     {
@@ -38,9 +36,15 @@ public class SpotlightScreen extends Screen
     protected void init()
     {
         final int searchBarX = (this.width - SEARCH_BAR_WIDTH) / 2;
-        final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FRON_CENTER;
+        final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FROM_CENTER;
 
-        this.searchInputWidget = SearchInputWidget.builder(searchBarX, searchBarY, SEARCH_BAR_WIDTH, SEARCH_BAR_HEIGHT).build();
+        this.searchInputWidget = SearchInputWidget.builder(
+                searchBarX,
+                searchBarY,
+                SEARCH_BAR_WIDTH,
+                SEARCH_BAR_HEIGHT
+        ).build();
+
         this.searchResultsWidget = ScrollBoxWidget.builder(
                 searchBarX,
                 searchInputWidget.getY() + SEARCH_BAR_HEIGHT - searchInputWidget.getOutlineThickness(),
@@ -62,21 +66,15 @@ public class SpotlightScreen extends Screen
 
     private void generateHotbarWidgets(int searchBarY, int searchBarX)
     {
-        final int slots = 9;
-
-        // width = slots * iconSize + (slots + 1) * padding
-        // => iconSize = (width - (slots + 1) * padding) / slots
-        final float iconSize = (SEARCH_BAR_WIDTH - HOTBAR_SLOT_PADDING * (slots + 1)) / (float) slots;
-
+        final float iconSize = (SEARCH_BAR_WIDTH - HOTBAR_SLOT_PADDING * (HOTBAR_SLOTS + 1)) / (float) HOTBAR_SLOTS;
         final int endY = searchBarY - searchInputWidget.getOutlineThickness() - HOTBAR_SLOT_PADDING;
         final int startY = (int) Math.ceil(endY - iconSize);
 
         float cursor = searchBarX + HOTBAR_SLOT_PADDING;
-        for (int i = 0; i < slots; i++)
+        for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
             this.searchHotbarWidgets.put(
-                    i,
-                    SearchHotbarWidget.builder(
+                    i, SearchHotbarWidget.builder(
                             (int) Math.ceil(cursor),
                             startY,
                             (int) Math.ceil(iconSize),
@@ -91,76 +89,64 @@ public class SpotlightScreen extends Screen
 
     private void onType(String text)
     {
-        // cancel previous search if still running
-        if (currentSearchThread != null && currentSearchThread.isAlive())
-            currentSearchThread.interrupt();
-
         if (text == null || text.isEmpty())
         {
             clearResults();
             return;
         }
 
-        // show loading indicator
+        // Set visual state to searching
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.SEARCHING);
 
-        currentSearchThread = new Thread(
-                () -> {
-                    List<SearchResultData> results = SearchHandler.search(text);
-                    // // testing delay
-                    // try
-                    // {
-                    //     Thread.sleep(250);
-                    // }
-                    // catch (InterruptedException e)
-                    // {
-                    //     // thread was interrupted during sleep
-                    //     return;
-                    // }
+        // Delegate logic to Handler
+        SearchHandler.searchAsync(text, this::displayResults);
+    }
 
-                    // Check if thread was interrupted
-                    if (Thread.currentThread().isInterrupted())
-                        return;
+    /**
+     * Handles the UI update when results arrive.
+     * Guaranteed to run on the Main Thread by SearchHandler.
+     */
+    private void displayResults(List<SearchResultData> results)
+    {
+        clearResults();
 
-                    // update UI on main thread
-                    Minecraft.getInstance().execute(() -> {
-                        // clear current results on finding new results
-                        clearResults();
+        // If results came back empty (or query was cancelled/cleared mid-flight), stop here.
+        if (results.isEmpty())
+        {
+            searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
+            return;
+        }
 
-                        int matchCount = 0;
-                        for (SearchResultData result : results)
-                        {
-                            if (matchCount < 9)
-                            {
-                                SearchHotbarWidget widget = searchHotbarWidgets.get(matchCount);
-                                if (widget != null)
-                                    widget.setSearchResultData(result);
-                                matchCount++;
-                                continue;
-                            }
+        int matchCount = 0;
+        for (SearchResultData result : results)
+        {
+            // Fill Hotbar Widgets (0-8)
+            if (matchCount < HOTBAR_SLOTS)
+            {
+                SearchHotbarWidget widget = searchHotbarWidgets.get(matchCount);
+                if (widget != null)
+                    widget.setSearchResultData(result);
+            }
+            // Fill Scroll Box (9+)
+            else
+            {
+                this.searchResultsWidget.addChildRow(SearchResultsWidget.builder(0, 0, result)
+                                                                        .width(searchResultsWidget.getMaxWidth())
+                                                                        .onClick(onResultClicked(
+                                                                                result))
+                                                                        .build());
+            }
+            matchCount++;
+        }
 
-                            matchCount++;
-
-                            this.searchResultsWidget.addChildRow(SearchResultsWidget.builder(0, 0, result).width(
-                                    searchResultsWidget.getMaxWidth()).onClick(onResultClicked(result)).build());
-                        }
-
-                        this.searchResultsWidget.visible = matchCount > 9;
-
-                        // hide loading indicator
-                        searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
-                    });
-                }, "SpotlightSearchThread"
-        );
-
-        currentSearchThread.start();
+        this.searchResultsWidget.visible = matchCount > HOTBAR_SLOTS;
+        searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
     }
 
     private void clearResults()
     {
         searchResultsWidget.visible = false;
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
-
         this.searchResultsWidget.removeAllChildren();
         searchHotbarWidgets.values().forEach(widget -> widget.setSearchResultData(null));
     }
@@ -168,12 +154,9 @@ public class SpotlightScreen extends Screen
     private BiConsumer<MouseButtonClick, Boolean> onResultClicked(SearchResultData block)
     {
         return (mouseButtonClick, isDoubleClick) -> {
-            // give the player the result they clicked on
             LocalPlayer player = Minecraft.getInstance().player;
-            if (player == null)
-                return;
-
-            player.connection.sendCommand(block.getCommandString());
+            if (player != null)
+                player.connection.sendCommand(block.getCommandString());
         };
     }
 
@@ -182,7 +165,7 @@ public class SpotlightScreen extends Screen
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        if (closeSpotlightKeyMapping.matches(keyCode, scanCode))
+        if (SpotlightEntryClient.closeSpotlightKeyMapping.matches(keyCode, scanCode))
         {
             if (searchInputWidget.hasText())
             {
@@ -198,16 +181,16 @@ public class SpotlightScreen extends Screen
         if (player == null)
             return super.keyPressed(keyCode, scanCode, modifiers);
 
-        // hotbar keybinds
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
-            if (keyCode == Minecraft.getInstance().options.keyHotbarSlots[i].getDefaultKey().getValue())
+            if (keyCode == Minecraft.getInstance().options.keyHotbarSlots[i].getDefaultKey()
+                                                                            .getValue())
             {
                 SearchHotbarWidget hotbarWidget = searchHotbarWidgets.get(i);
                 if (hotbarWidget != null && hotbarWidget.getSearchResultData() != null)
                 {
-                    SearchResultData result = hotbarWidget.getSearchResultData();
-                    player.connection.sendCommand(result.getCommandString());
+                    player.connection.sendCommand(hotbarWidget.getSearchResultData()
+                                                              .getCommandString());
                 }
             }
         }
@@ -216,22 +199,8 @@ public class SpotlightScreen extends Screen
     }
 
     @Override
-    public boolean mouseClicked(double d, double e, int i)
-    {
-        return super.mouseClicked(d, e, i);
-    }
-
-    /* `super` Settings */
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {}
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f)
-    {
-        // no background rendering
-    }
-
-    @Override
-    public boolean isPauseScreen()
-    {
-        return false;
-    }
+    public boolean isPauseScreen() {return false;}
 }
