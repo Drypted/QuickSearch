@@ -8,6 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -19,12 +20,12 @@ public class SpotlightScreen extends Screen
     private static final int SEARCH_BAR_HEIGHT = 20;
 
     private static final int DISTANCE_FRON_CENTER = 20;
-    private static final int HOTBAR_OFFSET = 20;
+    private static final int HOTBAR_SLOT_PADDING = 4;
     private static final int RESULTS_HEIGHT = 100;
 
-    private SearchHotbarWidget searchHotbarWidget;
     private SearchInputWidget searchInputWidget;
     private ScrollBoxWidget searchResultsWidget;
+    private final ArrayList<SearchHotbarWidget> searchHotbarWidgets = new ArrayList<>();
 
     private static final List<SearchResultData> SEARCH_DATA;
 
@@ -45,12 +46,6 @@ public class SpotlightScreen extends Screen
         final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FRON_CENTER;
 
         this.searchInputWidget = SearchInputWidget.builder(searchBarX, searchBarY, SEARCH_BAR_WIDTH, SEARCH_BAR_HEIGHT).build();
-        this.searchHotbarWidget = SearchHotbarWidget.builder(
-                searchBarX,
-                searchBarY - HOTBAR_OFFSET,
-                SEARCH_BAR_WIDTH,
-                SEARCH_BAR_HEIGHT
-        ).build();
         this.searchResultsWidget = ScrollBoxWidget.builder(
                 searchBarX,
                 searchInputWidget.getY() + SEARCH_BAR_HEIGHT - searchInputWidget.getOutlineThickness(),
@@ -58,13 +53,39 @@ public class SpotlightScreen extends Screen
                 RESULTS_HEIGHT
         ).showScrollerAlways(true).build();
 
+        generateHotbarWidgets(searchBarY, searchBarX);
+
         this.searchInputWidget.subscribeToTypeCallback(this::onType);
 
-        this.addRenderableWidget(searchHotbarWidget);
+        searchHotbarWidgets.forEach(this::addRenderableWidget);
         this.addRenderableWidget(searchInputWidget);
         this.addRenderableWidget(searchResultsWidget);
 
         this.setFocused(searchInputWidget);
+    }
+
+    private void generateHotbarWidgets(int searchBarY, int searchBarX)
+    {
+        final int slots = 9;
+
+        // width = slots * iconSize + (slots + 1) * padding
+        // => iconSize = (width - (slots + 1) * padding) / slots
+        final float iconSize = (SEARCH_BAR_WIDTH - HOTBAR_SLOT_PADDING * (slots + 1)) / (float) slots;
+
+        final int endY = searchBarY - searchInputWidget.getOutlineThickness();
+        final int startY = (int) Math.ceil(endY - iconSize);
+
+        float cursor = searchBarX + HOTBAR_SLOT_PADDING;
+        for (int i = 0; i < slots; i++)
+        {
+            this.searchHotbarWidgets.add(SearchHotbarWidget.builder(
+                    (int) Math.ceil(cursor),
+                    startY,
+                    (int) Math.ceil(iconSize),
+                    (int) Math.ceil(iconSize)
+            ).build());
+            cursor += iconSize + HOTBAR_SLOT_PADDING;
+        }
     }
 
     /* Callbacks */
@@ -123,8 +144,7 @@ public class SpotlightScreen extends Screen
     {
         if (!searchInputWidget.isMouseOver(d, e) //
                 && !searchResultsWidget.isMouseOver(d, e) //
-                && !searchHotbarWidget.isMouseOver(d, e) //
-        )
+                && searchHotbarWidgets.stream().noneMatch(widget -> widget.isMouseOver(d, e)))
             this.onClose(); // close on any mouse click outside of search bar
         return super.mouseClicked(d, e, i);
     }

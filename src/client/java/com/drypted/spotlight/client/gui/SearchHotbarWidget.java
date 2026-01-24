@@ -10,17 +10,15 @@ import net.minecraft.network.chat.Component;
 
 public class SearchHotbarWidget extends AbstractWidget
 {
-    private final int padding;
-    private final boolean isRounded;
+    private final RoundedCorners roundedCorners;
     private final int outlineThickness;
     private final Color backgroundColor;
     private final Color outlineColor;
 
-    public SearchHotbarWidget(int x, int y, int width, int height, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor)
+    public SearchHotbarWidget(int x, int y, int width, int height, RoundedCorners roundedCorners, int outlineThickness, Color backgroundColor, Color outlineColor)
     {
         super(x, y, width, height, Component.empty());
-        this.padding = padding;
-        this.isRounded = isRounded;
+        this.roundedCorners = roundedCorners;
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
         this.outlineColor = outlineColor;
@@ -29,33 +27,18 @@ public class SearchHotbarWidget extends AbstractWidget
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        final int slots = 9;
-
-        // width = slots * iconSize + (slots + 1) * padding
-        // => iconSize = (width - (slots + 1) * padding) / slots
-        final float iconSize = (this.getWidth() - this.padding * (slots + 1)) / (float) slots;
-
-        final int endY = this.getY() + this.getHeight() + this.outlineThickness;
-        final int startY = (int) Math.ceil(endY - iconSize);
-
-        float cursor = this.getX() + this.padding;
-        for (int i = 0; i < slots; i++)
-        {
-            RenderUtils.fillRectangle(
-                    guiGraphics,
-                    (int) Math.ceil(cursor),
-                    startY,
-                    (int) Math.ceil(cursor + iconSize),
-                    endY,
-                    RoundedCorners.fromSingle(this.isRounded),
-                    this.outlineThickness,
-                    false,
-                    this.backgroundColor,
-                    this.outlineColor
-            );
-
-            cursor += iconSize + this.padding;
-        }
+        RenderUtils.fillRectangle(
+                guiGraphics,
+                this.getX(),
+                this.getY(),
+                this.getX() + this.getWidth(),
+                this.getY() + this.getHeight(),
+                this.roundedCorners,
+                this.outlineThickness,
+                true,
+                this.backgroundColor,
+                this.outlineColor
+        );
     }
 
     /* Builder */
@@ -71,8 +54,7 @@ public class SearchHotbarWidget extends AbstractWidget
         private final int width;
         private final int height;
 
-        private int padding = 2;
-        private boolean isRounded = true;
+        private RoundedCorners roundedCorners = RoundedCorners.all();
         private int outlineThickness = 1;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
         private Color outlineColor = Colors.WHITE;
@@ -85,15 +67,9 @@ public class SearchHotbarWidget extends AbstractWidget
             this.height = height;
         }
 
-        public Builder padding(int padding)
+        public Builder isRounded(RoundedCorners roundedCorners)
         {
-            this.padding = padding;
-            return this;
-        }
-
-        public Builder isRounded(boolean isRounded)
-        {
-            this.isRounded = isRounded;
+            this.roundedCorners = roundedCorners;
             return this;
         }
 
@@ -117,10 +93,7 @@ public class SearchHotbarWidget extends AbstractWidget
 
         public SearchHotbarWidget build()
         {
-            return new SearchHotbarWidget(
-                    x, y, //
-                    width, height, padding, isRounded, outlineThickness, backgroundColor, outlineColor
-            );
+            return new SearchHotbarWidget(x, y, width, height, roundedCorners, outlineThickness, backgroundColor, outlineColor);
         }
     }
 
