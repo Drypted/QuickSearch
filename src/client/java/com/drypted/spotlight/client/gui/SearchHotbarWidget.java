@@ -6,6 +6,7 @@ import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -15,6 +16,7 @@ import java.util.function.Consumer;
 
 public class SearchHotbarWidget extends AbstractWidget
 {
+    private final int hotbarIndex;
     private final int iconPadding;
     private final RoundedCorners roundedCorners;
     private final int outlineThickness;
@@ -25,9 +27,10 @@ public class SearchHotbarWidget extends AbstractWidget
 
     private SearchResultData searchResultData = SearchResultData.EMPTY;
 
-    public SearchHotbarWidget(int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, Color backgroundColor, Color outlineColor, Consumer<MouseButtonClick> onClickCallback)
+    public SearchHotbarWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, Color backgroundColor, Color outlineColor, Consumer<MouseButtonClick> onClickCallback)
     {
         super(x, y, width, height, Component.empty());
+        this.hotbarIndex = hotbarIndex;
         this.iconPadding = iconPadding;
         this.roundedCorners = roundedCorners;
         this.outlineThickness = outlineThickness;
@@ -39,7 +42,7 @@ public class SearchHotbarWidget extends AbstractWidget
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        RenderUtils.fillRectangle(
+        RenderUtils.drawRectangle(
                 guiGraphics,
                 this.getX(),
                 this.getY(),
@@ -52,6 +55,7 @@ public class SearchHotbarWidget extends AbstractWidget
                 this.outlineColor
         );
 
+        // show icon if search result data is available
         if (searchResultData != null && searchResultData.isNotEmpty())
         {
             int iconSize = this.getHeight() - 2 * iconPadding;
@@ -61,6 +65,23 @@ public class SearchHotbarWidget extends AbstractWidget
                     this.getX() + iconPadding,
                     this.getY() + iconPadding,
                     iconSize
+            );
+        }
+
+        // show hotbar keybind if focused
+        if (this.isFocused())
+        {
+            final int padding = 8;
+            String hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
+                                                                                          .getString();
+            int textWidth = Minecraft.getInstance().font.width(hotbarKey);
+
+            RenderUtils.drawText(
+                    guiGraphics,
+                    hotbarKey.toUpperCase(),
+                    this.getX() + (this.getWidth() - textWidth) / 2,
+                    this.getY() - Minecraft.getInstance().font.lineHeight - 4 - padding
+                    // 4 is padding of bg
             );
         }
     }
@@ -104,13 +125,14 @@ public class SearchHotbarWidget extends AbstractWidget
 
     /* Builder */
 
-    public static Builder builder(int x, int y, int width, int height)
+    public static Builder builder(int hotbarIndex, int x, int y, int width, int height)
     {
-        return new Builder(x, y, width, height);
+        return new Builder(hotbarIndex, x, y, width, height);
     }
 
     public static class Builder
     {
+        private final int hotbarIndex;
         private final int x;
         private final int y;
         private final int width;
@@ -124,8 +146,9 @@ public class SearchHotbarWidget extends AbstractWidget
 
         private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
 
-        public Builder(int x, int y, int width, int height)
+        public Builder(int hotbarIndex, int x, int y, int width, int height)
         {
+            this.hotbarIndex = hotbarIndex;
             this.x = x;
             this.y = y;
             this.width = width;
@@ -171,6 +194,7 @@ public class SearchHotbarWidget extends AbstractWidget
         public SearchHotbarWidget build()
         {
             return new SearchHotbarWidget(
+                    hotbarIndex,
                     x,
                     y, //
                     width,

@@ -1,7 +1,9 @@
 package com.drypted.spotlight.client.gui;
 
+import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
+import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -283,14 +285,18 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private void drawBackground(GuiGraphics g, int x1, int y1, int x2, int y2)
     {
-        // Background
-        g.fill(x1 + 1, y1 + 1, x2 - 1, y2 - 1, bgColor.asInt());
-
-        // Border
-        g.fill(x1, y1, x2, y1 + 1, outlineColor.asInt());
-        g.fill(x1, y2 - 1, x2, y2, outlineColor.asInt());
-        g.fill(x1, y1, x1 + 1, y2, outlineColor.asInt());
-        g.fill(x2 - 1, y1, x2, y2, outlineColor.asInt());
+        RenderUtils.drawRectangle(
+                g,
+                x1,
+                y1,
+                x2,
+                y2,
+                RoundedCorners.none(),
+                1,
+                true,
+                bgColor,
+                outlineColor
+        );
     }
 
     private void drawChildren(GuiGraphics g, int mouseX, int mouseY, float delta, int x1, int y1, int x2, int y2)
@@ -348,7 +354,7 @@ public class ScrollBoxWidget extends AbstractWidget
         private final int width;
         private final int height;
         private int margin = 4;
-        private int spacing = 0;
+        private int spacing = margin; // by default, spacing = margin
         private boolean showScrollerAlways = false;
 
         private Color bgColor = Colors.BLACK.withHalfAlpha();

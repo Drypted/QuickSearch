@@ -4,12 +4,15 @@ import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.SearchHandler;
 import com.drypted.spotlight.client.core.models.SearchResultData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SpotlightScreen extends Screen
@@ -25,7 +28,8 @@ public class SpotlightScreen extends Screen
 
     private SearchInputWidget searchInputWidget;
     private ScrollBoxWidget searchResultsWidget;
-    private final HashMap<Integer, SearchHotbarWidget> searchHotbarWidgets = new HashMap<>();
+    private final ArrayList<SearchHotbarWidget> searchHotbarWidgets = new ArrayList<>(HOTBAR_SLOTS);
+    private HotbarFocusProxyWidget hotbarFocusProxy;
 
     public SpotlightScreen()
     {
@@ -56,13 +60,15 @@ public class SpotlightScreen extends Screen
 
         this.searchInputWidget.subscribeToTypeCallback(this::onType);
 
-        this.searchHotbarWidgets.values().forEach(this::addRenderableWidget);
+        this.searchHotbarWidgets.forEach(this::addRenderableWidget);
         this.addRenderableWidget(searchInputWidget);
         this.addRenderableWidget(searchResultsWidget);
 
+        this.addRenderableWidget(hotbarFocusProxy);
+
         // show search on open
         this.searchResultsWidget.visible = false;
-        this.searchHotbarWidgets.values().forEach(widget -> widget.visible = false);
+        this.searchHotbarWidgets.forEach(widget -> widget.visible = false);
         this.setFocused(searchInputWidget);
     }
 
@@ -75,44 +81,26 @@ public class SpotlightScreen extends Screen
         float cursor = searchBarX + HOTBAR_SLOT_PADDING;
         for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
-            this.searchHotbarWidgets.put(
-                    i, SearchHotbarWidget.builder(
+            this.searchHotbarWidgets.add( //
+                    SearchHotbarWidget.builder(
+                            i,
                             (int) Math.ceil(cursor),
                             startY,
                             (int) Math.ceil(iconSize),
                             (int) Math.ceil(iconSize)
-                    ).build()
-            );
+                    ).build());
             cursor += iconSize + HOTBAR_SLOT_PADDING;
         }
-    }
 
-    /* Callbacks */
-
-    private void onType(String text)
-    {
-        if (text == null || text.isEmpty())
-        {
-            this.searchHotbarWidgets.values().forEach(widget -> widget.visible = false);
-            this.searchResultsWidget.visible = false;
-            clearResults();
-            return;
-        }
-
-        // Set visual state to searching
-        searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.SEARCHING);
-        this.searchHotbarWidgets.values().forEach(widget -> widget.visible = true);
-        this.searchResultsWidget.visible = true;
-
-        // Delegate logic to Handler
-        SearchHandler.searchAsync(text, this::displayResults);
+        // generate proxy for hotbar focus navigation
+        this.hotbarFocusProxy = HotbarFocusProxyWidget.create(searchHotbarWidgets);
     }
 
     private void displayResults(List<SearchResultData> results)
     {
         clearResults();
 
-        // If results came back empty (or query was cancelled/cleared mid-flight), stop here.
+        // If results came back empty (or query was canceled/cleared mid-flight), stop here.
         if (results.isEmpty())
         {
             searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
@@ -139,9 +127,7 @@ public class SpotlightScreen extends Screen
             this.searchResultsWidget.addChildRow( //
                     SearchResultsWidget.builder(0, 0, result)
                                        .width(searchResultsWidget.getMaxWidth())
-                                       .onClick((mBC, dC) -> {
-                                           onResultClicked(result);
-                                       })
+                                       .onClick((mBC, dC) -> onResultClicked(result))
                                        .build() //
             );
 
@@ -155,7 +141,7 @@ public class SpotlightScreen extends Screen
     {
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
         this.searchResultsWidget.removeAllChildren();
-        searchHotbarWidgets.values().forEach(widget -> widget.setSearchResultData(null));
+        searchHotbarWidgets.forEach(widget -> widget.setSearchResultData(null));
     }
 
     private void onResultClicked(SearchResultData block)
@@ -167,12 +153,31 @@ public class SpotlightScreen extends Screen
 
     /* Input */
 
+    private void onType(String text, char typedChar)
+    {
+        if (text == null || text.isEmpty())
+        {
+            this.searchHotbarWidgets.forEach(widget -> widget.visible = false);
+            this.searchResultsWidget.visible = false;
+            clearResults();
+            return;
+        }
+
+        // Set visual state to searching
+        searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.SEARCHING);
+        this.searchHotbarWidgets.forEach(widget -> widget.visible = true);
+        this.searchResultsWidget.visible = true;
+
+        // Delegate logic to Handler
+        SearchHandler.searchAsync(text, this::displayResults);
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
         if (SpotlightEntryClient.closeSpotlightKeyMapping.matches(keyCode, scanCode))
         {
-            if (searchInputWidget.hasText())
+            if (searchInputWidget.isFocused() && searchInputWidget.hasText())
             {
                 searchInputWidget.clearText();
                 clearResults();
@@ -182,10 +187,6 @@ public class SpotlightScreen extends Screen
             return true;
         }
 
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null)
-            return super.keyPressed(keyCode, scanCode, modifiers);
-
         for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
             if (keyCode == Minecraft.getInstance().options.keyHotbarSlots[i].getDefaultKey()
@@ -194,13 +195,44 @@ public class SpotlightScreen extends Screen
                 SearchHotbarWidget hotbarWidget = searchHotbarWidgets.get(i);
                 if (hotbarWidget != null && hotbarWidget.getSearchResultData() != null)
                 {
-                    hotbarWidget.setFocused(true);
+                    onResultClicked(hotbarWidget.getSearchResultData());
+                    return true;
                 }
             }
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
+
+    /* Focus */
+
+    @Override
+    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent event)
+    {
+        if (!(event instanceof FocusNavigationEvent.TabNavigation))
+        {
+            return super.nextFocusPath(event);
+        }
+
+        // search bar -> hotbar proxy
+        if (this.getFocused() == searchInputWidget)
+        {
+            hotbarFocusProxy.setFocused(true);
+            return this.hotbarFocusProxy.getCurrentFocusPath();
+        }
+
+        // hotbar proxy > search bar
+        if (this.getFocused() == hotbarFocusProxy)
+        {
+            searchInputWidget.setFocused(false);
+            return this.searchInputWidget.getCurrentFocusPath();
+        }
+
+        return super.nextFocusPath(event);
+    }
+
+
+    /* Overrides for settings */
 
     @Override
     public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) { }

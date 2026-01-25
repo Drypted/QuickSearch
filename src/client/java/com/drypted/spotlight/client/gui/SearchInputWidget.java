@@ -4,6 +4,7 @@ import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.utils.GeneralUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,7 +15,7 @@ import net.minecraft.util.StringUtil;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class SearchInputWidget extends AbstractWidget
 {
@@ -41,7 +42,7 @@ public class SearchInputWidget extends AbstractWidget
     /// private long StatusChangeTime = 0L;
 
     /// Callbacks for when text is typed
-    private final ArrayList<Consumer<String>> onTypeCallbacks = new ArrayList<>();
+    private final ArrayList<BiConsumer<String, Character>> onTypeCallbacks = new ArrayList<>();
 
     public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color focusedCaretColor, Color unfocusedCaretColor)
     {
@@ -62,7 +63,7 @@ public class SearchInputWidget extends AbstractWidget
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         // background
-        RenderUtils.fillRectangle(
+        RenderUtils.drawRectangle(
                 guiGraphics,
                 this.getX(),
                 this.getY(),
@@ -114,8 +115,8 @@ public class SearchInputWidget extends AbstractWidget
                     caretX + 1,
                     TextY + 8,
                     this.isFocused()
-                    ? this.focusedCaretColor.asInt()
-                    : this.unfocusedCaretColor.asInt()
+                    ? focusedCaretColor.asInt()
+                    : unfocusedCaretColor.asInt()
             );
         }
     }
@@ -152,9 +153,9 @@ public class SearchInputWidget extends AbstractWidget
         if (StringUtil.isAllowedChatCharacter(codePoint))
         {
             this.text += codePoint;
-            for (Consumer<String> callback : this.onTypeCallbacks)
+            for (BiConsumer<String, Character> callback : this.onTypeCallbacks)
             {
-                callback.accept(this.text);
+                callback.accept(this.text, codePoint);
             }
             return true;
         }
@@ -165,26 +166,15 @@ public class SearchInputWidget extends AbstractWidget
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        // use tab to toggle selecting a entry
-        if (keyCode == GLFW.GLFW_KEY_TAB)
-        {
-            this.setFocused(true);
-            for (Consumer<String> callback : this.onTypeCallbacks)
-            {
-                callback.accept(this.text);
-            }
-            return true;
-        }
-
         if (this.isFocused())
         {
             // erase on backspace
             if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !this.text.isEmpty())
             {
                 this.text = this.text.substring(0, this.text.length() - 1);
-                for (Consumer<String> callback : this.onTypeCallbacks)
+                for (BiConsumer<String, Character> callback : this.onTypeCallbacks)
                 {
-                    callback.accept(this.text);
+                    callback.accept(this.text, GeneralUtils.EMPTY_CHAR);
                 }
                 return true;
             }
@@ -241,7 +231,7 @@ public class SearchInputWidget extends AbstractWidget
         return !this.text.isEmpty();
     }
 
-    public void subscribeToTypeCallback(Consumer<String> onTypeCallback)
+    public void subscribeToTypeCallback(BiConsumer<String, Character> onTypeCallback)
     {
         this.onTypeCallbacks.add(onTypeCallback);
     }

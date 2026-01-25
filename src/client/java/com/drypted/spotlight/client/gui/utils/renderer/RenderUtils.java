@@ -2,6 +2,8 @@ package com.drypted.spotlight.client.gui.utils.renderer;
 
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
+import com.drypted.spotlight.client.gui.utils.Colors;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 
@@ -23,7 +25,7 @@ public final class RenderUtils
      * @param backgroundColor  Background color
      * @param outlineColor     Outline color
      */
-    public static void fillRectangle(GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY, RoundedCorners corners, int outlineThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
+    public static void drawRectangle(GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY, RoundedCorners corners, int outlineThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
     {
         outlineThickness = Math.max(0, outlineThickness);
 
@@ -169,7 +171,7 @@ public final class RenderUtils
      * @param endPosX   Ending X position
      * @param posY      Y position of the line
      * @param thickness Thickness of the line in pixels
-     * @param color     Color of the line
+     * @param color     color of the line
      */
     public static void drawHorizontalLine(GuiGraphics g, int startPosX, int endPosX, int posY, int thickness, Color color)
     {
@@ -184,7 +186,7 @@ public final class RenderUtils
      * @param startPosY Starting Y position
      * @param endPosY   Ending Y position
      * @param thickness Thickness of the line in pixels
-     * @param color     Color of the line
+     * @param color     color of the line
      */
     public static void drawVerticalLine(GuiGraphics g, int posX, int startPosY, int endPosY, int thickness, Color color)
     {
@@ -223,7 +225,7 @@ public final class RenderUtils
      * @param posX        X position of the tick's bounding box
      * @param posY        Y position of the tick's bounding box
      * @param size        Size of the tick's bounding box in pixels
-     * @param color       Color of the tick
+     * @param color       color of the tick
      * @param thickness   Thickness of the tick lines in pixels
      */
     public static void drawTick(GuiGraphics guiGraphics, int posX, int posY, int size, Color color, int thickness)
@@ -272,7 +274,7 @@ public final class RenderUtils
      * @param posX          X position of the animation's bounding box
      * @param posY          Y position of the animation's bounding box
      * @param size          Size of the animation's bounding box in pixels
-     * @param color         Color of the dots
+     * @param color         color of the dots
      * @param currentTimeMs Current time in milliseconds for animation
      */
     public static void drawThreeDotPulseSpinner(GuiGraphics guiGraphics, int posX, int posY, int size, Color color, long currentTimeMs)
@@ -311,7 +313,7 @@ public final class RenderUtils
      * @param posX          X position of the animation's bounding box
      * @param posY          Y position of the animation's bounding box
      * @param size          Size of the animation's bounding box in pixels
-     * @param color         Color of the dots
+     * @param color         color of the dots
      * @param currentTimeMs Current time in milliseconds for animation
      */
     public static void drawThreeDotBouncePulseSpinner(GuiGraphics guiGraphics, int posX, int posY, int size, Color color, long currentTimeMs)
@@ -361,7 +363,7 @@ public final class RenderUtils
      * @param x2          End X position
      * @param y2          End Y position
      * @param thickness   Thickness of the line in pixels
-     * @param color       Color of the line
+     * @param color       color of the line
      */
     private static void drawThickLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness, Color color)
     {
@@ -425,5 +427,44 @@ public final class RenderUtils
                 y1 += sy;
             }
         }
+    }
+
+    public static void drawText(GuiGraphics guiGraphics, String text, int posX, int posY)
+    {
+        drawText(
+                guiGraphics,
+                text,
+                posX,
+                posY,
+                4,
+                Colors.BLACK.withHalfAlpha(),
+                Colors.WHITE,
+                Colors.WHITE
+        );
+    }
+
+    public static void drawText(GuiGraphics guiGraphics, String text, int posX, int posY, int padding, Color backgroundColor, Color outlineColor, Color textColor)
+    {
+        RenderUtils.drawRectangle(
+                guiGraphics,
+                posX - padding,
+                posY - padding,
+                posX + Minecraft.getInstance().font.width(text) + padding,
+                posY + Minecraft.getInstance().font.lineHeight + padding,
+                RoundedCorners.all(),
+                1,
+                true,
+                backgroundColor,
+                outlineColor
+        );
+
+        guiGraphics.drawString(
+                Minecraft.getInstance().font,
+                text,
+                posX,
+                posY,
+                textColor.asInt(),
+                true
+        );
     }
 }
