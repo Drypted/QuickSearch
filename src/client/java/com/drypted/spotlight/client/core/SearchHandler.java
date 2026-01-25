@@ -4,10 +4,11 @@ import com.drypted.spotlight.client.core.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTabs;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -32,23 +33,28 @@ public class SearchHandler
             return;
         }
 
-        CreativeModeTab.ItemDisplayParameters params = new CreativeModeTab.ItemDisplayParameters( //
-                minecraft.level.enabledFeatures(), true, minecraft.level.registryAccess());
+        LinkedHashMap<String, SearchResultData> combined = new LinkedHashMap<>();
 
-        // Match CreativeModeTabs.buildAllTabContents exactly
-        CreativeModeTabs.allTabs()
-                        .stream()
-                        .filter(tab -> tab.getType() == CreativeModeTab.Type.CATEGORY)
-                        .forEach(tab -> tab.buildContents(params));
+        // 1. Creative-mode items (sorted, visible)
+        CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems().stream()).forEach(
+                stack -> {
+                    SearchResultData data = SearchResultData.fromItemStack(stack);
+                    combined.putIfAbsent(data.getIdentifier().toString(), data);
+                });
 
-        CreativeModeTabs.allTabs()
-                        .stream()
-                        .filter(tab -> tab.getType() != CreativeModeTab.Type.CATEGORY)
-                        .forEach(tab -> tab.buildContents(params));
+        // 2. Registry fallback (includes hidden mod items)
+        BuiltInRegistries.ITEM.stream().forEach(item -> {
+            try
+            {
+                SearchResultData data = SearchResultData.fromItem(item);
+                combined.putIfAbsent(data.getIdentifier().toString(), data);
+            } catch (Exception ignored)
+            {
+                // Some items are not safe to instantiate
+            }
+        });
 
-        GameItems = CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems()
-                                                                          .stream()).distinct().map(
-                SearchResultData::fromItemStack).toList();
+        GameItems = List.copyOf(combined.values());
     }
 
     public static void requestCreativeTabRebuild()

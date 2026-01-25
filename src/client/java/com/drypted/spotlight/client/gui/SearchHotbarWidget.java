@@ -1,7 +1,8 @@
 package com.drypted.spotlight.client.gui;
 
-import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.core.models.SearchResultData;
+import com.drypted.spotlight.client.gui.models.MouseButtonClick;
+import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
@@ -9,6 +10,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+
+import java.util.function.Consumer;
 
 public class SearchHotbarWidget extends AbstractWidget
 {
@@ -18,9 +21,11 @@ public class SearchHotbarWidget extends AbstractWidget
     private final Color backgroundColor;
     private final Color outlineColor;
 
+    private Consumer<MouseButtonClick> onClickCallback;
+
     private SearchResultData searchResultData = SearchResultData.EMPTY;
 
-    public SearchHotbarWidget(int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, Color backgroundColor, Color outlineColor)
+    public SearchHotbarWidget(int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, Color backgroundColor, Color outlineColor, Consumer<MouseButtonClick> onClickCallback)
     {
         super(x, y, width, height, Component.empty());
         this.iconPadding = iconPadding;
@@ -28,6 +33,7 @@ public class SearchHotbarWidget extends AbstractWidget
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
         this.outlineColor = outlineColor;
+        this.onClickCallback = onClickCallback;
     }
 
     @Override
@@ -59,6 +65,21 @@ public class SearchHotbarWidget extends AbstractWidget
         }
     }
 
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        if (isMouseOver(mouseX, mouseY))
+        {
+            if (onClickCallback != null)
+            {
+                MouseButtonClick click = new MouseButtonClick(mouseX, mouseY, button);
+                onClickCallback.accept(click);
+            }
+            return true;
+        }
+        return false;
+    }
+
     /* Getters and Setters */
 
     public SearchResultData getSearchResultData()
@@ -69,6 +90,16 @@ public class SearchHotbarWidget extends AbstractWidget
     public void setSearchResultData(SearchResultData searchResultData)
     {
         this.searchResultData = searchResultData;
+    }
+
+    public Consumer<MouseButtonClick> getOnClickCallback()
+    {
+        return onClickCallback;
+    }
+
+    public void setOnClickCallback(Consumer<MouseButtonClick> onClickCallback)
+    {
+        this.onClickCallback = onClickCallback;
     }
 
     /* Builder */
@@ -90,6 +121,8 @@ public class SearchHotbarWidget extends AbstractWidget
         private int outlineThickness = 1;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
         private Color outlineColor = Colors.WHITE;
+
+        private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
 
         public Builder(int x, int y, int width, int height)
         {
@@ -129,6 +162,12 @@ public class SearchHotbarWidget extends AbstractWidget
             return this;
         }
 
+        public Builder onClickCallback(Consumer<MouseButtonClick> onClickCallback)
+        {
+            this.onClickCallback = onClickCallback;
+            return this;
+        }
+
         public SearchHotbarWidget build()
         {
             return new SearchHotbarWidget(
@@ -140,7 +179,8 @@ public class SearchHotbarWidget extends AbstractWidget
                     roundedCorners,
                     outlineThickness,
                     backgroundColor,
-                    outlineColor
+                    outlineColor,
+                    onClickCallback
             );
         }
     }

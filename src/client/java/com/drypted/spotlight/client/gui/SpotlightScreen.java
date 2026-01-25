@@ -2,7 +2,6 @@ package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.SearchHandler;
-import com.drypted.spotlight.client.gui.models.MouseButtonClick;
 import com.drypted.spotlight.client.core.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,7 +11,6 @@ import net.minecraft.network.chat.Component;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public class SpotlightScreen extends Screen
 {
@@ -62,6 +60,9 @@ public class SpotlightScreen extends Screen
         this.addRenderableWidget(searchInputWidget);
         this.addRenderableWidget(searchResultsWidget);
 
+        // show search on open
+        this.searchResultsWidget.visible = false;
+        this.searchHotbarWidgets.values().forEach(widget -> widget.visible = false);
         this.setFocused(searchInputWidget);
     }
 
@@ -92,21 +93,21 @@ public class SpotlightScreen extends Screen
     {
         if (text == null || text.isEmpty())
         {
+            this.searchHotbarWidgets.values().forEach(widget -> widget.visible = false);
+            this.searchResultsWidget.visible = false;
             clearResults();
             return;
         }
 
         // Set visual state to searching
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.SEARCHING);
+        this.searchHotbarWidgets.values().forEach(widget -> widget.visible = true);
+        this.searchResultsWidget.visible = true;
 
         // Delegate logic to Handler
         SearchHandler.searchAsync(text, this::displayResults);
     }
 
-    /**
-     * Handles the UI update when results arrive.
-     * Guaranteed to run on the Main Thread by SearchHandler.
-     */
     private void displayResults(List<SearchResultData> results)
     {
         clearResults();
@@ -126,10 +127,24 @@ public class SpotlightScreen extends Screen
             {
                 SearchHotbarWidget widget = searchHotbarWidgets.get(matchCount);
                 if (widget != null)
+                {
                     widget.setSearchResultData(result);
+                    widget.setOnClickCallback(mouseButtonClick -> {
+                        onResultClicked(result);
+                        widget.setFocused(true);
+                    });
+                }
             }
-            this.searchResultsWidget.addChildRow(SearchResultsWidget.builder(0, 0, result).width(
-                    searchResultsWidget.getMaxWidth()).onClick(onResultClicked(result)).build());
+
+            this.searchResultsWidget.addChildRow( //
+                    SearchResultsWidget.builder(0, 0, result)
+                                       .width(searchResultsWidget.getMaxWidth())
+                                       .onClick((mBC, dC) -> {
+                                           onResultClicked(result);
+                                       })
+                                       .build() //
+            );
+
             matchCount++;
         }
 
@@ -143,13 +158,11 @@ public class SpotlightScreen extends Screen
         searchHotbarWidgets.values().forEach(widget -> widget.setSearchResultData(null));
     }
 
-    private BiConsumer<MouseButtonClick, Boolean> onResultClicked(SearchResultData block)
+    private void onResultClicked(SearchResultData block)
     {
-        return (mouseButtonClick, isDoubleClick) -> {
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null)
-                player.connection.sendCommand(block.getCommandString());
-        };
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null)
+            player.connection.sendCommand(block.getCommandString());
     }
 
     /* Input */
@@ -182,8 +195,6 @@ public class SpotlightScreen extends Screen
                 if (hotbarWidget != null && hotbarWidget.getSearchResultData() != null)
                 {
                     hotbarWidget.setFocused(true);
-                    player.connection.sendCommand(hotbarWidget.getSearchResultData()
-                                                              .getCommandString());
                 }
             }
         }
@@ -192,8 +203,8 @@ public class SpotlightScreen extends Screen
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {}
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) { }
 
     @Override
-    public boolean isPauseScreen() {return false;}
+    public boolean isPauseScreen() { return false; }
 }
