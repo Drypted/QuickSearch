@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.gui;
+package com.drypted.spotlight.client.gui.models;
 
 public record MouseButtonClick(double x, double y, int button)
 {

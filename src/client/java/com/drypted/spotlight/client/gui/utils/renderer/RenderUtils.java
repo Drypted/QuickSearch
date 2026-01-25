@@ -1,7 +1,7 @@
-package com.drypted.spotlight.client.gui;
+package com.drypted.spotlight.client.gui.utils.renderer;
 
-import com.drypted.spotlight.client.records.RoundedCorners;
-import com.drypted.spotlight.client.utils.Color;
+import com.drypted.spotlight.client.gui.models.RoundedCorners;
+import com.drypted.spotlight.client.gui.utils.Color;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 
@@ -238,8 +238,7 @@ public final class RenderUtils
         int shortArmEndY = posY + (int) (size * 0.7f);
 
         // Long arm: middle to top-right
-        int longArmStartX = shortArmEndX;
-        int longArmStartY = shortArmEndY;
+        // start from short arm end
         int longArmEndX = posX + (int) (size * 0.8f);
         int longArmEndY = posY + (int) (size * 0.3f);
 
@@ -257,58 +256,14 @@ public final class RenderUtils
         // Draw long arm (with thickness)
         drawThickLine(
                 guiGraphics,
-                longArmStartX,
-                longArmStartY,
+                shortArmEndX,
+                shortArmEndY,
                 longArmEndX,
                 longArmEndY,
                 thickness,
                 color
         );
     }
-
-    /**
-     * Draws a rotating loading spinner.
-     *
-     * @param guiGraphics   `GuiGraphics` context to draw on
-     * @param posX          X position of the spinner's center
-     * @param posY          Y position of the spinner's center
-     * @param size          Size of the spinner's bounding box in pixels
-     * @param color         Color of the spinner
-     * @param currentTimeMs Current time in milliseconds for animation
-     * @param thickness     Thickness of the spinner segments in pixels
-     */
-    // public static void drawLoadingSpinner(GuiGraphics guiGraphics, int posX, int posY, int size, Color color, long currentTimeMs, int thickness)
-    // {
-    //     thickness = Math.max(1, thickness);
-    //
-    //     final int segmentCount = 8;
-    //     final int rotationSpeed = 800; // milliseconds per full rotation
-    //
-    //     float centerX = posX + size / 2.0f;
-    //     float centerY = posY + size / 2.0f;
-    //     float radius = size * 0.35f;
-    //
-    //     // Calculate rotation angle based on time
-    //     float rotationAngle = (float) ((currentTimeMs % rotationSpeed) / (double) rotationSpeed * 2.0 * Math.PI);
-    //
-    //     for (int i = 0; i < segmentCount; i++)
-    //     {
-    //         float angle = (float) (2.0 * Math.PI * i / segmentCount) + rotationAngle;
-    //
-    //         // Calculate alpha fade for trailing effect
-    //         float alphaMult = 1.0f - (i / (float) segmentCount);
-    //         Color segmentColor = color.withAlpha((int) (255 * alphaMult * alphaMult));
-    //
-    //         // Calculate segment position
-    //         float innerX = centerX + (float) Math.cos(angle) * radius * 0.5f;
-    //         float innerY = centerY + (float) Math.sin(angle) * radius * 0.5f;
-    //         float outerX = centerX + (float) Math.cos(angle) * radius;
-    //         float outerY = centerY + (float) Math.sin(angle) * radius;
-    //
-    //         // Draw segment line
-    //         drawThickLine(guiGraphics, (int) innerX, (int) innerY, (int) outerX, (int) outerY, thickness, segmentColor);
-    //     }
-    // }
 
     /**
      * Draws a three-dot loading animation (dots pulse in sequence).

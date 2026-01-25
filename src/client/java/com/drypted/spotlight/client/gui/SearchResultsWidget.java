@@ -1,8 +1,11 @@
 package com.drypted.spotlight.client.gui;
 
-import com.drypted.spotlight.client.records.RoundedCorners;
-import com.drypted.spotlight.client.utils.Color;
-import com.drypted.spotlight.client.utils.Colors;
+import com.drypted.spotlight.client.gui.models.MouseButtonClick;
+import com.drypted.spotlight.client.gui.models.RoundedCorners;
+import com.drypted.spotlight.client.core.models.SearchResultData;
+import com.drypted.spotlight.client.gui.utils.Color;
+import com.drypted.spotlight.client.gui.utils.Colors;
+import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -256,7 +259,7 @@ public class SearchResultsWidget extends AbstractWidget
 
     public static Builder builder(int x, int y, SearchResultData data)
     {
-        return new Builder(x, y, data.getIcon(), data.getName(), data.getIdentifier());
+        return new Builder(x, y, data.getIcon(), data.getName(), data.getIdentifier().toString());
     }
 
     public static final class Builder

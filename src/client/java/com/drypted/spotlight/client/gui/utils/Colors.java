@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.utils;
+package com.drypted.spotlight.client.gui.utils;
 
 public class Colors
 {

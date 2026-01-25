@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.gui;
 
-import com.drypted.spotlight.client.utils.Color;
-import com.drypted.spotlight.client.utils.Colors;
+import com.drypted.spotlight.client.gui.utils.Color;
+import com.drypted.spotlight.client.gui.utils.Colors;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;

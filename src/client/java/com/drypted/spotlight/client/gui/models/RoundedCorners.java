@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.records;
+package com.drypted.spotlight.client.gui.models;
 
 public record RoundedCorners(boolean topLeft, boolean topRight, boolean bottomLeft,
                              boolean bottomRight)

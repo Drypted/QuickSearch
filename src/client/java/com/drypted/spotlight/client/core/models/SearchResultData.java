@@ -1,6 +1,7 @@
-package com.drypted.spotlight.client.gui;
+package com.drypted.spotlight.client.core.models;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -10,20 +11,20 @@ public final class SearchResultData
 {
     private final ItemStack icon;
     private final String name;
-    private final String identifier;
+    private final ResourceLocation identifier;
     private final int maxStackSize;
     private final String commandString;
 
-    public SearchResultData(ItemStack icon, String name, String identifier, int maxStackSize)
+    public SearchResultData(ItemStack icon, String name, ResourceLocation identifier, int maxStackSize)
     {
         this.icon = icon;
         this.name = name;
         this.identifier = identifier;
         this.maxStackSize = maxStackSize;
-        this.commandString = ("give @s " + identifier + " " + maxStackSize);
+        this.commandString = ("give @s " + identifier.toString() + " " + maxStackSize);
     }
 
-    public SearchResultData(ItemStack icon, String name, String identifier, int maxStackSize, String commandString)
+    public SearchResultData(ItemStack icon, String name, ResourceLocation identifier, int maxStackSize, String commandString)
     {
         this.icon = icon;
         this.name = name;
@@ -40,7 +41,8 @@ public final class SearchResultData
     public boolean containsText(String text)
     {
         final String lowerText = text.toLowerCase();
-        return name.toLowerCase().contains(lowerText) || identifier.toLowerCase()
+        return name.toLowerCase().contains(lowerText) || identifier.getPath()
+                                                                   .toLowerCase()
                                                                    .contains(lowerText);
     }
 
@@ -48,7 +50,7 @@ public final class SearchResultData
     {
         final ItemStack icon = block.asItem().getDefaultInstance();
         final String name = block.getName().getString();
-        final String identifier = BuiltInRegistries.BLOCK.getKey(block).toString();
+        final ResourceLocation identifier = BuiltInRegistries.BLOCK.getKey(block);
         final int maxStackSize = block.asItem().getDefaultMaxStackSize();
 
         return new SearchResultData(icon, name, identifier, maxStackSize);
@@ -62,7 +64,7 @@ public final class SearchResultData
         final ItemStack stack = item.getDefaultInstance();
 
         final String name = item.getName(stack).getString();
-        final String identifier = BuiltInRegistries.ITEM.getKey(item).toString();
+        final ResourceLocation identifier = BuiltInRegistries.ITEM.getKey(item);
         final int maxStackSize = item.getDefaultMaxStackSize();
 
         return new SearchResultData(stack, name, identifier, maxStackSize);
@@ -75,7 +77,7 @@ public final class SearchResultData
 
         final Item item = stack.getItem();
         final String name = item.getName(stack).getString();
-        final String identifier = BuiltInRegistries.ITEM.getKey(item).toString();
+        final ResourceLocation identifier = BuiltInRegistries.ITEM.getKey(item);
         final int maxStackSize = item.getDefaultMaxStackSize();
 
         return new SearchResultData(stack, name, identifier, maxStackSize);
@@ -93,7 +95,7 @@ public final class SearchResultData
         return name;
     }
 
-    public String getIdentifier()
+    public ResourceLocation getIdentifier()
     {
         return identifier;
     }
@@ -109,6 +111,10 @@ public final class SearchResultData
     }
 
     /* Predefined */
-
-    public static final SearchResultData EMPTY = new SearchResultData(ItemStack.EMPTY, "", "", 0);
+    public static final SearchResultData EMPTY = new SearchResultData(
+            ItemStack.EMPTY,
+            "",
+            ResourceLocation.fromNamespaceAndPath("spotlight", "search_result_data_empty"),
+            0
+    );
 }

@@ -2,6 +2,8 @@ package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.SearchHandler;
+import com.drypted.spotlight.client.gui.models.MouseButtonClick;
+import com.drypted.spotlight.client.core.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;

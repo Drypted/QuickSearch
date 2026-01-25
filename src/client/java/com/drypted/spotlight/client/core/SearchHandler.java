@@ -1,7 +1,9 @@
 package com.drypted.spotlight.client.core;
 
-import com.drypted.spotlight.client.gui.SearchResultData;
+import com.drypted.spotlight.client.core.models.SearchResultData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 
@@ -15,7 +17,6 @@ public class SearchHandler
 {
     private static final int MAX_RESULTS = 60;
 
-    private static boolean RequestedOnce = false;
     private static List<SearchResultData> GameItems = Collections.emptyList();
 
     // Keep track of the active search to allow cancellation
@@ -52,24 +53,18 @@ public class SearchHandler
 
     public static void requestCreativeTabRebuild()
     {
-        if (RequestedOnce)
-        {
-            return;
-        }
+        ClientLevel level = Minecraft.getInstance().level;
+        LocalPlayer player = Minecraft.getInstance().player;
 
-        RequestedOnce = true;
-
-        Minecraft minecraft = Minecraft.getInstance();
-
-        if (minecraft.level == null)
+        if (level == null || player == null)
         {
             return;
         }
 
         CreativeModeTabs.tryRebuildTabContents(
-                minecraft.level.enabledFeatures(),
-                true,
-                minecraft.level.registryAccess()
+                level.enabledFeatures(),
+                player.canUseGameMasterBlocks(),
+                level.registryAccess()
         );
     }
 
