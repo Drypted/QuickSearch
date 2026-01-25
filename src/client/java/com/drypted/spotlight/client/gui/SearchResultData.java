@@ -68,6 +68,19 @@ public final class SearchResultData
         return new SearchResultData(stack, name, identifier, maxStackSize);
     }
 
+    public static SearchResultData fromItemStack(ItemStack stack)
+    {
+        if (stack == null || stack.isEmpty() || stack.getItem() == Items.AIR)
+            return SearchResultData.EMPTY;
+
+        final Item item = stack.getItem();
+        final String name = item.getName(stack).getString();
+        final String identifier = BuiltInRegistries.ITEM.getKey(item).toString();
+        final int maxStackSize = item.getDefaultMaxStackSize();
+
+        return new SearchResultData(stack, name, identifier, maxStackSize);
+    }
+
     /* GETTERS & SETTERS */
 
     public ItemStack getIcon()

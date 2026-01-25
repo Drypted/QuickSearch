@@ -27,9 +27,10 @@ public class SearchInputWidget extends AbstractWidget
     private final int outlineThickness;
     private final Color backgroundColor;
     private final Color outlineColor;
+    private final Color focusedCaretColor;
+    private final Color unfocusedCaretColor;
 
     private String text = "";
-    private boolean canType = true;
 
     private final int TextX;
     private final int TextY;
@@ -41,13 +42,15 @@ public class SearchInputWidget extends AbstractWidget
     /// Callbacks for when text is typed
     private final ArrayList<Consumer<String>> onTypeCallbacks = new ArrayList<>();
 
-    public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor)
+    public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color focusedCaretColor, Color unfocusedCaretColor)
     {
         super(x, y, width, height, Component.empty());
         this.isRounded = isRounded;
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
         this.outlineColor = outlineColor;
+        this.focusedCaretColor = focusedCaretColor;
+        this.unfocusedCaretColor = unfocusedCaretColor;
 
         // calculate text position
         TextX = this.getX() + TEXT_PADDING_X;
@@ -109,7 +112,9 @@ public class SearchInputWidget extends AbstractWidget
                     TextY,
                     caretX + 1,
                     TextY + 8,
-                    canType ? Colors.iWHITE : Colors.iYELLOW
+                    this.isFocused()
+                    ? this.focusedCaretColor.asInt()
+                    : this.unfocusedCaretColor.asInt()
             );
         }
     }
@@ -139,7 +144,8 @@ public class SearchInputWidget extends AbstractWidget
     @Override
     public boolean charTyped(char codePoint, int modifiers)
     {
-        if (!this.canType)
+        // no typing if not focused
+        if (!this.isFocused())
             return false;
 
         if (StringUtil.isAllowedChatCharacter(codePoint))
@@ -161,7 +167,7 @@ public class SearchInputWidget extends AbstractWidget
         // use tab to toggle selecting a entry
         if (keyCode == GLFW.GLFW_KEY_TAB)
         {
-            this.canType = !this.canType;
+            this.setFocused(true);
             for (Consumer<String> callback : this.onTypeCallbacks)
             {
                 callback.accept(this.text);
@@ -169,7 +175,7 @@ public class SearchInputWidget extends AbstractWidget
             return true;
         }
 
-        if (this.canType)
+        if (this.isFocused())
         {
             // erase on backspace
             if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !this.text.isEmpty())
@@ -256,6 +262,8 @@ public class SearchInputWidget extends AbstractWidget
         private int outlineThickness = 1;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
         private Color outlineColor = Colors.WHITE;
+        private Color focusedCaretColor = Colors.WHITE;
+        private Color unfocusedCaretColor = Colors.YELLOW;
 
         public Builder(int x, int y, int width, int height)
         {
@@ -295,11 +303,24 @@ public class SearchInputWidget extends AbstractWidget
             return this;
         }
 
+        public Builder focusedCaretColor(Color focusedCaretColor)
+        {
+            this.focusedCaretColor = focusedCaretColor;
+            return this;
+        }
+
+        public Builder unfocusedCaretColor(Color unfocusedCaretColor)
+        {
+            this.unfocusedCaretColor = unfocusedCaretColor;
+            return this;
+        }
+
         public SearchInputWidget build()
         {
             return new SearchInputWidget(
                     x, y, //
-                    width, height, isRounded, outlineThickness, backgroundColor, outlineColor
+                    width, height, isRounded, outlineThickness, //
+                    backgroundColor, outlineColor, focusedCaretColor, unfocusedCaretColor
             );
         }
     }
@@ -312,6 +333,6 @@ public class SearchInputWidget extends AbstractWidget
     public enum SearchStatus
     {
         IDLE,
-        SEARCHING,
+        SEARCHING
     }
 }

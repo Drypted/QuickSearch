@@ -61,7 +61,6 @@ public class SpotlightScreen extends Screen
         this.addRenderableWidget(searchResultsWidget);
 
         this.setFocused(searchInputWidget);
-        this.searchResultsWidget.visible = false;
     }
 
     private void generateHotbarWidgets(int searchBarY, int searchBarX)
@@ -120,32 +119,23 @@ public class SpotlightScreen extends Screen
         int matchCount = 0;
         for (SearchResultData result : results)
         {
-            // Fill Hotbar Widgets (0-8)
+            // fill hotbar for first 9
             if (matchCount < HOTBAR_SLOTS)
             {
                 SearchHotbarWidget widget = searchHotbarWidgets.get(matchCount);
                 if (widget != null)
                     widget.setSearchResultData(result);
             }
-            // Fill Scroll Box (9+)
-            else
-            {
-                this.searchResultsWidget.addChildRow(SearchResultsWidget.builder(0, 0, result)
-                                                                        .width(searchResultsWidget.getMaxWidth())
-                                                                        .onClick(onResultClicked(
-                                                                                result))
-                                                                        .build());
-            }
+            this.searchResultsWidget.addChildRow(SearchResultsWidget.builder(0, 0, result).width(
+                    searchResultsWidget.getMaxWidth()).onClick(onResultClicked(result)).build());
             matchCount++;
         }
 
-        this.searchResultsWidget.visible = matchCount > HOTBAR_SLOTS;
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
     }
 
     private void clearResults()
     {
-        searchResultsWidget.visible = false;
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
         this.searchResultsWidget.removeAllChildren();
         searchHotbarWidgets.values().forEach(widget -> widget.setSearchResultData(null));
@@ -189,6 +179,7 @@ public class SpotlightScreen extends Screen
                 SearchHotbarWidget hotbarWidget = searchHotbarWidgets.get(i);
                 if (hotbarWidget != null && hotbarWidget.getSearchResultData() != null)
                 {
+                    hotbarWidget.setFocused(true);
                     player.connection.sendCommand(hotbarWidget.getSearchResultData()
                                                               .getCommandString());
                 }
