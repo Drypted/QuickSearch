@@ -125,11 +125,6 @@ public class SearchHotbarWidget extends AbstractWidget
         this.searchResultData = searchResultData;
     }
 
-    public Consumer<MouseButtonClick> getOnClickCallback()
-    {
-        return onClickCallback;
-    }
-
     public void setOnClickCallback(Consumer<MouseButtonClick> onClickCallback)
     {
         this.onClickCallback = onClickCallback;
@@ -144,7 +139,6 @@ public class SearchHotbarWidget extends AbstractWidget
     {
         this.showBind = showBind;
     }
-
 
     /* Builder */
 

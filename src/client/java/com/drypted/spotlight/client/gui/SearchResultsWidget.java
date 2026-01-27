@@ -12,7 +12,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.function.BiConsumer;
 
@@ -20,9 +19,7 @@ public class SearchResultsWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
 
-    private ItemStack icon;
-    private String title;
-    private String subtitle;
+    SearchResultData data;
 
     private final int padding;
     private final boolean isRounded;
@@ -32,6 +29,7 @@ public class SearchResultsWidget extends AbstractWidget
     private Color hoverColor;
     private Color clickColor;
     private boolean pressed;
+    private boolean showBind = false;
 
     private Color outlineColor = Colors.CLEAR;
 
@@ -44,12 +42,10 @@ public class SearchResultsWidget extends AbstractWidget
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public SearchResultsWidget(int x, int y, int width, ItemStack icon, String title, String subtitle, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
+    public SearchResultsWidget(int x, int y, int width, SearchResultData data, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
     {
         super(x, y, width, 0, Component.empty());
-        this.icon = icon;
-        this.title = title;
-        this.subtitle = subtitle;
+        this.data = data;
         this.padding = padding;
         this.isRounded = isRounded;
         this.outlineThickness = outlineThickness;
@@ -95,22 +91,22 @@ public class SearchResultsWidget extends AbstractWidget
                 endPosY,
                 RoundedCorners.fromSingle(this.isRounded),
                 this.outlineThickness,
-                renderOutline,
+                this.shouldShowBind() || renderOutline,
                 this.backgroundColor,
-                outlineColor
+                this.shouldShowBind() ? Colors.WARNING_YELLOW : outlineColor
         );
 
         // icon
         int iconX = startPosX + padding;
         int iconY = startPosY + padding;
 
-        RenderUtils.drawScaledItemSize(g, this.icon, iconX, iconY, ICON_SIZE);
+        RenderUtils.drawScaledItemSize(g, this.data.getIcon(), iconX, iconY, ICON_SIZE);
 
         // title
         int titleX = iconX + ICON_SIZE + ICON_PADDING;
         int titleY = startPosY + padding;
 
-        g.drawString(FONT, this.title, titleX, titleY, textColor.asInt(), false);
+        g.drawString(FONT, this.data.getName(), titleX, titleY, textColor.asInt(), false);
 
         // subtitle
         int subtitleY = titleY + FONT.lineHeight + SUBTITLE_SPACING;
@@ -120,14 +116,30 @@ public class SearchResultsWidget extends AbstractWidget
         g.pose().scale(subtitleScale, subtitleScale, subtitleScale);
         g.drawString(
                 FONT,
-                this.subtitle,
+                this.data.getIdentifier().toString(),
                 (int) (titleX / subtitleScale),
                 (int) (subtitleY / subtitleScale),
                 textColor.asInt(),
                 false
         );
         g.pose().popPose();
-        
+
+        if (this.shouldShowBind())
+        {
+            final int size = 8;
+            RenderUtils.drawText(
+                    g,
+                    "O",
+                    0.75f,
+                    endPosX - size,
+                    endPosY - size,
+                    endPosX,
+                    endPosY,
+                    RoundedCorners.from(true, false, false, false),
+                    Colors.WARNING_YELLOW,
+                    textColor
+            );
+        }
     }
 
     /* Input */
@@ -176,36 +188,6 @@ public class SearchResultsWidget extends AbstractWidget
     public void setOnClickCallback(BiConsumer<MouseButtonClick, Boolean> onClickCallback)
     {
         this.onClickCallback = onClickCallback;
-    }
-
-    public ItemStack getIcon()
-    {
-        return icon;
-    }
-
-    public void setIcon(ItemStack icon)
-    {
-        this.icon = icon;
-    }
-
-    public String getTitle()
-    {
-        return title;
-    }
-
-    public void setTitle(String title)
-    {
-        this.title = title;
-    }
-
-    public String getSubtitle()
-    {
-        return subtitle;
-    }
-
-    public void setSubtitle(String subtitle)
-    {
-        this.subtitle = subtitle;
     }
 
     public Color getBackgroundColor()
@@ -258,11 +240,21 @@ public class SearchResultsWidget extends AbstractWidget
         this.outlineColor = outlineColor;
     }
 
+    public boolean shouldShowBind()
+    {
+        return showBind;
+    }
+
+    public void setShowBind(boolean showBind)
+    {
+        this.showBind = showBind;
+    }
+
     /* Builder */
 
     public static Builder builder(int x, int y, SearchResultData data)
     {
-        return new Builder(x, y, data.getIcon(), data.getName(), data.getIdentifier().toString());
+        return new Builder(x, y, data);
     }
 
     public static final class Builder
@@ -270,9 +262,7 @@ public class SearchResultsWidget extends AbstractWidget
         private final int x;
         private final int y;
         private int width = 0;
-        private final ItemStack icon;
-        private final String title;
-        private final String subtitle;
+        private final SearchResultData data;
 
         private int padding = 5;
         private boolean isRounded = false;
@@ -288,13 +278,11 @@ public class SearchResultsWidget extends AbstractWidget
         private BiConsumer<MouseButtonClick, Boolean> onClick = (e, pressed) -> {
         };
 
-        private Builder(int x, int y, ItemStack icon, String title, String subtitle)
+        private Builder(int x, int y, SearchResultData data)
         {
             this.x = x;
             this.y = y;
-            this.icon = icon;
-            this.title = title;
-            this.subtitle = subtitle;
+            this.data = data;
         }
 
         public Builder width(int width)
@@ -369,9 +357,7 @@ public class SearchResultsWidget extends AbstractWidget
                     this.x,
                     this.y,
                     this.width,
-                    this.icon,
-                    this.title,
-                    this.subtitle,
+                    this.data,
                     this.padding,
                     this.isRounded,
                     this.outlineThickness,

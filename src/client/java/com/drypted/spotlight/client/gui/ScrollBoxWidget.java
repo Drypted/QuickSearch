@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ScrollBoxWidget extends AbstractWidget
 {
@@ -31,6 +32,12 @@ public class ScrollBoxWidget extends AbstractWidget
     private boolean scrolling;
 
     private int lastId = 0;
+
+    private Consumer<Boolean> onFocus;
+    private Consumer<Boolean> onScroll;
+    private boolean lastSignaledScrollState = false;
+    private long lastWheelScrollTime = 0L;
+    private static final long WHEEL_SCROLL_END_DELAY_MS = 100;
 
     public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
     {
@@ -171,7 +178,7 @@ public class ScrollBoxWidget extends AbstractWidget
         if (scrollbarVisible() && isValidClickButton(button) && isOverScrollbar(mouseX, mouseY))
         {
             this.scrolling = true;
-            this.setFocused(true);
+            signalScrollState(true);
             return true;
         }
 
@@ -193,7 +200,7 @@ public class ScrollBoxWidget extends AbstractWidget
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
         this.scrolling = false;
-        this.setFocused(false);
+        signalScrollState(false);
 
         for (WidgetEntry entry : children)
         {
@@ -210,6 +217,10 @@ public class ScrollBoxWidget extends AbstractWidget
             return false;
         }
 
+        this.scrolling = true;
+        signalScrollState(true);
+
+        lastWheelScrollTime = System.currentTimeMillis();
         setScrollAmount(scrollAmount - scrollY * scrollRate());
         return true;
     }
@@ -250,6 +261,19 @@ public class ScrollBoxWidget extends AbstractWidget
     {
         return this.width - (margin * 2) - (scrollbarVisible() ? SCROLLBAR_WIDTH : 0);
     }
+
+    private void signalScrollState(boolean scrollingNow)
+    {
+        if (onScroll == null)
+            return;
+
+        if (lastSignaledScrollState != scrollingNow)
+        {
+            lastSignaledScrollState = scrollingNow;
+            onScroll.accept(scrollingNow);
+        }
+    }
+
 
     /* Render */
 
@@ -338,6 +362,32 @@ public class ScrollBoxWidget extends AbstractWidget
         // {
         //     g.requestCursor(this.scrolling ? CursorTypes.RESIZE_NS : CursorTypes.POINTING_HAND);
         // }
+    }
+
+    public void tick()
+    {
+        if (scrolling && lastWheelScrollTime != 0L)
+        {
+            if (System.currentTimeMillis() - lastWheelScrollTime > WHEEL_SCROLL_END_DELAY_MS)
+            {
+                scrolling = false;
+                lastWheelScrollTime = 0L;
+                signalScrollState(false);
+            }
+        }
+    }
+
+
+    /* Getters And Setters */
+
+    public void setOnFocusCallback(Consumer<Boolean> onFocus)
+    {
+        this.onFocus = onFocus;
+    }
+
+    public void setOnScrollCallback(Consumer<Boolean> onScroll)
+    {
+        this.onScroll = onScroll;
     }
 
     /* Builder */
@@ -447,5 +497,15 @@ public class ScrollBoxWidget extends AbstractWidget
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narration)
     {
+    }
+
+    @Override
+    public void setFocused(boolean bl)
+    {
+        if (onFocus != null)
+        {
+            onFocus.accept(bl);
+        }
+        super.setFocused(bl);
     }
 }

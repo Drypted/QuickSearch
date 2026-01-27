@@ -52,6 +52,21 @@ public class SpotlightScreen extends Screen
                 searchInputWidget.getWidth(),
                 RESULTS_HEIGHT
         ).showScrollerAlways(true).build();
+        this.searchResultsWidget.setOnFocusCallback((focused) -> {
+            this.searchResultsWidget.getAllChildren().forEach(widget -> {
+                if (widget instanceof SearchResultsWidget resultWidget)
+                    resultWidget.setShowBind(focused);
+            });
+        });
+        this.searchResultsWidget.setOnScrollCallback((scrolling) -> {
+            if (!this.searchResultsWidget.isFocused())
+                return;
+
+            this.searchResultsWidget.getAllChildren().forEach(widget -> {
+                if (widget instanceof SearchResultsWidget resultWidget)
+                    resultWidget.setShowBind(!scrolling); // hide when scrolling
+            });
+        });
 
         generateHotbarWidgets(searchBarY, searchBarX);
 
@@ -69,6 +84,13 @@ public class SpotlightScreen extends Screen
         this.setFocused(searchInputWidget);
     }
 
+    @Override
+    public void tick()
+    {
+        super.tick();
+        this.searchResultsWidget.tick();
+    }
+
     private void generateHotbarWidgets(int searchBarY, int searchBarX)
     {
         final float iconSize = (SEARCH_BAR_WIDTH - HOTBAR_SLOT_PADDING * (HOTBAR_SLOTS + 1)) / (float) HOTBAR_SLOTS;
@@ -78,14 +100,25 @@ public class SpotlightScreen extends Screen
         float cursor = searchBarX + HOTBAR_SLOT_PADDING;
         for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
-            this.searchHotbarWidgets.add( //
-                    SearchHotbarWidget.builder(
-                            i,
-                            (int) Math.ceil(cursor),
-                            startY,
-                            (int) Math.ceil(iconSize),
-                            (int) Math.ceil(iconSize)
-                    ).build());
+            final SearchHotbarWidget hotbarWidget = SearchHotbarWidget.builder(
+                    i,
+                    (int) Math.ceil(
+                            cursor),
+                    startY,
+                    (int) Math.ceil(
+                            iconSize),
+                    (int) Math.ceil(
+                            iconSize)
+            ).build();
+            final int finalI = i;
+            hotbarWidget.setOnClickCallback(mouseButtonClick -> {
+                SearchResultData item = hotbarWidget.getSearchResultData();
+                if (item == null || item.isEmpty())
+                    return;
+
+                onHotbarKeyPressed(item, finalI);
+            });
+            this.searchHotbarWidgets.add(hotbarWidget);
             cursor += iconSize + HOTBAR_SLOT_PADDING;
         }
 
@@ -187,10 +220,6 @@ public class SpotlightScreen extends Screen
         if (this.minecraft == null)
             return super.keyPressed(keyCode, scanCode, modifiers);
 
-        LocalPlayer player = this.minecraft.player;
-        if (player == null)
-            return super.keyPressed(keyCode, scanCode, modifiers);
-
         // only allow key when hotbar is focused
         if (hotbarFocusProxy.isFocused())
         {
@@ -204,7 +233,7 @@ public class SpotlightScreen extends Screen
                     if (item == null || item.isEmpty())
                         continue;
 
-                    onHotbarKeyPressed(item, player, i);
+                    onHotbarKeyPressed(item, i);
                     return true;
                 }
             }
@@ -213,16 +242,20 @@ public class SpotlightScreen extends Screen
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    private static void onHotbarKeyPressed(SearchResultData item, LocalPlayer player, int slotIndex)
+    private static void onHotbarKeyPressed(SearchResultData item, int slotIndex)
     {
-        String command = String.format(
-                "item replace entity @s hotbar.%d with %s %d",
-                slotIndex,                        // hotbar slot
-                item.getIdentifier(),             // item
-                item.getIcon().getMaxStackSize()  // count
-        );
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null)
+        {
+            String command = String.format(
+                    "item replace entity @s hotbar.%d with %s %d",
+                    slotIndex,                        // hotbar slot
+                    item.getIdentifier(),             // item
+                    item.getIcon().getMaxStackSize()  // count
+            );
 
-        player.connection.sendCommand(command);
+            player.connection.sendCommand(command);
+        }
     }
 
 
