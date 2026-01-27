@@ -169,6 +169,32 @@ public class ScrollBoxWidget extends AbstractWidget
         return mouseX >= scrollBarX() && mouseX <= scrollBarX() + SCROLLBAR_WIDTH && mouseY >= getY() && mouseY < getBottom();
     }
 
+    private void updateScrollPosition(double mouseY)
+    {
+        final int topY = getY();
+        final int bottomY = getBottom();
+
+        if (mouseY < topY)
+        {
+            setScrollAmount(0.0);
+        }
+        else if (mouseY > bottomY)
+        {
+            setScrollAmount(maxScrollAmount());
+        }
+        else
+        {
+            final int scrollerHeight = scrollerHeight();
+            final int trackHeight = height - scrollerHeight;
+
+            // This centers the scroller thumb on the mouse cursor
+            final double mouseOffset = mouseY - getY() - scrollerHeight / 2.0;
+            final double scrollRatio = Mth.clamp(mouseOffset / trackHeight, 0.0, 1.0);
+
+            setScrollAmount(scrollRatio * maxScrollAmount());
+        }
+    }
+
     /* Mouse Scroll Logic */
 
     @Override
@@ -179,6 +205,9 @@ public class ScrollBoxWidget extends AbstractWidget
         {
             this.scrolling = true;
             signalScrollState(true);
+
+            updateScrollPosition(mouseY);
+
             return true;
         }
 
@@ -230,27 +259,7 @@ public class ScrollBoxWidget extends AbstractWidget
     {
         if (scrolling)
         {
-            final int topY = getY();
-            final int bottomY = getBottom();
-
-            if (mouseY < topY)
-            {
-                setScrollAmount(0.0);
-            }
-            else if (mouseY > bottomY)
-            {
-                setScrollAmount(maxScrollAmount());
-            }
-            else
-            {
-                final int scrollerHeight = scrollerHeight();
-                final int trackHeight = height - scrollerHeight;
-
-                final double mouseOffset = mouseY - getY() - scrollerHeight / 2.0;
-                final double scrollRatio = Mth.clamp(mouseOffset / trackHeight, 0.0, 1.0);
-
-                setScrollAmount(scrollRatio * maxScrollAmount());
-            }
+            updateScrollPosition(mouseY);
             return true;
         }
 
@@ -269,6 +278,7 @@ public class ScrollBoxWidget extends AbstractWidget
 
         if (lastSignaledScrollState != scrollingNow)
         {
+            System.out.println("Signalling Scrolling: " + scrollingNow);
             lastSignaledScrollState = scrollingNow;
             onScroll.accept(scrollingNow);
         }
@@ -500,12 +510,20 @@ public class ScrollBoxWidget extends AbstractWidget
     }
 
     @Override
-    public void setFocused(boolean bl)
+    public void setFocused(boolean focused)
     {
         if (onFocus != null)
         {
-            onFocus.accept(bl);
+            onFocus.accept(focused);
         }
-        super.setFocused(bl);
+        super.setFocused(focused);
+
+        // If we are currently scrolling, the focus change above
+        // might have just shown the binds effectively undoing our "hide while scrolling" logic.
+        // We must re-signal that we are scrolling to force them back to hidden.
+        if (focused && scrolling && onScroll != null)
+        {
+            onScroll.accept(true);
+        }
     }
 }

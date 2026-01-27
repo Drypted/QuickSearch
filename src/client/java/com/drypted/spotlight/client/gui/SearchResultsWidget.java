@@ -93,7 +93,7 @@ public class SearchResultsWidget extends AbstractWidget
                 this.outlineThickness,
                 this.shouldShowBind() || renderOutline,
                 this.backgroundColor,
-                this.shouldShowBind() ? Colors.WARNING_YELLOW : outlineColor
+                this.shouldShowBind() ? Colors.HIGHLIGHT_YELLOW : outlineColor
         );
 
         // icon
@@ -136,7 +136,7 @@ public class SearchResultsWidget extends AbstractWidget
                     endPosX,
                     endPosY,
                     RoundedCorners.from(true, false, false, false),
-                    Colors.WARNING_YELLOW,
+                    Colors.HIGHLIGHT_YELLOW,
                     textColor
             );
         }

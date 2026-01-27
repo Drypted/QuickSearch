@@ -29,8 +29,8 @@ public class SearchInputWidget extends AbstractWidget
     private final int outlineThickness;
     private final Color backgroundColor;
     private final Color outlineColor;
-    private final Color focusedCaretColor;
-    private final Color unfocusedCaretColor;
+    private final Color focusedColor;
+    private final Color unfocusedColor;
 
     private String text = "";
 
@@ -44,15 +44,15 @@ public class SearchInputWidget extends AbstractWidget
     /// Callbacks for when text is typed
     private final ArrayList<BiConsumer<String, Character>> onTypeCallbacks = new ArrayList<>();
 
-    public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color focusedCaretColor, Color unfocusedCaretColor)
+    public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color focusedColor, Color unfocusedColor)
     {
         super(x, y, width, height, Component.empty());
         this.isRounded = isRounded;
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
         this.outlineColor = outlineColor;
-        this.focusedCaretColor = focusedCaretColor;
-        this.unfocusedCaretColor = unfocusedCaretColor;
+        this.focusedColor = focusedColor;
+        this.unfocusedColor = unfocusedColor;
 
         // calculate text position
         TextX = this.getX() + TEXT_PADDING_X;
@@ -82,7 +82,7 @@ public class SearchInputWidget extends AbstractWidget
                 this.text,
                 TextX,
                 TextY,
-                Colors.iWHITE,
+                this.isFocused() ? focusedColor.asInt() : unfocusedColor.asInt(),
                 false
         );
 
@@ -114,9 +114,7 @@ public class SearchInputWidget extends AbstractWidget
                     TextY,
                     caretX + 1,
                     TextY + 8,
-                    this.isFocused()
-                    ? focusedCaretColor.asInt()
-                    : unfocusedCaretColor.asInt()
+                    this.isFocused() ? focusedColor.asInt() : unfocusedColor.asInt()
             );
         }
     }
@@ -253,8 +251,8 @@ public class SearchInputWidget extends AbstractWidget
         private int outlineThickness = 1;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
         private Color outlineColor = Colors.WHITE;
-        private Color focusedCaretColor = Colors.WHITE;
-        private Color unfocusedCaretColor = Colors.YELLOW;
+        private Color focusedColor = Colors.WHITE;
+        private Color unfocusedColor = Colors.HIGHLIGHT_YELLOW;
 
         public Builder(int x, int y, int width, int height)
         {
@@ -294,15 +292,15 @@ public class SearchInputWidget extends AbstractWidget
             return this;
         }
 
-        public Builder focusedCaretColor(Color focusedCaretColor)
+        public Builder focusedColor(Color focusedColor)
         {
-            this.focusedCaretColor = focusedCaretColor;
+            this.focusedColor = focusedColor;
             return this;
         }
 
-        public Builder unfocusedCaretColor(Color unfocusedCaretColor)
+        public Builder unfocusedColor(Color unfocusedColor)
         {
-            this.unfocusedCaretColor = unfocusedCaretColor;
+            this.unfocusedColor = unfocusedColor;
             return this;
         }
 
@@ -311,7 +309,7 @@ public class SearchInputWidget extends AbstractWidget
             return new SearchInputWidget(
                     x, y, //
                     width, height, isRounded, outlineThickness, //
-                    backgroundColor, outlineColor, focusedCaretColor, unfocusedCaretColor
+                    backgroundColor, outlineColor, focusedColor, unfocusedColor
             );
         }
     }

@@ -162,7 +162,7 @@ public class SearchHotbarWidget extends AbstractWidget
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
         private Color textColor = Colors.WHITE;
         private Color unfocusedOutlineColor = Colors.WHITE;
-        private Color focusedOutlineColor = Colors.WARNING_YELLOW;
+        private Color focusedOutlineColor = Colors.HIGHLIGHT_YELLOW;
 
         private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
 

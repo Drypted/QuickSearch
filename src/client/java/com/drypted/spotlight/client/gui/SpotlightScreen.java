@@ -62,6 +62,8 @@ public class SpotlightScreen extends Screen
             if (!this.searchResultsWidget.isFocused())
                 return;
 
+            System.out.println("Receive Scrolling: " + scrolling);
+
             this.searchResultsWidget.getAllChildren().forEach(widget -> {
                 if (widget instanceof SearchResultsWidget resultWidget)
                     resultWidget.setShowBind(!scrolling); // hide when scrolling
@@ -102,13 +104,10 @@ public class SpotlightScreen extends Screen
         {
             final SearchHotbarWidget hotbarWidget = SearchHotbarWidget.builder(
                     i,
-                    (int) Math.ceil(
-                            cursor),
+                    (int) Math.ceil(cursor),
                     startY,
-                    (int) Math.ceil(
-                            iconSize),
-                    (int) Math.ceil(
-                            iconSize)
+                    (int) Math.ceil(iconSize),
+                    (int) Math.ceil(iconSize)
             ).build();
             final int finalI = i;
             hotbarWidget.setOnClickCallback(mouseButtonClick -> {
@@ -258,6 +257,18 @@ public class SpotlightScreen extends Screen
         }
     }
 
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        if (!super.mouseClicked(mouseX, mouseY, button))
+        {
+            // click outside, close spotlight
+            this.onClose();
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
 
     /* Overrides for settings */
 
