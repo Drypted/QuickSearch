@@ -66,7 +66,7 @@ public class SearchHotbarWidget extends AbstractWidget
         );
 
         // show icon if search result data is available
-        if (searchResultData != null && searchResultData.isNotEmpty())
+        if (searchResultData != null && !searchResultData.isEmpty())
         {
             int iconSize = this.getHeight() - 2 * iconPadding;
             RenderUtils.drawScaledItemSize(
@@ -86,7 +86,7 @@ public class SearchHotbarWidget extends AbstractWidget
             RenderUtils.drawText(
                     guiGraphics,
                     hotbarKey,
-                    0.8f,
+                    hotbarKeyTextScale,
                     this.getX() + padding,
                     this.getY() - this.getWidth() + (padding * 2),
                     this.getRight() - padding,
@@ -144,6 +144,7 @@ public class SearchHotbarWidget extends AbstractWidget
     {
         this.showBind = showBind;
     }
+
 
     /* Builder */
 

@@ -58,10 +58,10 @@ public class SpotlightScreen extends Screen
         this.searchInputWidget.subscribeToTypeCallback(this::onType);
 
         this.searchHotbarWidgets.forEach(this::addRenderableOnly);
-        this.addRenderableWidget(searchInputWidget);
-        this.addRenderableWidget(searchResultsWidget);
 
+        this.addRenderableWidget(searchInputWidget);
         this.addRenderableWidget(hotbarFocusProxy);
+        this.addRenderableWidget(searchResultsWidget);
 
         // show search on open
         this.searchResultsWidget.visible = false;
@@ -184,15 +184,27 @@ public class SpotlightScreen extends Screen
             return true;
         }
 
-        for (int i = 0; i < HOTBAR_SLOTS; i++)
+        if (this.minecraft == null)
+            return super.keyPressed(keyCode, scanCode, modifiers);
+
+        LocalPlayer player = this.minecraft.player;
+        if (player == null)
+            return super.keyPressed(keyCode, scanCode, modifiers);
+
+        // only allow key when hotbar is focused
+        if (hotbarFocusProxy.isFocused())
         {
-            if (keyCode == Minecraft.getInstance().options.keyHotbarSlots[i].getDefaultKey()
-                                                                            .getValue())
+            for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
                 SearchHotbarWidget hotbarWidget = searchHotbarWidgets.get(i);
-                if (hotbarWidget != null && hotbarWidget.getSearchResultData() != null)
+                if (hotbarWidget != null && keyCode == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
+                                                                                               .getValue())
                 {
-                    onResultClicked(hotbarWidget.getSearchResultData());
+                    SearchResultData item = hotbarWidget.getSearchResultData();
+                    if (item == null || item.isEmpty())
+                        continue;
+
+                    onHotbarKeyPressed(item, player, i);
                     return true;
                 }
             }
@@ -201,36 +213,17 @@ public class SpotlightScreen extends Screen
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    /* Focus */
+    private static void onHotbarKeyPressed(SearchResultData item, LocalPlayer player, int slotIndex)
+    {
+        String command = String.format(
+                "item replace entity @s hotbar.%d with %s %d",
+                slotIndex,                        // hotbar slot
+                item.getIdentifier(),             // item
+                item.getIcon().getMaxStackSize()  // count
+        );
 
-    // @Override
-    // public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent event)
-    // {
-    //     if (!(event instanceof FocusNavigationEvent.TabNavigation tab))
-    //     {
-    //         SpotlightEntryClient.LOGGER.info("Navigation");
-    //         return super.nextFocusPath(event);
-    //     }
-    //     SpotlightEntryClient.LOGGER.info("Press tab");
-    //
-    //
-    //     // search bar -> hotbar proxy
-    //     if (this.searchInputWidget.isFocused())
-    //     {
-    //         SpotlightEntryClient.LOGGER.info("Moving focus to Proxy");
-    //         return ComponentPath.path(this.hotbarFocusProxy);
-    //     }
-    //     // hotbar proxy > search bar
-    //     else if (this.hotbarFocusProxy.isFocused())
-    //     {
-    //         SpotlightEntryClient.LOGGER.info("Moving focus to Input");
-    //         return ComponentPath.path(this.searchInputWidget);
-    //     }
-    //     else
-    //     {
-    //         return ComponentPath.path(this.searchInputWidget);
-    //     }
-    // }
+        player.connection.sendCommand(command);
+    }
 
 
     /* Overrides for settings */

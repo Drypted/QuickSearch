@@ -33,9 +33,9 @@ public final class SearchResultData
         this.commandString = commandString;
     }
 
-    public boolean isNotEmpty()
+    public boolean isEmpty()
     {
-        return this != EMPTY;
+        return this == EMPTY;
     }
 
     public boolean containsText(String text)
