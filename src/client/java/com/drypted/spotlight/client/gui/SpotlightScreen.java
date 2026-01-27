@@ -5,6 +5,7 @@ import com.drypted.spotlight.client.core.SearchHandler;
 import com.drypted.spotlight.client.core.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -81,8 +82,9 @@ public class SpotlightScreen extends Screen
         this.addRenderableWidget(searchResultsWidget);
 
         // show search on open
-        this.searchResultsWidget.visible = false;
-        this.searchHotbarWidgets.forEach(widget -> widget.visible = false);
+        setVisible(this.searchResultsWidget, false);
+        this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
+
         this.setFocused(searchInputWidget);
     }
 
@@ -104,10 +106,13 @@ public class SpotlightScreen extends Screen
         {
             final SearchHotbarWidget hotbarWidget = SearchHotbarWidget.builder(
                     i,
-                    (int) Math.ceil(cursor),
+                    (int) Math.ceil(
+                            cursor),
                     startY,
-                    (int) Math.ceil(iconSize),
-                    (int) Math.ceil(iconSize)
+                    (int) Math.ceil(
+                            iconSize),
+                    (int) Math.ceil(
+                            iconSize)
             ).build();
             final int finalI = i;
             hotbarWidget.setOnClickCallback(mouseButtonClick -> {
@@ -186,16 +191,16 @@ public class SpotlightScreen extends Screen
     {
         if (text == null || text.isEmpty())
         {
-            this.searchHotbarWidgets.forEach(widget -> widget.visible = false);
-            this.searchResultsWidget.visible = false;
+            this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
+            setVisible(this.searchResultsWidget, false);
             clearResults();
             return;
         }
 
         // Set visual state to searching
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.SEARCHING);
-        this.searchHotbarWidgets.forEach(widget -> widget.visible = true);
-        this.searchResultsWidget.visible = true;
+        this.searchHotbarWidgets.forEach(widget -> setVisible(widget, true));
+        setVisible(this.searchResultsWidget, true);
 
         // Delegate logic to Handler
         SearchHandler.searchAsync(text, this::displayResults);
@@ -210,6 +215,8 @@ public class SpotlightScreen extends Screen
             {
                 searchInputWidget.clearText();
                 clearResults();
+                this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
+                setVisible(this.searchResultsWidget, false);
                 return true;
             }
             this.onClose();
@@ -277,4 +284,12 @@ public class SpotlightScreen extends Screen
 
     @Override
     public boolean isPauseScreen() { return false; }
+
+    /* Helpers */
+
+    public void setVisible(AbstractWidget widget, boolean visible)
+    {
+        widget.visible = visible;
+        widget.active = visible;
+    }
 }
