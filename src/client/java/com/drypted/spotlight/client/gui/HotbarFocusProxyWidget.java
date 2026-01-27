@@ -32,6 +32,6 @@ public class HotbarFocusProxyWidget extends AbstractWidget
     public void setFocused(boolean focused)
     {
         super.setFocused(focused);
-        searchHotbarWidgets.forEach(w -> w.setFocused(focused));
+        searchHotbarWidgets.forEach(w -> w.setShowBind(focused));
     }
 }

@@ -4,13 +4,10 @@ import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.SearchHandler;
 import com.drypted.spotlight.client.core.models.SearchResultData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +57,7 @@ public class SpotlightScreen extends Screen
 
         this.searchInputWidget.subscribeToTypeCallback(this::onType);
 
-        this.searchHotbarWidgets.forEach(this::addRenderableWidget);
+        this.searchHotbarWidgets.forEach(this::addRenderableOnly);
         this.addRenderableWidget(searchInputWidget);
         this.addRenderableWidget(searchResultsWidget);
 
@@ -206,30 +203,34 @@ public class SpotlightScreen extends Screen
 
     /* Focus */
 
-    @Override
-    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent event)
-    {
-        if (!(event instanceof FocusNavigationEvent.TabNavigation))
-        {
-            return super.nextFocusPath(event);
-        }
-
-        // search bar -> hotbar proxy
-        if (this.getFocused() == searchInputWidget)
-        {
-            hotbarFocusProxy.setFocused(true);
-            return this.hotbarFocusProxy.getCurrentFocusPath();
-        }
-
-        // hotbar proxy > search bar
-        if (this.getFocused() == hotbarFocusProxy)
-        {
-            searchInputWidget.setFocused(false);
-            return this.searchInputWidget.getCurrentFocusPath();
-        }
-
-        return super.nextFocusPath(event);
-    }
+    // @Override
+    // public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent event)
+    // {
+    //     if (!(event instanceof FocusNavigationEvent.TabNavigation tab))
+    //     {
+    //         SpotlightEntryClient.LOGGER.info("Navigation");
+    //         return super.nextFocusPath(event);
+    //     }
+    //     SpotlightEntryClient.LOGGER.info("Press tab");
+    //
+    //
+    //     // search bar -> hotbar proxy
+    //     if (this.searchInputWidget.isFocused())
+    //     {
+    //         SpotlightEntryClient.LOGGER.info("Moving focus to Proxy");
+    //         return ComponentPath.path(this.hotbarFocusProxy);
+    //     }
+    //     // hotbar proxy > search bar
+    //     else if (this.hotbarFocusProxy.isFocused())
+    //     {
+    //         SpotlightEntryClient.LOGGER.info("Moving focus to Input");
+    //         return ComponentPath.path(this.searchInputWidget);
+    //     }
+    //     else
+    //     {
+    //         return ComponentPath.path(this.searchInputWidget);
+    //     }
+    // }
 
 
     /* Overrides for settings */

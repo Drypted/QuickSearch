@@ -14,87 +14,81 @@ public final class RenderUtils
     /**
      * Fills a rectangle with optional rounded corners and outline.
      *
-     * @param g                `GuiGraphics` context to draw on
-     * @param startPosX        Start X position
-     * @param startPosY        Start Y position
-     * @param endPosX          End X position
-     * @param endPosY          End Y position
-     * @param corners          `RoundedCorners` specifying which corners are rounded
-     * @param outlineThickness Thickness of the outline in pixels
-     * @param renderOutline    Whether to render the outline
-     * @param backgroundColor  Background color
-     * @param outlineColor     Outline color
+     * @param g               `GuiGraphics` context to draw on
+     * @param startPosX       Start X position
+     * @param startPosY       Start Y position
+     * @param endPosX         End X position
+     * @param endPosY         End Y position
+     * @param corners         `RoundedCorners` specifying which corners are rounded; requires insetThickness > 0
+     * @param insetThickness  Thickness of the outline in pixels
+     * @param renderOutline   Whether to render the outline
+     * @param backgroundColor Background color
+     * @param outlineColor    Outline color
      */
-    public static void drawRectangle(GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY, RoundedCorners corners, int outlineThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
+    public static void drawRectangle(GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY, RoundedCorners corners, int insetThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
     {
-        outlineThickness = Math.max(0, outlineThickness);
+        insetThickness = Math.max(0, insetThickness);
 
-        // Main body; inset by outlineThickness
+        // Main body
+        if (!renderOutline || insetThickness == 0)
+        {
+            g.fill(startPosX, startPosY, endPosX, endPosY, backgroundColor.asInt());
+            return;
+        }
+
         g.fill(
-                startPosX + outlineThickness,
-                startPosY + outlineThickness,
-                endPosX - outlineThickness,
-                endPosY - outlineThickness,
+                startPosX + insetThickness,
+                startPosY + insetThickness,
+                endPosX - insetThickness,
+                endPosY - insetThickness,
                 backgroundColor.asInt()
         );
 
-        // Stripes; inset by outlineThickness
-        // left
+        // LEFT
         g.fill(
                 startPosX,
-                startPosY + outlineThickness,
-                startPosX + outlineThickness,
-                endPosY - outlineThickness,
+                startPosY + (corners.topLeft() ? insetThickness : 0),
+                startPosX + insetThickness,
+                endPosY - (corners.bottomLeft() ? insetThickness : 0),
                 outlineColor.asInt()
         );
-        // right
+
+        // RIGHT
         g.fill(
-                endPosX - outlineThickness,
-                startPosY + outlineThickness,
+                endPosX - insetThickness,
+                startPosY + (corners.topRight() ? insetThickness : 0),
                 endPosX,
-                endPosY - outlineThickness,
+                endPosY - (corners.bottomRight() ? insetThickness : 0),
                 outlineColor.asInt()
         );
-        // top
+
+        // TOP
         g.fill(
-                startPosX + outlineThickness,
+                startPosX + (corners.topLeft() ? insetThickness : 0),
                 startPosY,
-                endPosX - outlineThickness,
-                startPosY + outlineThickness,
+                endPosX - (corners.topRight() ? insetThickness : 0),
+                startPosY + insetThickness,
                 outlineColor.asInt()
         );
-        // bottom
+
+        // BOTTOM
         g.fill(
-                startPosX + outlineThickness,
-                endPosY - outlineThickness,
-                endPosX - outlineThickness,
+                startPosX + (corners.bottomLeft() ? insetThickness : 0),
+                endPosY - insetThickness,
+                endPosX - (corners.bottomRight() ? insetThickness : 0),
                 endPosY,
                 outlineColor.asInt()
         );
 
-        if (!renderOutline || outlineThickness == 0)
-        {
-            return;
-        }
+        // Corner pixels for rounded
 
-        // Corner pixels
         if (corners.topLeft())
         {
             g.fill(
-                    startPosX + outlineThickness,
-                    startPosY + outlineThickness,
-                    startPosX + (2 * outlineThickness),
-                    startPosY + (2 * outlineThickness),
-                    outlineColor.asInt()
-            );
-        }
-        else
-        {
-            g.fill(
-                    startPosX,
-                    startPosY,
-                    startPosX + outlineThickness,
-                    startPosY + outlineThickness,
+                    startPosX + insetThickness,
+                    startPosY + insetThickness,
+                    startPosX + (2 * insetThickness),
+                    startPosY + (2 * insetThickness),
                     outlineColor.asInt()
             );
         }
@@ -102,20 +96,10 @@ public final class RenderUtils
         if (corners.topRight())
         {
             g.fill(
-                    endPosX - (2 * outlineThickness),
-                    startPosY + outlineThickness,
-                    endPosX - outlineThickness,
-                    startPosY + (2 * outlineThickness),
-                    outlineColor.asInt()
-            );
-        }
-        else
-        {
-            g.fill(
-                    endPosX - outlineThickness,
-                    startPosY,
-                    endPosX,
-                    startPosY + outlineThickness,
+                    endPosX - (2 * insetThickness),
+                    startPosY + insetThickness,
+                    endPosX - insetThickness,
+                    startPosY + (2 * insetThickness),
                     outlineColor.asInt()
             );
         }
@@ -123,20 +107,10 @@ public final class RenderUtils
         if (corners.bottomLeft())
         {
             g.fill(
-                    startPosX + outlineThickness,
-                    endPosY - (2 * outlineThickness),
-                    startPosX + (2 * outlineThickness),
-                    endPosY - outlineThickness,
-                    outlineColor.asInt()
-            );
-        }
-        else
-        {
-            g.fill(
-                    startPosX,
-                    endPosY - outlineThickness,
-                    startPosX + outlineThickness,
-                    endPosY,
+                    startPosX + insetThickness,
+                    endPosY - (2 * insetThickness),
+                    startPosX + (2 * insetThickness),
+                    endPosY - insetThickness,
                     outlineColor.asInt()
             );
         }
@@ -144,20 +118,10 @@ public final class RenderUtils
         if (corners.bottomRight())
         {
             g.fill(
-                    endPosX - (2 * outlineThickness),
-                    endPosY - (2 * outlineThickness),
-                    endPosX - outlineThickness,
-                    endPosY - outlineThickness,
-                    outlineColor.asInt()
-            );
-        }
-        else
-        {
-            g.fill(
-                    endPosX - outlineThickness,
-                    endPosY - outlineThickness,
-                    endPosX,
-                    endPosY,
+                    endPosX - (2 * insetThickness),
+                    endPosY - (2 * insetThickness),
+                    endPosX - insetThickness,
+                    endPosY - insetThickness,
                     outlineColor.asInt()
             );
         }
@@ -429,21 +393,21 @@ public final class RenderUtils
         }
     }
 
-    public static void drawText(GuiGraphics guiGraphics, String text, int posX, int posY)
+    public static void drawTextAutoSize(GuiGraphics guiGraphics, String text, int posX, int posY)
     {
-        drawText(
+        drawTextAutoSize(
                 guiGraphics,
                 text,
                 posX,
                 posY,
                 4,
                 Colors.BLACK.withHalfAlpha(),
-                Colors.WHITE,
+                Colors.CLEAR,
                 Colors.WHITE
         );
     }
 
-    public static void drawText(GuiGraphics guiGraphics, String text, int posX, int posY, int padding, Color backgroundColor, Color outlineColor, Color textColor)
+    public static void drawTextAutoSize(GuiGraphics guiGraphics, String text, int posX, int posY, int padding, Color backgroundColor, Color outlineColor, Color textColor)
     {
         RenderUtils.drawRectangle(
                 guiGraphics,
@@ -453,7 +417,7 @@ public final class RenderUtils
                 posY + Minecraft.getInstance().font.lineHeight + padding,
                 RoundedCorners.all(),
                 1,
-                true,
+                !outlineColor.equals(Colors.CLEAR), // draw outline if its not clear
                 backgroundColor,
                 outlineColor
         );
@@ -466,5 +430,40 @@ public final class RenderUtils
                 textColor.asInt(),
                 true
         );
+    }
+
+    public static void drawText(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
+    {
+        // background
+        RenderUtils.drawRectangle(
+                g,
+                startX,
+                startY,
+                endX,
+                endY,
+                corners,
+                1,
+                true,
+                backgroundColor,
+                backgroundColor
+        );
+
+        // text
+        int textWidth = (int) (Minecraft.getInstance().font.width(text) * scale);
+        int textHeight = (int) (Minecraft.getInstance().font.lineHeight * scale);
+
+        int textPosX = startX + ((endX - startX) / 2) - (textWidth / 2);
+        int textPosY = startY + (endY - startY) / 2 - (textHeight / 2);
+
+        RenderUtils.drawScaledText(g, text, scale, textPosX, textPosY, textColor);
+    }
+
+    private static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color)
+    {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0.0F);
+        g.pose().scale(scale, scale, 1.0F);
+        g.drawString(Minecraft.getInstance().font, text, 0, 0, color.asInt());
+        g.pose().popPose();
     }
 }

@@ -127,6 +127,7 @@ public class SearchResultsWidget extends AbstractWidget
                 false
         );
         g.pose().popPose();
+        
     }
 
     /* Input */

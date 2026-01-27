@@ -16,27 +16,37 @@ import java.util.function.Consumer;
 
 public class SearchHotbarWidget extends AbstractWidget
 {
-    private final int hotbarIndex;
+    private final String hotbarKey;
     private final int iconPadding;
     private final RoundedCorners roundedCorners;
     private final int outlineThickness;
+    private final float hotbarKeyTextScale;
     private final Color backgroundColor;
-    private final Color outlineColor;
+    private final Color textColor;
+    private final Color unfocusedOutlineColor;
+    private final Color focusedOutlineColor;
 
     private Consumer<MouseButtonClick> onClickCallback;
 
     private SearchResultData searchResultData = SearchResultData.EMPTY;
+    private boolean showBind = false;
 
-    public SearchHotbarWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, Color backgroundColor, Color outlineColor, Consumer<MouseButtonClick> onClickCallback)
+    public SearchHotbarWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedOutlineColor, Color unfocusedOutlineColor, Consumer<MouseButtonClick> onClickCallback)
     {
         super(x, y, width, height, Component.empty());
-        this.hotbarIndex = hotbarIndex;
         this.iconPadding = iconPadding;
         this.roundedCorners = roundedCorners;
         this.outlineThickness = outlineThickness;
+        this.hotbarKeyTextScale = hotbarKeyTextScale;
         this.backgroundColor = backgroundColor;
-        this.outlineColor = outlineColor;
+        this.textColor = textColor;
+        this.unfocusedOutlineColor = unfocusedOutlineColor;
+        this.focusedOutlineColor = focusedOutlineColor;
         this.onClickCallback = onClickCallback;
+
+        this.hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
+                                                                                    .getString()
+                                                                                    .toUpperCase();
     }
 
     @Override
@@ -52,7 +62,7 @@ public class SearchHotbarWidget extends AbstractWidget
                 this.outlineThickness,
                 true,
                 this.backgroundColor,
-                this.outlineColor
+                this.shouldShowBind() ? this.focusedOutlineColor : this.unfocusedOutlineColor
         );
 
         // show icon if search result data is available
@@ -69,19 +79,21 @@ public class SearchHotbarWidget extends AbstractWidget
         }
 
         // show hotbar keybind if focused
-        if (this.isFocused())
+        if (this.shouldShowBind())
         {
-            final int padding = 8;
-            String hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
-                                                                                          .getString();
-            int textWidth = Minecraft.getInstance().font.width(hotbarKey);
+            final int padding = 4;
 
             RenderUtils.drawText(
                     guiGraphics,
-                    hotbarKey.toUpperCase(),
-                    this.getX() + (this.getWidth() - textWidth) / 2,
-                    this.getY() - Minecraft.getInstance().font.lineHeight - 4 - padding
-                    // 4 is padding of bg
+                    hotbarKey,
+                    0.8f,
+                    this.getX() + padding,
+                    this.getY() - this.getWidth() + (padding * 2),
+                    this.getRight() - padding,
+                    this.getY(),
+                    RoundedCorners.fromVerticalSides(true, false),
+                    focusedOutlineColor,
+                    textColor
             );
         }
     }
@@ -123,6 +135,16 @@ public class SearchHotbarWidget extends AbstractWidget
         this.onClickCallback = onClickCallback;
     }
 
+    public boolean shouldShowBind()
+    {
+        return showBind;
+    }
+
+    public void setShowBind(boolean showBind)
+    {
+        this.showBind = showBind;
+    }
+
     /* Builder */
 
     public static Builder builder(int hotbarIndex, int x, int y, int width, int height)
@@ -141,8 +163,11 @@ public class SearchHotbarWidget extends AbstractWidget
         private int iconPadding = 2;
         private RoundedCorners roundedCorners = RoundedCorners.all();
         private int outlineThickness = 1;
+        private float hotbarTextScale = 0.8f;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
-        private Color outlineColor = Colors.WHITE;
+        private Color textColor = Colors.WHITE;
+        private Color unfocusedOutlineColor = Colors.WHITE;
+        private Color focusedOutlineColor = Colors.WARNING_YELLOW;
 
         private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
 
@@ -173,15 +198,33 @@ public class SearchHotbarWidget extends AbstractWidget
             return this;
         }
 
+        public Builder hotbarTextScale(float hotbarTextScale)
+        {
+            this.hotbarTextScale = hotbarTextScale;
+            return this;
+        }
+
         public Builder backgroundColor(Color backgroundColor)
         {
             this.backgroundColor = backgroundColor;
             return this;
         }
 
-        public Builder outlineColor(Color outlineColor)
+        public Builder textColor(Color textColor)
         {
-            this.outlineColor = outlineColor;
+            this.textColor = textColor;
+            return this;
+        }
+
+        public Builder unfocusedOutlineColor(Color unfocusedOutlineColor)
+        {
+            this.unfocusedOutlineColor = unfocusedOutlineColor;
+            return this;
+        }
+
+        public Builder focusedOutlineColor(Color focusedOutlineColor)
+        {
+            this.focusedOutlineColor = focusedOutlineColor;
             return this;
         }
 
@@ -202,8 +245,11 @@ public class SearchHotbarWidget extends AbstractWidget
                     iconPadding,
                     roundedCorners,
                     outlineThickness,
+                    hotbarTextScale,
                     backgroundColor,
-                    outlineColor,
+                    textColor,
+                    focusedOutlineColor,
+                    unfocusedOutlineColor,
                     onClickCallback
             );
         }
