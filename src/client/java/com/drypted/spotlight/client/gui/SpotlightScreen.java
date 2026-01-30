@@ -4,6 +4,7 @@ import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.SearchHandler;
 import com.drypted.spotlight.client.core.models.SearchResultData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -69,6 +70,7 @@ public class SpotlightScreen extends Screen
 
         // show search on open
         setVisible(this.searchResultsWidget, false);
+        setVisible(this.hotbarFocusProxy, false);
         this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
 
         this.setFocused(searchInputWidget);
@@ -172,6 +174,7 @@ public class SpotlightScreen extends Screen
         {
             this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
             setVisible(this.searchResultsWidget, false);
+            setVisible(this.hotbarFocusProxy, false);
             clearResults();
             return;
         }
@@ -180,6 +183,7 @@ public class SpotlightScreen extends Screen
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.SEARCHING);
         this.searchHotbarWidgets.forEach(widget -> setVisible(widget, true));
         setVisible(this.searchResultsWidget, true);
+        setVisible(this.hotbarFocusProxy, true);
 
         // Delegate logic to Handler
         SearchHandler.searchAsync(text, this::displayResults);
@@ -196,6 +200,7 @@ public class SpotlightScreen extends Screen
                 clearResults();
                 this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
                 setVisible(this.searchResultsWidget, false);
+                setVisible(this.hotbarFocusProxy, false);
                 return true;
             }
             this.onClose();
@@ -268,7 +273,6 @@ public class SpotlightScreen extends Screen
 
             player.connection.sendCommand(command);
         }
-
     }
 
     @Override
@@ -302,5 +306,12 @@ public class SpotlightScreen extends Screen
     {
         widget.visible = visible;
         widget.active = visible;
+    }
+
+    @Override
+    protected void changeFocus(ComponentPath componentPath)
+    {
+        super.changeFocus(componentPath);
+        System.out.println("Changed focus to " + componentPath.toString());
     }
 }
