@@ -90,29 +90,9 @@ public class ScrollBoxWidget extends AbstractWidget
         return widgets;
     }
 
-    public void removeChild(AbstractWidget widget)
-    {
-        // If removing the selected widget, clear selection
-        int removingIndex = -1;
-        for (int i = 0; i < children.size(); i++)
-        {
-            if (children.get(i).widget == widget)
-            {
-                removingIndex = i;
-                break;
-            }
-        }
-
-        children.removeIf(entry -> entry.widget == widget);
-
-        selectedIndex = 0;
-        validateSelectedIndex();
-    }
-
     public void removeAllChildren()
     {
-        selectedIndex = 0;
-        validateSelectedIndex();
+        selectedIndex = -1;
         children.clear();
         setScrollAmount(0.0);
     }
@@ -385,67 +365,86 @@ public class ScrollBoxWidget extends AbstractWidget
     @Override
     public void setFocused(boolean focused)
     {
+        super.setFocused(focused);
         if (onFocus != null)
         {
             onFocus.accept(focused);
         }
 
-        setSelectedElementIsSelectedTo(focused);
-
-        super.setFocused(focused);
+        // select
+        if (selectedIndex < 0 && !children.isEmpty())
+        {
+            selectedIndex = 0;
+        }
+        // handles null state inside
+        updateSelectionState(selectedIndex, focused);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        // Use keyCode (first parameter) to detect GLFW moveUp/down keys
-        if (keyCode == GLFW.GLFW_KEY_UP)
+        if (children.isEmpty())
+            return super.keyPressed(keyCode, scanCode, modifiers);
+
+        switch (keyCode)
         {
-            --selectedIndex;
-            setSelectedElementIsSelectedTo(true);
-            return true;
-        }
-        else if (keyCode == GLFW.GLFW_KEY_DOWN)
-        {
-            ++selectedIndex;
-            setSelectedElementIsSelectedTo(true);
-            return true;
-        }
-        else if (keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
-        {
-            AbstractWidget selectedChild = getChildByIndex(selectedIndex);
-            if (selectedChild instanceof ScrollBoxWidgetEntry pressable)
+            case GLFW.GLFW_KEY_UP ->
             {
-                pressable.press();
+                changeSelection(-1);
                 return true;
+            }
+            case GLFW.GLFW_KEY_DOWN ->
+            {
+                changeSelection(1);
+                return true;
+            }
+            case GLFW.GLFW_KEY_SPACE, GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER ->
+            {
+                if (getChildByIndex(selectedIndex) instanceof ScrollBoxWidgetEntry pressable)
+                {
+                    pressable.press();
+                    return true;
+                }
             }
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    private void setSelectedElementIsSelectedTo(boolean value)
+    /**
+     * Moves the selection by a relative amount (e.g., +1 or -1) and wraps if necessary.
+     */
+    private void changeSelection(int delta)
     {
-        validateSelectedIndex();
+        int oldIndex = selectedIndex;
 
-        if (children.isEmpty())
-            return;
+        // Calculate new index with wrapping
+        int newIndex = selectedIndex + delta;
+        // wrap around
+        if (newIndex < 0)
+            newIndex = children.size() - 1;
+        else if (newIndex >= children.size())
+            newIndex = 0;
 
-        WidgetEntry selectedChild = children.get(selectedIndex);
-        if (selectedChild != null && selectedChild.widget instanceof ScrollBoxWidgetEntry pressable)
+        if (oldIndex != newIndex)
         {
-            children.forEach(entry -> {
-                if (entry.widget instanceof ScrollBoxWidgetEntry spw)
-                {
-                    spw.select(false);
-                }
-            });
-            // if selected, select and scroll to view
-            if (value)
-            {
-                pressable.select(value);
-                scrollChildToView(selectedIndex);
-            }
+            updateSelectionState(oldIndex, false); // Deselect old
+        }
+
+        selectedIndex = newIndex;
+        updateSelectionState(selectedIndex, true); // Select new
+        scrollChildToView(selectedIndex);
+    }
+
+    /**
+     * Updates a specific child's selection state if it implements ScrollBoxWidgetEntry.
+     */
+    private void updateSelectionState(int index, boolean isSelected)
+    {
+        AbstractWidget widget = getChildByIndex(index);
+        if (widget instanceof ScrollBoxWidgetEntry selectable)
+        {
+            selectable.select(isSelected);
         }
     }
 
