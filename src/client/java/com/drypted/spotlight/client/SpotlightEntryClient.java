@@ -4,7 +4,6 @@ import com.drypted.spotlight.client.core.SearchHandler;
 import com.drypted.spotlight.client.gui.SpotlightScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;

@@ -7,12 +7,12 @@ public record MouseButtonClick(double x, double y, int button)
         this(x, y, 0);
     }
 
-    public MouseButtonClick from(double x, double y)
+    public static MouseButtonClick from(double x, double y)
     {
         return new MouseButtonClick(x, y, 0);
     }
 
-    public MouseButtonClick from(double x, double y, int button)
+    public static MouseButtonClick from(double x, double y, int button)
     {
         return new MouseButtonClick(x, y, button);
     }

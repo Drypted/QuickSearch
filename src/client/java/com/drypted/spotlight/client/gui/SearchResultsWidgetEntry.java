@@ -3,6 +3,7 @@ package com.drypted.spotlight.client.gui;
 import com.drypted.spotlight.client.core.models.SearchResultData;
 import com.drypted.spotlight.client.gui.models.MouseButtonClick;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
+import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
@@ -15,7 +16,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.BiConsumer;
 
-public class SearchResultsWidget extends AbstractWidget
+public class SearchResultsWidgetEntry extends AbstractWidget implements ScrollBoxWidgetEntry
 {
     private static final Font FONT = Minecraft.getInstance().font;
 
@@ -29,7 +30,7 @@ public class SearchResultsWidget extends AbstractWidget
     private Color hoverColor;
     private Color clickColor;
     private boolean pressed;
-    private boolean showBind = false;
+    private boolean selected;
 
     private Color outlineColor = Colors.CLEAR;
 
@@ -42,7 +43,7 @@ public class SearchResultsWidget extends AbstractWidget
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public SearchResultsWidget(int x, int y, int width, SearchResultData data, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
+    public SearchResultsWidgetEntry(int x, int y, int width, SearchResultData data, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
     {
         super(x, y, width, 0, Component.empty());
         this.data = data;
@@ -91,9 +92,9 @@ public class SearchResultsWidget extends AbstractWidget
                 endPosY,
                 RoundedCorners.fromSingle(this.isRounded),
                 this.outlineThickness,
-                this.shouldShowBind() || renderOutline,
+                this.selected || renderOutline,
                 this.backgroundColor,
-                this.shouldShowBind() ? Colors.HIGHLIGHT_YELLOW : outlineColor
+                this.selected ? Colors.HIGHLIGHT_YELLOW : outlineColor
         );
 
         // icon
@@ -124,22 +125,22 @@ public class SearchResultsWidget extends AbstractWidget
         );
         g.pose().popPose();
 
-        if (this.shouldShowBind())
-        {
-            final int size = 8;
-            RenderUtils.drawText(
-                    g,
-                    "O",
-                    0.75f,
-                    endPosX - size,
-                    endPosY - size,
-                    endPosX,
-                    endPosY,
-                    RoundedCorners.from(true, false, false, false),
-                    Colors.HIGHLIGHT_YELLOW,
-                    textColor
-            );
-        }
+        // if (this.shouldShowBind())
+        // {
+        //     final int size = 8;
+        //     RenderUtils.drawText(
+        //             g,
+        //             "O",
+        //             0.75f,
+        //             endPosX - size,
+        //             endPosY - size,
+        //             endPosX,
+        //             endPosY,
+        //             RoundedCorners.from(true, false, false, false),
+        //             Colors.HIGHLIGHT_YELLOW,
+        //             textColor
+        //     );
+        // }
     }
 
     /* Input */
@@ -181,6 +182,18 @@ public class SearchResultsWidget extends AbstractWidget
     public boolean isPressed()
     {
         return pressed;
+    }
+
+    @Override
+    public void select(boolean selected)
+    {
+        this.selected = selected;
+    }
+
+    @Override
+    public void press()
+    {
+        onClickCallback.accept(MouseButtonClick.from(getX(), getY()), true);
     }
 
     /* GETTERS & SETTERS */
@@ -240,15 +253,15 @@ public class SearchResultsWidget extends AbstractWidget
         this.outlineColor = outlineColor;
     }
 
-    public boolean shouldShowBind()
-    {
-        return showBind;
-    }
-
-    public void setShowBind(boolean showBind)
-    {
-        this.showBind = showBind;
-    }
+    // public boolean shouldShowBind()
+    // {
+    //     return showBind;
+    // }
+    //
+    // public void setShowBind(boolean showBind)
+    // {
+    //     this.showBind = showBind;
+    // }
 
     /* Builder */
 
@@ -351,9 +364,9 @@ public class SearchResultsWidget extends AbstractWidget
             return this;
         }
 
-        public SearchResultsWidget build()
+        public SearchResultsWidgetEntry build()
         {
-            SearchResultsWidget button = new SearchResultsWidget(
+            SearchResultsWidgetEntry button = new SearchResultsWidgetEntry(
                     this.x,
                     this.y,
                     this.width,

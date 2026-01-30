@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
+import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +34,9 @@ public class ScrollBoxWidget extends AbstractWidget
     private boolean scrolling;
 
     private int lastId = 0;
+    private int selectedIndex = 0;
 
     private Consumer<Boolean> onFocus;
-    private Consumer<Boolean> onScroll;
-    private boolean lastSignaledScrollState = false;
-    private long lastWheelScrollTime = 0L;
-    private static final long WHEEL_SCROLL_END_DELAY_MS = 100;
 
     public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
     {
@@ -55,8 +54,9 @@ public class ScrollBoxWidget extends AbstractWidget
 
     public int addChildRow(AbstractWidget widget)
     {
-        this.children.add(new WidgetEntry(widget, lastId++));
-        return lastId;
+        int id = lastId++;
+        this.children.add(new WidgetEntry(widget, id));
+        return id;
     }
 
     @Nullable
@@ -72,6 +72,14 @@ public class ScrollBoxWidget extends AbstractWidget
         return null;
     }
 
+    @Nullable
+    public AbstractWidget getChildByIndex(int index)
+    {
+        if (index < 0 || index >= children.size())
+            return null;
+        return children.get(index).widget;
+    }
+
     public List<AbstractWidget> getAllChildren()
     {
         List<AbstractWidget> widgets = new ArrayList<>();
@@ -84,16 +92,32 @@ public class ScrollBoxWidget extends AbstractWidget
 
     public void removeChild(AbstractWidget widget)
     {
+        // If removing the selected widget, clear selection
+        int removingIndex = -1;
+        for (int i = 0; i < children.size(); i++)
+        {
+            if (children.get(i).widget == widget)
+            {
+                removingIndex = i;
+                break;
+            }
+        }
+
         children.removeIf(entry -> entry.widget == widget);
+
+        selectedIndex = 0;
+        validateSelectedIndex();
     }
 
     public void removeAllChildren()
     {
+        selectedIndex = 0;
+        validateSelectedIndex();
         children.clear();
         setScrollAmount(0.0);
     }
 
-    /* Scroll Logic */
+    /* Meta (Scroll Logic) */
 
     private int contentHeight()
     {
@@ -104,7 +128,7 @@ public class ScrollBoxWidget extends AbstractWidget
             height += e.widget.getHeight() + spacing;
         }
 
-        return height - spacing + margin;
+        return height + margin;
     }
 
     private double scrollRate()
@@ -132,9 +156,9 @@ public class ScrollBoxWidget extends AbstractWidget
         final float rawScrollerHeight = (float) (viewportHeight * viewportHeight) / (float) totalContentHeight;
 
         final int minScrollerHeight = 32;
-        final int maxScrollerHeight = viewportHeight;
 
-        return Mth.clamp((int) rawScrollerHeight, minScrollerHeight, maxScrollerHeight);
+        // max scroller height is viewport height
+        return Mth.clamp((int) rawScrollerHeight, minScrollerHeight, viewportHeight);
     }
 
     private int scrollBarX()
@@ -195,7 +219,7 @@ public class ScrollBoxWidget extends AbstractWidget
         }
     }
 
-    /* Mouse Scroll Logic */
+    /* Mouse Scroll Input */
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button)
@@ -204,7 +228,6 @@ public class ScrollBoxWidget extends AbstractWidget
         if (scrollbarVisible() && isValidClickButton(button) && isOverScrollbar(mouseX, mouseY))
         {
             this.scrolling = true;
-            signalScrollState(true);
 
             updateScrollPosition(mouseY);
 
@@ -229,7 +252,6 @@ public class ScrollBoxWidget extends AbstractWidget
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
         this.scrolling = false;
-        signalScrollState(false);
 
         for (WidgetEntry entry : children)
         {
@@ -247,9 +269,7 @@ public class ScrollBoxWidget extends AbstractWidget
         }
 
         this.scrolling = true;
-        signalScrollState(true);
 
-        lastWheelScrollTime = System.currentTimeMillis();
         setScrollAmount(scrollAmount - scrollY * scrollRate());
         return true;
     }
@@ -270,20 +290,6 @@ public class ScrollBoxWidget extends AbstractWidget
     {
         return this.width - (margin * 2) - (scrollbarVisible() ? SCROLLBAR_WIDTH : 0);
     }
-
-    private void signalScrollState(boolean scrollingNow)
-    {
-        if (onScroll == null)
-            return;
-
-        if (lastSignaledScrollState != scrollingNow)
-        {
-            System.out.println("Signalling Scrolling: " + scrollingNow);
-            lastSignaledScrollState = scrollingNow;
-            onScroll.accept(scrollingNow);
-        }
-    }
-
 
     /* Render */
 
@@ -374,17 +380,117 @@ public class ScrollBoxWidget extends AbstractWidget
         // }
     }
 
-    public void tick()
+    /* Select Element with keys */
+
+    @Override
+    public void setFocused(boolean focused)
     {
-        if (scrolling && lastWheelScrollTime != 0L)
+        if (onFocus != null)
         {
-            if (System.currentTimeMillis() - lastWheelScrollTime > WHEEL_SCROLL_END_DELAY_MS)
+            onFocus.accept(focused);
+        }
+
+        setSelectedElementIsSelectedTo(focused);
+
+        super.setFocused(focused);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    {
+        // Use keyCode (first parameter) to detect GLFW moveUp/down keys
+        if (keyCode == GLFW.GLFW_KEY_UP)
+        {
+            --selectedIndex;
+            setSelectedElementIsSelectedTo(true);
+            return true;
+        }
+        else if (keyCode == GLFW.GLFW_KEY_DOWN)
+        {
+            ++selectedIndex;
+            setSelectedElementIsSelectedTo(true);
+            return true;
+        }
+        else if (keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
+        {
+            AbstractWidget selectedChild = getChildByIndex(selectedIndex);
+            if (selectedChild instanceof ScrollBoxWidgetEntry pressable)
             {
-                scrolling = false;
-                lastWheelScrollTime = 0L;
-                signalScrollState(false);
+                pressable.press();
+                return true;
             }
         }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    private void setSelectedElementIsSelectedTo(boolean value)
+    {
+        validateSelectedIndex();
+
+        if (children.isEmpty())
+            return;
+
+        WidgetEntry selectedChild = children.get(selectedIndex);
+        if (selectedChild != null && selectedChild.widget instanceof ScrollBoxWidgetEntry pressable)
+        {
+            children.forEach(entry -> {
+                if (entry.widget instanceof ScrollBoxWidgetEntry spw)
+                {
+                    spw.select(false);
+                }
+            });
+            // if selected, select and scroll to view
+            if (value)
+            {
+                pressable.select(value);
+                scrollChildToView(selectedIndex);
+            }
+        }
+    }
+
+    private void scrollChildToView(int index)
+    {
+        final int paddingTop = 8, paddingBottom = 8;
+
+        if (index < 0 || index >= children.size())
+            return;
+
+        // compute child top
+        int childTop = margin;
+
+        for (int i = 0; i < index; i++)
+        {
+            AbstractWidget w = children.get(i).widget;
+            childTop += w.getHeight() + spacing;
+        }
+
+        AbstractWidget child = children.get(index).widget;
+        int childBottom = childTop + child.getHeight();
+
+        // viewport in content space
+        int viewTop = (int) scrollAmount + paddingTop;
+        int viewBottom = (int) scrollAmount + height - paddingBottom;
+
+        // scroll moveUp
+        if (childTop < viewTop)
+        {
+            setScrollAmount(childTop - paddingTop);
+        }
+        // scroll down
+        else if (childBottom > viewBottom)
+        {
+            setScrollAmount(childBottom - height + paddingBottom);
+        }
+    }
+
+    private void validateSelectedIndex()
+    {
+        if (selectedIndex < 0)
+            selectedIndex = children.size() - 1;
+
+        if (selectedIndex >= children.size())
+            selectedIndex = 0;
     }
 
 
@@ -393,11 +499,6 @@ public class ScrollBoxWidget extends AbstractWidget
     public void setOnFocusCallback(Consumer<Boolean> onFocus)
     {
         this.onFocus = onFocus;
-    }
-
-    public void setOnScrollCallback(Consumer<Boolean> onScroll)
-    {
-        this.onScroll = onScroll;
     }
 
     /* Builder */
@@ -507,23 +608,5 @@ public class ScrollBoxWidget extends AbstractWidget
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narration)
     {
-    }
-
-    @Override
-    public void setFocused(boolean focused)
-    {
-        if (onFocus != null)
-        {
-            onFocus.accept(focused);
-        }
-        super.setFocused(focused);
-
-        // If we are currently scrolling, the focus change above
-        // might have just shown the binds effectively undoing our "hide while scrolling" logic.
-        // We must re-signal that we are scrolling to force them back to hidden.
-        if (focused && scrolling && onScroll != null)
-        {
-            onScroll.accept(true);
-        }
     }
 }

@@ -53,23 +53,6 @@ public class SpotlightScreen extends Screen
                 searchInputWidget.getWidth(),
                 RESULTS_HEIGHT
         ).showScrollerAlways(true).build();
-        this.searchResultsWidget.setOnFocusCallback((focused) -> {
-            this.searchResultsWidget.getAllChildren().forEach(widget -> {
-                if (widget instanceof SearchResultsWidget resultWidget)
-                    resultWidget.setShowBind(focused);
-            });
-        });
-        this.searchResultsWidget.setOnScrollCallback((scrolling) -> {
-            if (!this.searchResultsWidget.isFocused())
-                return;
-
-            System.out.println("Receive Scrolling: " + scrolling);
-
-            this.searchResultsWidget.getAllChildren().forEach(widget -> {
-                if (widget instanceof SearchResultsWidget resultWidget)
-                    resultWidget.setShowBind(!scrolling); // hide when scrolling
-            });
-        });
 
         generateHotbarWidgets(searchBarY, searchBarX);
 
@@ -86,13 +69,6 @@ public class SpotlightScreen extends Screen
         this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
 
         this.setFocused(searchInputWidget);
-    }
-
-    @Override
-    public void tick()
-    {
-        super.tick();
-        this.searchResultsWidget.tick();
     }
 
     private void generateHotbarWidgets(int searchBarY, int searchBarX)
@@ -159,10 +135,10 @@ public class SpotlightScreen extends Screen
             }
 
             this.searchResultsWidget.addChildRow( //
-                    SearchResultsWidget.builder(0, 0, result)
-                                       .width(searchResultsWidget.getMaxWidth())
-                                       .onClick((mBC, dC) -> onResultClicked(result))
-                                       .build() //
+                    SearchResultsWidgetEntry.builder(0, 0, result)
+                                            .width(searchResultsWidget.getMaxWidth())
+                                            .onClick((mBC, dC) -> onResultClicked(result))
+                                            .build() //
             );
 
             matchCount++;
