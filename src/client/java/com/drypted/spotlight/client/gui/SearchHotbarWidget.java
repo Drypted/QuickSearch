@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 
 public class SearchHotbarWidget extends AbstractWidget
 {
+    private final int hotbarIndex;
     private final String hotbarKey;
     private final int iconPadding;
     private final RoundedCorners roundedCorners;
@@ -23,25 +24,29 @@ public class SearchHotbarWidget extends AbstractWidget
     private final float hotbarKeyTextScale;
     private final Color backgroundColor;
     private final Color textColor;
-    private final Color unfocusedOutlineColor;
+    private final Color outlineColor;
     private final Color focusedOutlineColor;
+    private final Color highlightedOutlineColor;
 
     private Consumer<MouseButtonClick> onClickCallback;
 
     private SearchResultData searchResultData = SearchResultData.EMPTY;
     private boolean showBind = false;
+    private boolean highlighted = false;
 
-    public SearchHotbarWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedOutlineColor, Color unfocusedOutlineColor, Consumer<MouseButtonClick> onClickCallback)
+    public SearchHotbarWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedOutlineColor, Color outlineColor, Color highlightedOutlineColor, Consumer<MouseButtonClick> onClickCallback)
     {
         super(x, y, width, height, Component.empty());
+        this.hotbarIndex = hotbarIndex;
         this.iconPadding = iconPadding;
         this.roundedCorners = roundedCorners;
         this.outlineThickness = outlineThickness;
         this.hotbarKeyTextScale = hotbarKeyTextScale;
         this.backgroundColor = backgroundColor;
         this.textColor = textColor;
-        this.unfocusedOutlineColor = unfocusedOutlineColor;
+        this.outlineColor = outlineColor;
         this.focusedOutlineColor = focusedOutlineColor;
+        this.highlightedOutlineColor = highlightedOutlineColor;
         this.onClickCallback = onClickCallback;
 
         this.hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
@@ -62,7 +67,9 @@ public class SearchHotbarWidget extends AbstractWidget
                 this.outlineThickness,
                 true,
                 this.backgroundColor,
-                this.shouldShowBind() ? this.focusedOutlineColor : this.unfocusedOutlineColor
+                this.highlighted
+                ? this.highlightedOutlineColor
+                : this.shouldShowBind() ? this.focusedOutlineColor : this.outlineColor
         );
 
         // show icon if search result data is available
@@ -92,7 +99,7 @@ public class SearchHotbarWidget extends AbstractWidget
                     this.getRight() - padding,
                     this.getY(),
                     RoundedCorners.fromVerticalSides(true, false),
-                    focusedOutlineColor,
+                    this.highlighted ? highlightedOutlineColor : focusedOutlineColor,
                     textColor
             );
         }
@@ -140,6 +147,21 @@ public class SearchHotbarWidget extends AbstractWidget
         this.showBind = showBind;
     }
 
+    public boolean isHighlighted()
+    {
+        return highlighted;
+    }
+
+    public void setHighlighted(boolean highlighted)
+    {
+        this.highlighted = highlighted;
+    }
+
+    public int getHotbarIndex()
+    {
+        return hotbarIndex;
+    }
+
     /* Builder */
 
     public static Builder builder(int hotbarIndex, int x, int y, int width, int height)
@@ -163,6 +185,7 @@ public class SearchHotbarWidget extends AbstractWidget
         private Color textColor = Colors.WHITE;
         private Color unfocusedOutlineColor = Colors.WHITE;
         private Color focusedOutlineColor = Colors.HIGHLIGHT_YELLOW;
+        private Color highlightedOutlineColor = Colors.INFO_BLUE;
 
         private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
 
@@ -223,6 +246,12 @@ public class SearchHotbarWidget extends AbstractWidget
             return this;
         }
 
+        public Builder highlightedOutlineColor(Color highlightedOutlineColor)
+        {
+            this.highlightedOutlineColor = highlightedOutlineColor;
+            return this;
+        }
+
         public Builder onClickCallback(Consumer<MouseButtonClick> onClickCallback)
         {
             this.onClickCallback = onClickCallback;
@@ -245,6 +274,7 @@ public class SearchHotbarWidget extends AbstractWidget
                     textColor,
                     focusedOutlineColor,
                     unfocusedOutlineColor,
+                    highlightedOutlineColor,
                     onClickCallback
             );
         }
