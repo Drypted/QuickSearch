@@ -18,7 +18,7 @@ import java.util.List;
 public class SpotlightScreen extends Screen
 {
     private static final int SEARCH_BAR_WIDTH = 200;
-    private static final int SEARCH_BAR_HEIGHT = 20;
+    private static final int SEARCH_BAR_HEIGHT = 22;
 
     private static final int HOTBAR_SLOT_PADDING = 2;
 
@@ -50,6 +50,9 @@ public class SpotlightScreen extends Screen
                 SEARCH_BAR_WIDTH,
                 SEARCH_BAR_HEIGHT
         ).build();
+        this.searchInputWidget.setPlaceholder("Search items for blocks ...");
+        // set validator for no symbols
+        this.searchInputWidget.setValidator(text -> text.matches("[a-zA-Z0-9 _-]*"));
 
         this.searchResultsWidget = ScrollBoxWidget.builder(
                 searchBarX,
@@ -60,17 +63,17 @@ public class SpotlightScreen extends Screen
 
         generateHotbarWidgets(searchBarY, searchBarX);
 
-        this.searchInputWidget.subscribeToTypeCallback(this::onType);
+        this.searchInputWidget.addTypeListener(this::onType);
 
         this.searchHotbarWidgets.forEach(this::addRenderableOnly);
 
-        this.addRenderableWidget(searchInputWidget);
-        this.addRenderableWidget(hotbarFocusProxy);
+        this.addWidget(hotbarFocusProxy);
         this.addRenderableWidget(searchResultsWidget);
+        this.addRenderableWidget(searchInputWidget);
 
         // show search on open
-        setVisible(this.searchResultsWidget, false);
-        setVisible(this.hotbarFocusProxy, false);
+        // setVisible(this.searchResultsWidget, false);
+        // setVisible(this.hotbarFocusProxy, false);
         this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
 
         this.setFocused(searchInputWidget);
@@ -237,10 +240,13 @@ public class SpotlightScreen extends Screen
             this.hotbarFocusProxy.highlightSlot(selectedHotbarWidget.getHotbarIndex());
             return;
         }
+
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null)
         {
             SearchResultData item = widget.getSearchResultData();
+            if (item == null)
+                return;
 
             String identifier;
             int count;

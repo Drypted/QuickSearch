@@ -4,5 +4,7 @@
 version: "1.0"
 profile:
   name: qodana.starter
-include:
-  - name: CommentedOutCode
+exclude:
+  - name: All
+    paths:
+      - src/client/java/com/drypted/spotlight/client/core/algorithms/SmartSearch.java

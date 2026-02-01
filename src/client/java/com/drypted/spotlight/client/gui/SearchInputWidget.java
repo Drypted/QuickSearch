@@ -9,60 +9,97 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class SearchInputWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
     private static final int TEXT_PADDING_X = 6;
-
+    private static final int TEXT_PADDING_Y = 1;
     private static final int INDICATOR_PADDING_RIGHT = 4;
-    private static final float STATUS_TRANSITION_TIME_MS = 200f;
+    private static final int CARET_BLINK_TIME = 500;
 
+    // Visual configuration
     private final boolean isRounded;
     private final int outlineThickness;
     private final Color backgroundColor;
     private final Color outlineColor;
-    private final Color focusedColor;
-    private final Color unfocusedColor;
+    private final Color caretColor;
+    private final Color normalTextColor;
+    private final Color disabledTextColor;
+    private final Color selectionBackgroundColor;
+    private final Color selectionTextColor; // TODO: Add selection text color support
+    private final Color placeholderColor;
+    private final Color errorColor;
 
+    // Text state
     private String text = "";
+    private int maxLength = 256;
+    private String placeholder = "";
 
-    private final int TextX;
-    private final int TextY;
+    // Caret and selection
+    private int cursorPos = 0;
+    private int selectionStart = -1;
+    private int selectionEnd = -1;
+    private long caretTime = 0;
 
+    // Scrolling
+    private int scrollOffset = 0;
+
+    // Widget states
     private SearchStatus searchStatus = SearchStatus.IDLE;
-    /// /// For transition animations; Disabled for now
-    /// private long StatusChangeTime = 0L;
+    private boolean isDisabled = false;
+    private boolean isReadOnly = false;
+    private boolean hasError = false;
 
-    /// Callbacks for when text is typed
+    // Mouse selection
+    private boolean isDragging = false;
+    private int dragStartPos = -1;
+
+    // Callbacks
     private final ArrayList<BiConsumer<String, Character>> onTypeCallbacks = new ArrayList<>();
+    private final ArrayList<Consumer<String>> onTextChangeCallbacks = new ArrayList<>();
+    private final ArrayList<Consumer<String>> onSubmitCallbacks = new ArrayList<>();
+    private final ArrayList<Consumer<Boolean>> onFocusChangeCallbacks = new ArrayList<>();
+    private Predicate<String> validator = null;
 
-    public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color focusedColor, Color unfocusedColor)
+    public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor, Color errorColor)
     {
         super(x, y, width, height, Component.empty());
         this.isRounded = isRounded;
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
         this.outlineColor = outlineColor;
-        this.focusedColor = focusedColor;
-        this.unfocusedColor = unfocusedColor;
-
-        // calculate text position
-        TextX = this.getX() + TEXT_PADDING_X;
-        TextY = this.getY() + (height - FONT.lineHeight) / 2;
+        this.caretColor = caretColor;
+        this.normalTextColor = normalTextColor;
+        this.disabledTextColor = disabledTextColor;
+        this.selectionBackgroundColor = selectionBackgroundColor;
+        this.selectionTextColor = selectionTextColor;
+        this.placeholderColor = placeholderColor;
+        this.errorColor = errorColor;
     }
 
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        // background
+        // Determine outline color based on state
+        Color currentOutlineColor = this.outlineColor;
+        if (hasError)
+        {
+            currentOutlineColor = errorColor;
+        }
+
+        // Background
         RenderUtils.drawRectangle(
                 guiGraphics,
                 this.getX(),
@@ -73,62 +110,134 @@ public class SearchInputWidget extends AbstractWidget
                 this.outlineThickness,
                 true,
                 this.backgroundColor,
-                this.outlineColor
+                currentOutlineColor
         );
 
-        // text
-        guiGraphics.drawString(
-                Minecraft.getInstance().font,
-                this.text,
-                TextX,
-                TextY,
-                this.isFocused() ? focusedColor.asInt() : unfocusedColor.asInt(),
-                false
+        // Calculate text rendering area
+        int textX = getTextX();
+        int textY = getTextY();
+        int textAreaWidth = getTextAreaWidth();
+        int textAreaHeight = this.getHeight();
+
+        // Enable scissor for clipping
+        guiGraphics.enableScissor(
+                textX,
+                this.getY(),
+                textX + textAreaWidth,
+                this.getY() + textAreaHeight
         );
 
-        // caret
-        drawCaret(guiGraphics);
+        // Render text or placeholder
+        if (this.text.isEmpty() && !this.placeholder.isEmpty())
+        {
+            // Render placeholder
+            guiGraphics.drawString(
+                    FONT,
+                    this.placeholder,
+                    textX,
+                    textY,
+                    placeholderColor.asInt(),
+                    false
+            );
+        }
+        else
+        {
+            // Render selection highlight
+            if (hasSelection())
+            {
+                drawSelection(guiGraphics, textX, textY);
+            }
 
+            // Render text
+            Color textColor = isDisabled ? disabledTextColor : normalTextColor;
+            guiGraphics.drawString(
+                    FONT,
+                    this.text,
+                    textX - scrollOffset,
+                    textY,
+                    textColor.asInt(),
+                    false
+            );
+
+        }
+
+        // Render caret
+        if (this.isFocused() && !isReadOnly && shouldDrawCaret())
+        {
+            drawCaret(guiGraphics, textX, textY);
+        }
+
+        // Disable scissor
+        guiGraphics.disableScissor();
+
+        // Render status indicators
         switch (this.searchStatus)
         {
-            case IDLE:
-                // do nothing
-                break;
             case SEARCHING:
                 drawLoadingAtEnd(guiGraphics);
+                break;
+            case IDLE:
+            default:
                 break;
         }
     }
 
-    /* Draw */
+    /* Drawing Methods */
 
-    private void drawCaret(GuiGraphics guiGraphics)
+    private void drawCaret(GuiGraphics guiGraphics, int textX, int textY)
     {
-        final int blinkTimeMs = 500;
+        String textBeforeCursor = this.text.substring(0, cursorPos);
+        int caretX = textX + FONT.width(textBeforeCursor) - scrollOffset;
 
-        if (System.currentTimeMillis() % (blinkTimeMs * 2) < blinkTimeMs)
+        // Only draw if caret is within visible area
+        int textAreaWidth = getTextAreaWidth();
+        if (caretX >= textX && caretX < textX + textAreaWidth)
         {
-            int caretX = TextX + Minecraft.getInstance().font.width(this.text);
             guiGraphics.fill(
                     caretX,
-                    TextY,
+                    textY,
                     caretX + 1,
-                    TextY + 8,
-                    this.isFocused() ? focusedColor.asInt() : unfocusedColor.asInt()
+                    textY + FONT.lineHeight,
+                    caretColor.asInt()
+            );
+        }
+    }
+
+    private void drawSelection(GuiGraphics guiGraphics, int textX, int textY)
+    {
+        int start = Math.min(selectionStart, selectionEnd);
+        int end = Math.max(selectionStart, selectionEnd);
+
+        String textBeforeStart = this.text.substring(0, start);
+        String selectedText = this.text.substring(start, end);
+
+        int selectionX = textX + FONT.width(textBeforeStart) - scrollOffset;
+        int selectionWidth = FONT.width(selectedText);
+
+        // Clip selection to visible area
+        int textAreaWidth = getTextAreaWidth();
+        int visibleSelectionX = Math.max(selectionX, textX);
+        int visibleSelectionEnd = Math.min(selectionX + selectionWidth, textX + textAreaWidth);
+        int visibleSelectionWidth = visibleSelectionEnd - visibleSelectionX;
+
+        if (visibleSelectionWidth > 0)
+        {
+            guiGraphics.fill(
+                    visibleSelectionX,
+                    textY,
+                    visibleSelectionX + visibleSelectionWidth,
+                    textY + FONT.lineHeight,
+                    selectionBackgroundColor.asInt()
             );
         }
     }
 
     private void drawLoadingAtEnd(GuiGraphics guiGraphics)
     {
-        /// long elapsed = System.currentTimeMillis() - StatusChangeTime;
-        /// float fadeIn = Math.min(1.0f, elapsed / STATUS_TRANSITION_TIME_MS); // 200ms fade-in
-
         int size = this.height - (2 * INDICATOR_PADDING_RIGHT);
         int loadingX = this.getX() + this.getWidth() - INDICATOR_PADDING_RIGHT - size;
         int loadingY = this.getY() + INDICATOR_PADDING_RIGHT;
 
-        /// Color loadingColor = Colors.INFO_BLUE.withAlpha((int) (255 * fadeIn));
         RenderUtils.drawThreeDotPulseSpinner(
                 guiGraphics,
                 loadingX,
@@ -139,22 +248,43 @@ public class SearchInputWidget extends AbstractWidget
         );
     }
 
-    /* Meta (Stuff to make it functional) */
+    /* Helper Methods */
+
+    private int getTextX()
+    {
+        return this.getX() + TEXT_PADDING_X;
+    }
+
+    private int getTextY()
+    {
+        return this.getY() + (this.height - FONT.lineHeight) / 2 + TEXT_PADDING_Y;
+    }
+
+    private int getTextAreaWidth()
+    {
+        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING)
+                             ? (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT)
+                             : 0;
+        return this.getWidth() - (TEXT_PADDING_X * 2) - indicatorSpace;
+    }
+
+    private boolean shouldDrawCaret()
+    {
+        long elapsed = System.currentTimeMillis() - caretTime;
+        return (elapsed / CARET_BLINK_TIME) % 2 == 0;
+    }
+
+    /* Text Editing */
 
     @Override
     public boolean charTyped(char codePoint, int modifiers)
     {
-        // no typing if not focused
-        if (!this.isFocused())
+        if (!this.isFocused() || isDisabled || isReadOnly)
             return false;
 
         if (StringUtil.isAllowedChatCharacter(codePoint))
         {
-            this.text += codePoint;
-            for (BiConsumer<String, Character> callback : this.onTypeCallbacks)
-            {
-                callback.accept(this.text, codePoint);
-            }
+            insertText(String.valueOf(codePoint));
             return true;
         }
 
@@ -164,43 +294,658 @@ public class SearchInputWidget extends AbstractWidget
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        if (this.isFocused())
+        if (!this.isFocused() || isDisabled)
+            return false;
+
+        boolean ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0 || (modifiers & GLFW.GLFW_MOD_SUPER) != 0;
+        boolean shift = (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
+
+        // Clipboard operations
+        if (ctrl)
         {
-            // erase on backspace
-            if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !this.text.isEmpty())
+            switch (keyCode)
             {
-                this.text = this.text.substring(0, this.text.length() - 1);
-                for (BiConsumer<String, Character> callback : this.onTypeCallbacks)
-                {
-                    callback.accept(this.text, GeneralUtils.EMPTY_CHAR);
-                }
-                return true;
+                case GLFW.GLFW_KEY_C:
+                    copyToClipboard();
+                    return true;
+                case GLFW.GLFW_KEY_X:
+                    if (!isReadOnly)
+                    {
+                        cutToClipboard();
+                    }
+                    return true;
+                case GLFW.GLFW_KEY_V:
+                    if (!isReadOnly)
+                    {
+                        pasteFromClipboard();
+                    }
+                    return true;
+                case GLFW.GLFW_KEY_A:
+                    selectAll();
+                    return true;
             }
+        }
+
+        if (isReadOnly && (keyCode == GLFW.GLFW_KEY_BACKSPACE || keyCode == GLFW.GLFW_KEY_DELETE))
+            return false;
+
+        // Movement and editing
+        return switch (keyCode)
+        {
+            case GLFW.GLFW_KEY_LEFT ->
+            {
+                moveCursorLeft(ctrl, shift);
+                yield true;
+            }
+            case GLFW.GLFW_KEY_RIGHT ->
+            {
+                moveCursorRight(ctrl, shift);
+                yield true;
+            }
+            case GLFW.GLFW_KEY_HOME ->
+            {
+                moveCursorToStart(shift);
+                yield true;
+            }
+            case GLFW.GLFW_KEY_END ->
+            {
+                moveCursorToEnd(shift);
+                yield true;
+            }
+            case GLFW.GLFW_KEY_BACKSPACE ->
+            {
+                handleBackspace(ctrl);
+                yield true;
+            }
+            case GLFW.GLFW_KEY_DELETE ->
+            {
+                handleDelete(ctrl);
+                yield true;
+            }
+            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER ->
+            {
+                submit();
+                yield true;
+            }
+            default -> false;
+        };
+
+    }
+
+    /* Cursor Movement */
+
+    private void moveCursorLeft(boolean byWord, boolean selecting)
+    {
+        if (byWord)
+        {
+            moveCursorByWord(-1, selecting);
+        }
+        else
+        {
+            int newPos = Math.max(0, cursorPos - 1);
+            setCursorPosition(newPos, selecting);
+        }
+    }
+
+    private void moveCursorRight(boolean byWord, boolean selecting)
+    {
+        if (byWord)
+        {
+            moveCursorByWord(1, selecting);
+        }
+        else
+        {
+            int newPos = Math.min(text.length(), cursorPos + 1);
+            setCursorPosition(newPos, selecting);
+        }
+    }
+
+    private void moveCursorByWord(int direction)
+    {
+        moveCursorByWord(direction, false);
+    }
+
+    private void moveCursorByWord(int direction, boolean selecting)
+    {
+        int newPos = cursorPos;
+
+        if (direction < 0)
+        {
+            // Move left by word
+            newPos = findPreviousWordBoundary(cursorPos);
+        }
+        else
+        {
+            // Move right by word
+            newPos = findNextWordBoundary(cursorPos);
+        }
+
+        setCursorPosition(newPos, selecting);
+    }
+
+    private void moveCursorToStart(boolean selecting)
+    {
+        setCursorPosition(0, selecting);
+    }
+
+    private void moveCursorToEnd(boolean selecting)
+    {
+        setCursorPosition(text.length(), selecting);
+    }
+
+    private void setCursorPosition(int pos, boolean selecting)
+    {
+        pos = Math.max(0, Math.min(text.length(), pos));
+
+        if (selecting)
+        {
+            if (selectionStart == -1)
+            {
+                selectionStart = cursorPos;
+            }
+            selectionEnd = pos;
+        }
+        else
+        {
+            clearSelection();
+        }
+
+        cursorPos = pos;
+        updateScrollOffset();
+        resetCaretBlink();
+    }
+
+    /* Word Boundaries */
+
+    private int findPreviousWordBoundary(int from)
+    {
+        if (from <= 0)
+            return 0;
+
+        int pos = from - 1;
+
+        // Skip whitespace
+        while (pos > 0 && Character.isWhitespace(text.charAt(pos)))
+        {
+            pos--;
+        }
+
+        // Skip word characters
+        while (pos > 0 && !Character.isWhitespace(text.charAt(pos - 1)))
+        {
+            pos--;
+        }
+
+        return pos;
+    }
+
+    private int findNextWordBoundary(int from)
+    {
+        if (from >= text.length())
+            return text.length();
+
+        int pos = from;
+
+        // Skip current word
+        while (pos < text.length() && !Character.isWhitespace(text.charAt(pos)))
+        {
+            pos++;
+        }
+
+        // Skip whitespace
+        while (pos < text.length() && Character.isWhitespace(text.charAt(pos)))
+        {
+            pos++;
+        }
+
+        return pos;
+    }
+
+    /* Selection */
+
+    private boolean hasSelection()
+    {
+        return selectionStart != -1 && selectionEnd != -1 && selectionStart != selectionEnd;
+    }
+
+    private void clearSelection()
+    {
+        selectionStart = -1;
+        selectionEnd = -1;
+    }
+
+    private void selectAll()
+    {
+        selectionStart = 0;
+        selectionEnd = text.length();
+        cursorPos = text.length();
+        updateScrollOffset();
+    }
+
+    private String getSelectedText()
+    {
+        if (!hasSelection())
+            return "";
+
+        int start = Math.min(selectionStart, selectionEnd);
+        int end = Math.max(selectionStart, selectionEnd);
+        return text.substring(start, end);
+    }
+
+    private void deleteSelection()
+    {
+        if (!hasSelection())
+            return;
+
+        int start = Math.min(selectionStart, selectionEnd);
+        int end = Math.max(selectionStart, selectionEnd);
+
+        text = text.substring(0, start) + text.substring(end);
+        cursorPos = start;
+        clearSelection();
+        notifyTextChanged();
+    }
+
+    /* Text Insertion and Deletion */
+
+    private void insertText(String str)
+    {
+        if (hasSelection())
+        {
+            deleteSelection();
+        }
+
+        // Check max length
+        if (text.length() + str.length() > maxLength)
+        {
+            str = str.substring(0, maxLength - text.length());
+            if (str.isEmpty())
+                return;
+        }
+
+        text = text.substring(0, cursorPos) + str + text.substring(cursorPos);
+        cursorPos += str.length();
+        clearSelection();
+        updateScrollOffset();
+        resetCaretBlink();
+        notifyTextChanged();
+
+        for (BiConsumer<String, Character> callback : onTypeCallbacks)
+        {
+            callback.accept(text, str.charAt(str.length() - 1));
+        }
+    }
+
+    private void handleBackspace(boolean byWord)
+    {
+        if (hasSelection())
+        {
+            deleteSelection();
+            updateScrollOffset();
+            resetCaretBlink();
+            return;
+        }
+
+        if (cursorPos == 0)
+            return;
+
+        if (byWord)
+        {
+            int newPos = findPreviousWordBoundary(cursorPos);
+            text = text.substring(0, newPos) + text.substring(cursorPos);
+            cursorPos = newPos;
+        }
+        else
+        {
+            text = text.substring(0, cursorPos - 1) + text.substring(cursorPos);
+            cursorPos--;
+        }
+
+        updateScrollOffset();
+        resetCaretBlink();
+        notifyTextChanged();
+
+        // Legacy callback
+        for (BiConsumer<String, Character> callback : onTypeCallbacks)
+        {
+            callback.accept(text, GeneralUtils.EMPTY_CHAR);
+        }
+    }
+
+    private void handleDelete(boolean byWord)
+    {
+        if (hasSelection())
+        {
+            deleteSelection();
+            updateScrollOffset();
+            resetCaretBlink();
+            return;
+        }
+
+        if (cursorPos >= text.length())
+            return;
+
+        if (byWord)
+        {
+            int newPos = findNextWordBoundary(cursorPos);
+            text = text.substring(0, cursorPos) + text.substring(newPos);
+        }
+        else
+        {
+            text = text.substring(0, cursorPos) + text.substring(cursorPos + 1);
+        }
+
+        updateScrollOffset();
+        resetCaretBlink();
+        notifyTextChanged();
+    }
+
+    /* Clipboard */
+
+    private void copyToClipboard()
+    {
+        if (!hasSelection())
+            return;
+
+        String selected = getSelectedText();
+        Minecraft.getInstance().keyboardHandler.setClipboard(selected);
+    }
+
+    private void cutToClipboard()
+    {
+        if (!hasSelection())
+            return;
+
+        copyToClipboard();
+        deleteSelection();
+        updateScrollOffset();
+        resetCaretBlink();
+    }
+
+    private void pasteFromClipboard()
+    {
+        String clipboard = Minecraft.getInstance().keyboardHandler.getClipboard();
+        if (clipboard.isEmpty())
+            return;
+
+        // Filter allowed characters
+        StringBuilder filtered = new StringBuilder();
+        for (char c : clipboard.toCharArray())
+        {
+            if (StringUtil.isAllowedChatCharacter(c))
+            {
+                filtered.append(c);
+            }
+        }
+
+        if (!filtered.isEmpty())
+        {
+            insertText(filtered.toString());
+        }
+    }
+
+    /* Scrolling */
+
+    private void updateScrollOffset()
+    {
+        String textBeforeCursor = text.substring(0, cursorPos);
+        int caretPixelPos = FONT.width(textBeforeCursor);
+        int textAreaWidth = getTextAreaWidth();
+
+        // Scroll right if caret is beyond visible area
+        if (caretPixelPos - scrollOffset > textAreaWidth - 5)
+        {
+            scrollOffset = caretPixelPos - textAreaWidth + 5;
+        }
+
+        // Scroll left if caret is before visible area
+        if (caretPixelPos - scrollOffset < 5)
+        {
+            scrollOffset = Math.max(0, caretPixelPos - 5);
+        }
+
+        // Clamp scroll offset
+        int maxScroll = Math.max(0, FONT.width(text) - textAreaWidth);
+        scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
+    }
+
+    private void resetCaretBlink()
+    {
+        caretTime = System.currentTimeMillis();
+    }
+
+    /* Mouse Interaction */
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    {
+        if (!this.isMouseOver(mouseX, mouseY))
+        {
+            if (this.isFocused())
+            {
+                setFocused(false);
+            }
+
+            return false;
+        }
+
+        if (isDisabled)
+            return false;
+
+        // Left click
+        if (button == 0)
+        {
+            setFocused(true);
+
+            // Single click - place caret
+            int clickPos = getCharacterIndexAt(mouseX);
+            setCursorPosition(clickPos, false);
+            updateScrollOffset();
+            isDragging = true;
+            dragStartPos = clickPos;
+
+            return true;
         }
 
         return false;
     }
 
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    {
+        if (!isDragging || isDisabled)
+            return false;
+
+        double clampedX = Math.max(getTextX(), mouseX);
+        int currentPos = getCharacterIndexAt(clampedX);
+        selectionStart = dragStartPos;
+        selectionEnd = currentPos;
+        cursorPos = currentPos;
+        updateScrollOffset();
+
+        return true;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        if (button == 0 && isDragging)
+        {
+            isDragging = false;
+            return true;
+        }
+        return false;
+    }
+
+    private int getCharacterIndexAt(double mouseX)
+    {
+        int textX = getTextX();
+        int relativeX = (int) mouseX - textX + scrollOffset;
+
+        if (relativeX <= 0)
+            return 0;
+
+        int width = 0;
+        for (int i = 0; i < text.length(); i++)
+        {
+            int charWidth = FONT.width(String.valueOf(text.charAt(i)));
+            if (relativeX < width + charWidth)
+            {
+                return i;
+            }
+            width += charWidth;
+        }
+
+        return text.length();
+    }
+
+    private void selectWordAt(int pos)
+    {
+        if (text.isEmpty())
+            return;
+
+        pos = Math.max(0, Math.min(text.length() - 1, pos));
+
+        int start = pos;
+        int end = pos;
+
+        // Expand to word boundaries
+        while (start > 0 && !Character.isWhitespace(text.charAt(start - 1)))
+        {
+            start--;
+        }
+
+        while (end < text.length() && !Character.isWhitespace(text.charAt(end)))
+        {
+            end++;
+        }
+
+        selectionStart = start;
+        selectionEnd = end;
+        cursorPos = end;
+        updateScrollOffset();
+    }
+
+    /* Focus */
+
+    @Override
+    public void setFocused(boolean focused)
+    {
+        boolean wasFocused = this.isFocused();
+        super.setFocused(focused);
+
+        if (focused && !wasFocused)
+        {
+            resetCaretBlink();
+        }
+
+        if (wasFocused != focused)
+        {
+            if (!focused)
+            {
+                clearSelection();
+            }
+
+            for (Consumer<Boolean> callback : onFocusChangeCallbacks)
+            {
+                callback.accept(focused);
+            }
+        }
+    }
+
+    /* Submission */
+
+    private void submit()
+    {
+        for (Consumer<String> callback : onSubmitCallbacks)
+        {
+            callback.accept(text);
+        }
+    }
+
+    /* Validation */
+
+    private void notifyTextChanged()
+    {
+        // Validate
+        if (validator != null)
+        {
+            hasError = !validator.test(text);
+        }
+
+        // Notify callbacks
+        for (Consumer<String> callback : onTextChangeCallbacks)
+        {
+            callback.accept(text);
+        }
+    }
+
+    /* Accessibility */
+
+    @Override
+    protected void updateWidgetNarration(NarrationElementOutput output)
+    {
+        if (isDisabled)
+        {
+            output.add(NarratedElementType.TITLE, Component.literal("Search input (disabled)"));
+        }
+        else if (isReadOnly)
+        {
+            output.add(
+                    NarratedElementType.TITLE,
+                    Component.literal("Search input (read-only): " + text)
+            );
+        }
+        else
+        {
+            String narration = "Search input";
+
+            if (!text.isEmpty())
+            {
+                narration += ": " + text;
+            }
+            else if (!placeholder.isEmpty())
+            {
+                narration += " (placeholder: " + placeholder + ")";
+            }
+
+            if (hasSelection())
+            {
+                narration += ". Selected: " + getSelectedText();
+            }
+            else
+            {
+                narration += ". Cursor at position " + cursorPos;
+            }
+
+            if (hasError)
+            {
+                narration += ". Invalid input";
+            }
+
+            if (Objects.requireNonNull(searchStatus) == SearchStatus.SEARCHING)
+            {
+                narration += ". Searching";
+            }
+
+            output.add(NarratedElementType.TITLE, Component.literal(narration));
+        }
+    }
+
     /* Getters and Setters */
-
-    public Color getBackgroundColor()
-    {
-        return backgroundColor;
-    }
-
-    public Color getOutlineColor()
-    {
-        return outlineColor;
-    }
-
-    public int getOutlineThickness()
-    {
-        return outlineThickness;
-    }
 
     public String getText()
     {
         return text;
+    }
+
+    public void setText(String text)
+    {
+        this.text = text == null ? "" : text.substring(0, Math.min(text.length(), maxLength));
+        this.cursorPos = Math.min(cursorPos, this.text.length());
+        clearSelection();
+        updateScrollOffset();
+        notifyTextChanged();
     }
 
     public SearchStatus getSearchStatus()
@@ -210,18 +955,92 @@ public class SearchInputWidget extends AbstractWidget
 
     public void setSearchStatus(SearchStatus searchStatus)
     {
-        /// if (this.searchStatus != searchStatus)
-        /// {
-        ///     this.StatusChangeTime = System.currentTimeMillis();
-        /// }
         this.searchStatus = searchStatus;
     }
 
-    /* Methods */
+    public boolean isDisabled()
+    {
+        return isDisabled;
+    }
+
+    public void setDisabled(boolean disabled)
+    {
+        this.isDisabled = disabled;
+        if (disabled && this.isFocused())
+        {
+            setFocused(false);
+        }
+    }
+
+    public boolean isReadOnly()
+    {
+        return isReadOnly;
+    }
+
+    public void setReadOnly(boolean readOnly)
+    {
+        this.isReadOnly = readOnly;
+    }
+
+    public boolean hasError()
+    {
+        return hasError;
+    }
+
+    public void setError(boolean hasError)
+    {
+        this.hasError = hasError;
+    }
+
+    public String getPlaceholder()
+    {
+        return placeholder;
+    }
+
+    public void setPlaceholder(String placeholder)
+    {
+        this.placeholder = placeholder == null ? "" : placeholder;
+    }
+
+    public int getMaxLength()
+    {
+        return maxLength;
+    }
+
+    public void setMaxLength(int maxLength)
+    {
+        this.maxLength = Math.max(1, maxLength);
+        if (text.length() > this.maxLength)
+        {
+            setText(text.substring(0, this.maxLength));
+        }
+    }
+
+    public Predicate<String> getValidator()
+    {
+        return validator;
+    }
+
+    public void setValidator(Predicate<String> validator)
+    {
+        this.validator = validator;
+        notifyTextChanged(); // Re-validate current text
+    }
+
+    public int getOutlineThickness()
+    {
+        return outlineThickness;
+    }
+
+    /* Public Methods */
 
     public void clearText()
     {
         this.text = "";
+        this.cursorPos = 0;
+        clearSelection();
+        scrollOffset = 0;
+        notifyTextChanged();
     }
 
     public boolean hasText()
@@ -229,9 +1048,26 @@ public class SearchInputWidget extends AbstractWidget
         return !this.text.isEmpty();
     }
 
-    public void subscribeToTypeCallback(BiConsumer<String, Character> onTypeCallback)
+    /* Callbacks */
+
+    public void addTypeListener(BiConsumer<String, Character> onTypeCallback)
     {
         this.onTypeCallbacks.add(onTypeCallback);
+    }
+
+    public void addTextChangeListener(Consumer<String> listener)
+    {
+        this.onTextChangeCallbacks.add(listener);
+    }
+
+    public void addSubmitListener(Consumer<String> listener)
+    {
+        this.onSubmitCallbacks.add(listener);
+    }
+
+    public void addFocusChangeListener(Consumer<Boolean> listener)
+    {
+        this.onFocusChangeCallbacks.add(listener);
     }
 
     /* Builder */
@@ -251,8 +1087,16 @@ public class SearchInputWidget extends AbstractWidget
         private int outlineThickness = 1;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
         private Color outlineColor = Colors.WHITE;
-        private Color focusedColor = Colors.WHITE;
-        private Color unfocusedColor = Colors.HIGHLIGHT_YELLOW;
+        private Color caretColor = Colors.WHITE;
+        private Color normalTextColor = Colors.WHITE;
+        private Color disabledTextColor = Colors.GRAY;
+        private Color selectionBackgroundColor = Colors.SELECTION_BG;
+        private Color selectionTextColor = Colors.SELECTION_TEXT;
+        private Color placeholderColor = Colors.WHITE.withAlpha(128);
+        private Color errorColor = Colors.RED;
+        private String placeholder = "";
+        private int maxLength = 256;
+        private Predicate<String> validator = null;
 
         public Builder(int x, int y, int width, int height)
         {
@@ -292,32 +1136,93 @@ public class SearchInputWidget extends AbstractWidget
             return this;
         }
 
-        public Builder focusedColor(Color focusedColor)
+        public Builder caretColor(Color caretColor)
         {
-            this.focusedColor = focusedColor;
+            this.caretColor = caretColor;
             return this;
         }
 
-        public Builder unfocusedColor(Color unfocusedColor)
+        public Builder normalTextColor(Color normalTextColor)
         {
-            this.unfocusedColor = unfocusedColor;
+            this.normalTextColor = normalTextColor;
+            return this;
+        }
+
+        public Builder disabledTextColor(Color disabledTextColor)
+        {
+            this.disabledTextColor = disabledTextColor;
+            return this;
+        }
+
+        public Builder selectionBackgroundColor(Color selectionBackgroundColor)
+        {
+            this.selectionBackgroundColor = selectionBackgroundColor;
+            return this;
+        }
+
+        public Builder selectionTextColor(Color selectionTextColor)
+        {
+            this.selectionTextColor = selectionTextColor;
+            return this;
+        }
+
+        public Builder placeholderColor(Color placeholderColor)
+        {
+            this.placeholderColor = placeholderColor;
+            return this;
+        }
+
+        public Builder errorColor(Color errorColor)
+        {
+            this.errorColor = errorColor;
+            return this;
+        }
+
+        public Builder placeholder(String placeholder)
+        {
+            this.placeholder = placeholder;
+            return this;
+        }
+
+        public Builder maxLength(int maxLength)
+        {
+            this.maxLength = maxLength;
+            return this;
+        }
+
+        public Builder validator(Predicate<String> validator)
+        {
+            this.validator = validator;
             return this;
         }
 
         public SearchInputWidget build()
         {
-            return new SearchInputWidget(
-                    x, y, //
-                    width, height, isRounded, outlineThickness, //
-                    backgroundColor, outlineColor, focusedColor, unfocusedColor
+            SearchInputWidget widget = new SearchInputWidget(
+                    x,
+                    y,
+                    width,
+                    height,
+                    isRounded,
+                    outlineThickness,
+                    backgroundColor,
+                    outlineColor,
+                    caretColor,
+                    normalTextColor,
+                    disabledTextColor,
+                    selectionBackgroundColor,
+                    selectionTextColor,
+                    placeholderColor,
+                    errorColor
             );
+            widget.setPlaceholder(placeholder);
+            widget.setMaxLength(maxLength);
+            widget.setValidator(validator);
+            return widget;
         }
     }
 
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput)
-    {
-    }
+    /* Inner Classes */
 
     public enum SearchStatus
     {
