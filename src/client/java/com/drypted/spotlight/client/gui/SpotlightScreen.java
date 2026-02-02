@@ -3,6 +3,7 @@ package com.drypted.spotlight.client.gui;
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.SearchHandler;
 import com.drypted.spotlight.client.core.models.SearchResultData;
+import com.drypted.spotlight.client.gui.components.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -244,14 +245,13 @@ public class SpotlightScreen extends Screen
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null)
         {
+            // if there is item in the selected hotbar slot
             SearchResultData item = widget.getSearchResultData();
-            if (item == null)
-                return;
 
             String identifier;
             int count;
             // if a slot is already selected, use that slot
-            if (selectedHotbarWidget != null)
+            if (selectedHotbarWidget != null && selectedHotbarWidget.getSearchResultData() != null)
             {
                 identifier = selectedHotbarWidget.getSearchResultData().getIdentifier().toString();
                 count = selectedHotbarWidget.getSearchResultData().getIcon().getMaxStackSize();
@@ -266,6 +266,13 @@ public class SpotlightScreen extends Screen
             }
             else
             {
+                // clear hotbar slot
+                String command = String.format(
+                        "item replace entity @s hotbar.%d with minecraft:air",
+                        widget.getHotbarIndex()
+                );
+
+                player.connection.sendCommand(command);
                 return;
             }
 

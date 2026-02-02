@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.gui;
+package com.drypted.spotlight.client.gui.components;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;

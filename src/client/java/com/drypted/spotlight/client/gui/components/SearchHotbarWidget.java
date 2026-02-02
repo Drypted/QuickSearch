@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.gui;
+package com.drypted.spotlight.client.gui.components;
 
 import com.drypted.spotlight.client.core.models.SearchResultData;
 import com.drypted.spotlight.client.gui.models.MouseButtonClick;
