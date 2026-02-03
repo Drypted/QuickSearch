@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.core.models;
+package com.drypted.spotlight.client.models;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;

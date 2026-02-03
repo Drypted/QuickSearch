@@ -2,7 +2,7 @@ package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.SearchHandler;
-import com.drypted.spotlight.client.core.models.SearchResultData;
+import com.drypted.spotlight.client.models.SearchResultData;
 import com.drypted.spotlight.client.gui.components.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;

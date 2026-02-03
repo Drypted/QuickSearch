@@ -3,7 +3,7 @@
  */
 package com.drypted.spotlight.client.core.algorithms;
 
-import com.drypted.spotlight.client.core.models.SearchResultData;
+import com.drypted.spotlight.client.models.SearchResultData;
 
 import java.util.*;
 import java.util.stream.Stream;

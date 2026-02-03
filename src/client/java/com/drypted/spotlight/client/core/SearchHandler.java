@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.core;
 
-import com.drypted.spotlight.client.core.models.SearchResultData;
+import com.drypted.spotlight.client.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
