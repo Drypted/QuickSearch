@@ -56,7 +56,7 @@ public class SpotlightScreen extends Screen
                 RESULTS_HEIGHT
         ).showScrollerAlways(true).build();
 
-        this.searchInputWidget.addTypeListener(this::onType);
+        this.searchInputWidget.addTextChangeListener(this::onType);
 
         this.hotbarFocusProxy = HotbarWidget.create(
                 SEARCH_BAR_WIDTH,
@@ -134,7 +134,7 @@ public class SpotlightScreen extends Screen
 
     /* Input */
 
-    private void onType(String text, char typedChar)
+    private void onType(String text)
     {
         if (text == null || text.isEmpty())
         {

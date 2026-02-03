@@ -67,7 +67,6 @@ public class SearchInputWidget extends AbstractWidget
     private int dragStartPos = -1;
 
     // Callbacks
-    private final ArrayList<BiConsumer<String, Character>> onTypeCallbacks = new ArrayList<>();
     private final ArrayList<Consumer<String>> onTextChangeCallbacks = new ArrayList<>();
     private final ArrayList<Consumer<String>> onSubmitCallbacks = new ArrayList<>();
     private final ArrayList<Consumer<Boolean>> onFocusChangeCallbacks = new ArrayList<>();
@@ -567,11 +566,6 @@ public class SearchInputWidget extends AbstractWidget
         updateScrollOffset();
         resetCaretBlink();
         notifyTextChanged();
-
-        for (BiConsumer<String, Character> callback : onTypeCallbacks)
-        {
-            callback.accept(text, str.charAt(str.length() - 1));
-        }
     }
 
     private void handleBackspace(boolean byWord)
@@ -602,12 +596,6 @@ public class SearchInputWidget extends AbstractWidget
         updateScrollOffset();
         resetCaretBlink();
         notifyTextChanged();
-
-        // Legacy callback
-        for (BiConsumer<String, Character> callback : onTypeCallbacks)
-        {
-            callback.accept(text, GeneralUtils.EMPTY_CHAR);
-        }
     }
 
     private void handleDelete(boolean byWord)
@@ -1047,11 +1035,6 @@ public class SearchInputWidget extends AbstractWidget
     }
 
     /* Callbacks */
-
-    public void addTypeListener(BiConsumer<String, Character> onTypeCallback)
-    {
-        this.onTypeCallbacks.add(onTypeCallback);
-    }
 
     public void addTextChangeListener(Consumer<String> listener)
     {
