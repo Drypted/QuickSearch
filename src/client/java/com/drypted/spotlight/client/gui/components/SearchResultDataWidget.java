@@ -16,7 +16,8 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.BiConsumer;
 
-public class SearchResultsWidgetEntry extends AbstractWidget implements ScrollBoxWidgetEntry
+/// Renders a `SearchResultData` entry as a widget, implements `ScrollBoxWidgetEntry`
+public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxWidgetEntry
 {
     private static final Font FONT = Minecraft.getInstance().font;
 
@@ -43,7 +44,7 @@ public class SearchResultsWidgetEntry extends AbstractWidget implements ScrollBo
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public SearchResultsWidgetEntry(int x, int y, int width, SearchResultData data, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
+    public SearchResultDataWidget(int x, int y, int width, SearchResultData data, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
     {
         super(x, y, width, 0, Component.empty());
         this.data = data;
@@ -366,9 +367,9 @@ public class SearchResultsWidgetEntry extends AbstractWidget implements ScrollBo
             return this;
         }
 
-        public SearchResultsWidgetEntry build()
+        public SearchResultDataWidget build()
         {
-            SearchResultsWidgetEntry button = new SearchResultsWidgetEntry(
+            SearchResultDataWidget button = new SearchResultDataWidget(
                     this.x,
                     this.y,
                     this.width,

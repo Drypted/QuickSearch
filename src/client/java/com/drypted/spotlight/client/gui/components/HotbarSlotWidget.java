@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
-public class SearchHotbarWidget extends AbstractWidget
+public class HotbarSlotWidget extends AbstractWidget
 {
     private final int hotbarIndex;
     private final String hotbarKey;
@@ -34,7 +34,7 @@ public class SearchHotbarWidget extends AbstractWidget
     private boolean showBind = false;
     private boolean highlighted = false;
 
-    public SearchHotbarWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedOutlineColor, Color outlineColor, Color highlightedOutlineColor, Consumer<MouseButtonClick> onClickCallback)
+    public HotbarSlotWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedOutlineColor, Color outlineColor, Color highlightedOutlineColor, Consumer<MouseButtonClick> onClickCallback)
     {
         super(x, y, width, height, Component.empty());
         this.hotbarIndex = hotbarIndex;
@@ -258,9 +258,9 @@ public class SearchHotbarWidget extends AbstractWidget
             return this;
         }
 
-        public SearchHotbarWidget build()
+        public HotbarSlotWidget build()
         {
-            return new SearchHotbarWidget(
+            return new HotbarSlotWidget(
                     hotbarIndex,
                     x,
                     y, //

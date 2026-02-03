@@ -20,25 +20,25 @@ public class HotbarWidget extends AbstractWidget
     private static final int HOTBAR_SLOT_PADDING = 2;
     private static final int HOTBAR_SLOTS = 9;
 
-    public final ArrayList<SearchHotbarWidget> searchHotbarWidgets = new ArrayList<>(HOTBAR_SLOTS);
-    private SearchHotbarWidget selectedHotbarWidget = null;
+    public final ArrayList<HotbarSlotWidget> hotbarSlotWidgets = new ArrayList<>(HOTBAR_SLOTS);
+    private HotbarSlotWidget selectedHotbarWidget = null;
 
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
 
     private Consumer<Boolean> onFocusChanged;
 
-    public HotbarWidget(int searchBarWidth, int searchBarX, int searchBarY, SearchInputWidget searchInputWidget)
+    public HotbarWidget(int searchBarWidth, int searchBarX, int searchBarY, InputWidget inputWidget)
     {
         super(0, 0, 0, 0, Component.empty());
         final float iconSize = (searchBarWidth - HOTBAR_SLOT_PADDING * (HOTBAR_SLOTS + 1)) / (float) HOTBAR_SLOTS;
-        final int endY = searchBarY - searchInputWidget.getOutlineThickness() - HOTBAR_SLOT_PADDING;
+        final int endY = searchBarY - inputWidget.getOutlineThickness() - HOTBAR_SLOT_PADDING;
         final int startY = (int) Math.ceil(endY - iconSize);
         float cursor = searchBarX + HOTBAR_SLOT_PADDING;
 
         for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
-            final SearchHotbarWidget hotbarWidget = SearchHotbarWidget.builder(
+            final HotbarSlotWidget hotbarWidget = HotbarSlotWidget.builder(
                     i, //
                     (int) Math.ceil(cursor),
                     startY,
@@ -52,7 +52,7 @@ public class HotbarWidget extends AbstractWidget
 
                 onHotbarKeyPressed(hotbarWidget, 0);
             });
-            this.searchHotbarWidgets.add(hotbarWidget);
+            this.hotbarSlotWidgets.add(hotbarWidget);
             cursor += iconSize + HOTBAR_SLOT_PADDING;
         }
 
@@ -62,13 +62,13 @@ public class HotbarWidget extends AbstractWidget
         });
     }
 
-    public static HotbarWidget create(int searchBarWidth, int searchBarX, int searchBarY, SearchInputWidget searchInputWidget)
+    public static HotbarWidget create(int searchBarWidth, int searchBarX, int searchBarY, InputWidget inputWidget)
     {
         return new HotbarWidget(
                 searchBarWidth,     //
                 searchBarX,         //
                 searchBarY,         //
-                searchInputWidget   //
+                inputWidget   //
         );
     }
 
@@ -77,7 +77,7 @@ public class HotbarWidget extends AbstractWidget
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        searchHotbarWidgets.forEach(widget -> widget.render(
+        hotbarSlotWidgets.forEach(widget -> widget.render(
                 guiGraphics,
                 mouseX,
                 mouseY,
@@ -91,10 +91,10 @@ public class HotbarWidget extends AbstractWidget
                     guiGraphics,
                     hotbarInstructionText.getText(),
                     0.75f,
-                    this.searchHotbarWidgets.getFirst().getX(),
-                    this.searchHotbarWidgets.getFirst().getY() - 16 - thisHeight,
-                    this.searchHotbarWidgets.getLast().getRight(),
-                    this.searchHotbarWidgets.getLast().getY() - 16,
+                    this.hotbarSlotWidgets.getFirst().getX(),
+                    this.hotbarSlotWidgets.getFirst().getY() - 16 - thisHeight,
+                    this.hotbarSlotWidgets.getLast().getRight(),
+                    this.hotbarSlotWidgets.getLast().getY() - 16,
                     RoundedCorners.all(),
                     this.anySlotHighlighted ? Colors.INFO_BLUE : Colors.HIGHLIGHT_YELLOW,
                     Colors.WHITE
@@ -111,12 +111,12 @@ public class HotbarWidget extends AbstractWidget
         anySlotHighlighted = true;
 
         // unhighlight all first
-        searchHotbarWidgets.forEach(widget -> widget.setHighlighted(false));
+        hotbarSlotWidgets.forEach(widget -> widget.setHighlighted(false));
         // get slot index and set show bind to true for that widget
-        searchHotbarWidgets.stream()
-                           .filter(widget -> widget.getHotbarIndex() == slotIndex)
-                           .findFirst()
-                           .ifPresent(widget -> widget.setHighlighted(true));
+        hotbarSlotWidgets.stream()
+                         .filter(widget -> widget.getHotbarIndex() == slotIndex)
+                         .findFirst()
+                         .ifPresent(widget -> widget.setHighlighted(true));
     }
 
     public void unhighlightAllSlots()
@@ -126,10 +126,10 @@ public class HotbarWidget extends AbstractWidget
         hotbarInstructionText = HotbarHelpText.UNSELECTED;
 
         // unhighlight all
-        searchHotbarWidgets.forEach(widget -> widget.setHighlighted(false));
+        hotbarSlotWidgets.forEach(widget -> widget.setHighlighted(false));
     }
 
-    public void onHotbarKeyPressed(SearchHotbarWidget widget, int modifiers)
+    public void onHotbarKeyPressed(HotbarSlotWidget widget, int modifiers)
     {
         // if shift pressed, select hotbar slot only
         if (isModifierPressed(modifiers, GLFW.GLFW_MOD_SHIFT))
@@ -190,9 +190,9 @@ public class HotbarWidget extends AbstractWidget
 
     /* GETTERS */
 
-    public ArrayList<SearchHotbarWidget> getWidgets()
+    public ArrayList<HotbarSlotWidget> getWidgets()
     {
-        return searchHotbarWidgets;
+        return hotbarSlotWidgets;
     }
 
     /* FOCUS */
@@ -205,7 +205,7 @@ public class HotbarWidget extends AbstractWidget
         {
             onFocusChanged.accept(focused);
         }
-        searchHotbarWidgets.forEach(w -> w.setShowBind(focused));
+        hotbarSlotWidgets.forEach(w -> w.setShowBind(focused));
     }
 
     public void setOnFocusChanged(Consumer<Boolean> onFocusChanged)

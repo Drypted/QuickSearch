@@ -4,7 +4,6 @@ import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
-import com.drypted.spotlight.client.utils.GeneralUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,11 +16,10 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class SearchInputWidget extends AbstractWidget
+public class InputWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
     private static final int TEXT_PADDING_X = 6;
@@ -72,7 +70,7 @@ public class SearchInputWidget extends AbstractWidget
     private final ArrayList<Consumer<Boolean>> onFocusChangeCallbacks = new ArrayList<>();
     private Predicate<String> validator = null;
 
-    public SearchInputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor, Color errorColor)
+    public InputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor, Color errorColor)
     {
         super(x, y, width, height, Component.empty());
         this.isRounded = isRounded;
@@ -1177,9 +1175,9 @@ public class SearchInputWidget extends AbstractWidget
             return this;
         }
 
-        public SearchInputWidget build()
+        public InputWidget build()
         {
-            SearchInputWidget widget = new SearchInputWidget(
+            InputWidget widget = new InputWidget(
                     x,
                     y,
                     width,

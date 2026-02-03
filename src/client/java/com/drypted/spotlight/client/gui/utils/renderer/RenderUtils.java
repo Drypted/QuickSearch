@@ -127,60 +127,7 @@ public final class RenderUtils
         }
     }
 
-    /**
-     * Draws a horizontal line with specified thickness and color.
-     *
-     * @param g         `GuiGraphics` context to draw on
-     * @param startPosX Starting X position
-     * @param endPosX   Ending X position
-     * @param posY      Y position of the line
-     * @param thickness Thickness of the line in pixels
-     * @param color     color of the line
-     */
-    public static void drawHorizontalLine(GuiGraphics g, int startPosX, int endPosX, int posY, int thickness, Color color)
-    {
-        g.fill(startPosX, posY, endPosX, posY + thickness, color.asInt());
-    }
-
-    /**
-     * Draws a vertical line with specified thickness and color.
-     *
-     * @param g         `GuiGraphics` context to draw on
-     * @param posX      X position of the line
-     * @param startPosY Starting Y position
-     * @param endPosY   Ending Y position
-     * @param thickness Thickness of the line in pixels
-     * @param color     color of the line
-     */
-    public static void drawVerticalLine(GuiGraphics g, int posX, int startPosY, int endPosY, int thickness, Color color)
-    {
-        g.fill(posX, startPosY, posX + thickness, endPosY, color.asInt());
-    }
-
-    /**
-     * Draws an item scaled by a given factor.
-     *
-     * @param scaleFactor Scaling factor (e.g. 1.0 = normal size, 2.0 = double size)
-     */
-    public static void drawScaledItemFactor(GuiGraphics g, ItemStack stack, int x, int y, float scaleFactor)
-    {
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0.0F);
-        g.pose().scale(scaleFactor, scaleFactor, 1.0F);
-        g.renderItem(stack, 0, 0);
-        g.pose().popPose();
-    }
-
-    /**
-     * Draws an item scaled to an exact GUI pixel size.
-     *
-     * @param size Target size in GUI pixels (e.g. 24, 32, 48)
-     */
-    public static void drawScaledItemSize(GuiGraphics g, ItemStack stack, int x, int y, int size)
-    {
-        float scale = (float) size / (float) VANILLA_ITEM_SIZE;
-        drawScaledItemFactor(g, stack, x, y, scale);
-    }
+    /* LOADERS */
 
     /**
      * Draws a checkmark/tick icon.
@@ -318,80 +265,7 @@ public final class RenderUtils
         }
     }
 
-    /**
-     * Helper method to draw a thick line between two points.
-     *
-     * @param guiGraphics `GuiGraphics` context to draw on
-     * @param x1          Start X position
-     * @param y1          Start Y position
-     * @param x2          End X position
-     * @param y2          End Y position
-     * @param thickness   Thickness of the line in pixels
-     * @param color       color of the line
-     */
-    private static void drawThickLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness, Color color)
-    {
-        // Calculate perpendicular offset for thickness
-        float dx = x2 - x1;
-        float dy = y2 - y1;
-        float length = (float) Math.sqrt(dx * dx + dy * dy);
-
-        if (length == 0)
-            return;
-
-        float perpX = -dy / length * thickness / 2.0f;
-        float perpY = dx / length * thickness / 2.0f;
-
-        // Draw filled polygon (thick line)
-        int colorInt = color.asInt();
-
-        for (int t = 0; t < thickness; t++)
-        {
-            float offset = t - thickness / 2.0f;
-            float offsetX = -dy / length * offset;
-            float offsetY = dx / length * offset;
-
-            int startX = (int) (x1 + offsetX);
-            int startY = (int) (y1 + offsetY);
-            int endX = (int) (x2 + offsetX);
-            int endY = (int) (y2 + offsetY);
-
-            // Use Bresenham's line algorithm for pixel-perfect rendering
-            drawBresenhamLine(guiGraphics, startX, startY, endX, endY, colorInt);
-        }
-    }
-
-    /**
-     * Draws a line using Bresenham's algorithm.
-     */
-    private static void drawBresenhamLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color)
-    {
-        int dx = Math.abs(x2 - x1);
-        int dy = Math.abs(y2 - y1);
-        int sx = x1 < x2 ? 1 : -1;
-        int sy = y1 < y2 ? 1 : -1;
-        int err = dx - dy;
-
-        while (true)
-        {
-            guiGraphics.fill(x1, y1, x1 + 1, y1 + 1, color);
-
-            if (x1 == x2 && y1 == y2)
-                break;
-
-            int e2 = 2 * err;
-            if (e2 > -dy)
-            {
-                err -= dy;
-                x1 += sx;
-            }
-            if (e2 < dx)
-            {
-                err += dx;
-                y1 += sy;
-            }
-        }
-    }
+    /* LABEL */
 
     public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int padding, Color backgroundColor, Color outlineColor, Color textColor)
     {
@@ -474,6 +348,158 @@ public final class RenderUtils
         int textY = startY + padding + ((boxHeight - scaledTextHeight) / 2);
 
         drawScaledText(g, text, scale, textX, textY, textColor);
+    }
+
+    /* DEBUG */
+
+    public static void __debugDrawRect(GuiGraphics g, int startX, int startY, int endX, int endY)
+    {
+        drawRectangle(
+                g,
+                startX,
+                startY,
+                endX,
+                endY,
+                RoundedCorners.none(),
+                1,
+                true,
+                Colors.DEBUG_RECT_FILL,
+                Colors.DEBUG_RECT_OUTLINE
+        );
+    }
+
+    /* MINI-FUNCTIONS */
+
+    /**
+     * Draws a horizontal line with specified thickness and color.
+     *
+     * @param g         `GuiGraphics` context to draw on
+     * @param startPosX Starting X position
+     * @param endPosX   Ending X position
+     * @param posY      Y position of the line
+     * @param thickness Thickness of the line in pixels
+     * @param color     color of the line
+     */
+    public static void drawHorizontalLine(GuiGraphics g, int startPosX, int endPosX, int posY, int thickness, Color color)
+    {
+        g.fill(startPosX, posY, endPosX, posY + thickness, color.asInt());
+    }
+
+    /**
+     * Draws a vertical line with specified thickness and color.
+     *
+     * @param g         `GuiGraphics` context to draw on
+     * @param posX      X position of the line
+     * @param startPosY Starting Y position
+     * @param endPosY   Ending Y position
+     * @param thickness Thickness of the line in pixels
+     * @param color     color of the line
+     */
+    public static void drawVerticalLine(GuiGraphics g, int posX, int startPosY, int endPosY, int thickness, Color color)
+    {
+        g.fill(posX, startPosY, posX + thickness, endPosY, color.asInt());
+    }
+
+    /**
+     * Draws an item scaled by a given factor.
+     *
+     * @param scaleFactor Scaling factor (e.g. 1.0 = normal size, 2.0 = double size)
+     */
+    public static void drawScaledItemFactor(GuiGraphics g, ItemStack stack, int x, int y, float scaleFactor)
+    {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0.0F);
+        g.pose().scale(scaleFactor, scaleFactor, 1.0F);
+        g.renderItem(stack, 0, 0);
+        g.pose().popPose();
+    }
+
+    /**
+     * Draws an item scaled to an exact GUI pixel size.
+     *
+     * @param size Target size in GUI pixels (e.g. 24, 32, 48)
+     */
+    public static void drawScaledItemSize(GuiGraphics g, ItemStack stack, int x, int y, int size)
+    {
+        float scale = (float) size / (float) VANILLA_ITEM_SIZE;
+        drawScaledItemFactor(g, stack, x, y, scale);
+    }
+
+    /* MARK: PRIVATE */
+
+    /**
+     * Helper method to draw a thick line between two points.
+     *
+     * @param guiGraphics `GuiGraphics` context to draw on
+     * @param x1          Start X position
+     * @param y1          Start Y position
+     * @param x2          End X position
+     * @param y2          End Y position
+     * @param thickness   Thickness of the line in pixels
+     * @param color       color of the line
+     */
+    private static void drawThickLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness, Color color)
+    {
+        // Calculate perpendicular offset for thickness
+        float dx = x2 - x1;
+        float dy = y2 - y1;
+        float length = (float) Math.sqrt(dx * dx + dy * dy);
+
+        if (length == 0)
+            return;
+
+        float perpX = -dy / length * thickness / 2.0f;
+        float perpY = dx / length * thickness / 2.0f;
+
+        // Draw filled polygon (thick line)
+        int colorInt = color.asInt();
+
+        for (int t = 0; t < thickness; t++)
+        {
+            float offset = t - thickness / 2.0f;
+            float offsetX = -dy / length * offset;
+            float offsetY = dx / length * offset;
+
+            int startX = (int) (x1 + offsetX);
+            int startY = (int) (y1 + offsetY);
+            int endX = (int) (x2 + offsetX);
+            int endY = (int) (y2 + offsetY);
+
+            // Use Bresenham's line algorithm for pixel-perfect rendering
+            drawBresenhamLine(guiGraphics, startX, startY, endX, endY, colorInt);
+        }
+    }
+
+    /**
+     * Draws a line using Bresenham's algorithm.
+     */
+    private static void drawBresenhamLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color)
+    {
+        int dx = Math.abs(x2 - x1);
+        int dy = Math.abs(y2 - y1);
+        int sx = x1 < x2 ? 1 : -1;
+        int sy = y1 < y2 ? 1 : -1;
+        int err = dx - dy;
+
+        while (true)
+        {
+            guiGraphics.fill(x1, y1, x1 + 1, y1 + 1, color);
+
+            if (x1 == x2 && y1 == y2)
+                break;
+
+            int e2 = 2 * err;
+            if (e2 > -dy)
+            {
+                err -= dy;
+                x1 += sx;
+            }
+            if (e2 < dx)
+            {
+                err += dx;
+                y1 += sy;
+            }
+        }
     }
 
     private static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color)

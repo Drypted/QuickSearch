@@ -30,4 +30,9 @@ public class Colors
     // Colors for Text Input
     public static final Color SELECTION_BG = Color.fromRGBA(147, 197, 253, 255);   // Light blue
     public static final Color SELECTION_TEXT = Color.fromRGBA(11, 11, 11, 255);    // Very dark gray
+
+    // DEBUG
+    public static final Color DEBUG_RECT_OUTLINE = Color.fromRGBA(168, 85, 247, 255);
+    // ^ Modern purple
+    public static final Color DEBUG_RECT_FILL = DEBUG_RECT_OUTLINE.withAlpha(64);
 }

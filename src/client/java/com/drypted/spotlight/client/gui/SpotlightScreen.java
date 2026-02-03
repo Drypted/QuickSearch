@@ -24,7 +24,7 @@ public class SpotlightScreen extends Screen
 
     private static final int HOTBAR_SLOTS = 9;
 
-    private SearchInputWidget searchInputWidget;
+    private InputWidget inputWidget;
     private ScrollBoxWidget searchResultsWidget;
     private HotbarWidget hotbarFocusProxy;
 
@@ -39,42 +39,42 @@ public class SpotlightScreen extends Screen
         final int searchBarX = (this.width - SEARCH_BAR_WIDTH) / 2;
         final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FROM_CENTER;
 
-        this.searchInputWidget = SearchInputWidget.builder(
+        this.inputWidget = InputWidget.builder(
                 searchBarX,
                 searchBarY,
                 SEARCH_BAR_WIDTH,
                 SEARCH_BAR_HEIGHT
         ).build();
-        this.searchInputWidget.setPlaceholder("Search items for blocks ...");
+        this.inputWidget.setPlaceholder("Search items for blocks ...");
         // set validator for no symbols
-        this.searchInputWidget.setValidator(text -> text.matches("[a-zA-Z0-9 _-]*"));
+        this.inputWidget.setValidator(text -> text.matches("[a-zA-Z0-9 _-]*"));
 
         this.searchResultsWidget = ScrollBoxWidget.builder(
                 searchBarX,
-                searchInputWidget.getY() + SEARCH_BAR_HEIGHT - searchInputWidget.getOutlineThickness(),
-                searchInputWidget.getWidth(),
+                inputWidget.getY() + SEARCH_BAR_HEIGHT - inputWidget.getOutlineThickness(),
+                inputWidget.getWidth(),
                 RESULTS_HEIGHT
         ).showScrollerAlways(true).build();
 
-        this.searchInputWidget.addTextChangeListener(this::onType);
+        this.inputWidget.addTextChangeListener(this::onType);
 
         this.hotbarFocusProxy = HotbarWidget.create(
                 SEARCH_BAR_WIDTH,
                 searchBarX,
                 searchBarY,
-                searchInputWidget
+                inputWidget
         );
 
         this.addRenderableWidget(hotbarFocusProxy);
         this.addRenderableWidget(searchResultsWidget);
-        this.addRenderableWidget(searchInputWidget);
+        this.addRenderableWidget(inputWidget);
 
         // show search on open
         setVisible(this.searchResultsWidget, false);
         setVisible(this.hotbarFocusProxy, false);
         this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, false));
 
-        this.setFocused(searchInputWidget);
+        this.setFocused(inputWidget);
     }
 
     private void displayResults(List<SearchResultData> results)
@@ -84,7 +84,7 @@ public class SpotlightScreen extends Screen
         // If results came back empty (or query was canceled/cleared mid-flight), stop here.
         if (results.isEmpty())
         {
-            searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
+            inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
             return;
         }
 
@@ -94,7 +94,7 @@ public class SpotlightScreen extends Screen
             // fill hotbar for first 9
             if (matchCount < HOTBAR_SLOTS)
             {
-                SearchHotbarWidget widget = this.hotbarFocusProxy.getWidgets().get(matchCount);
+                HotbarSlotWidget widget = this.hotbarFocusProxy.getWidgets().get(matchCount);
                 if (widget != null)
                 {
                     widget.setSearchResultData(result);
@@ -106,21 +106,21 @@ public class SpotlightScreen extends Screen
             }
 
             this.searchResultsWidget.addChildRow( //
-                    SearchResultsWidgetEntry.builder(0, 0, result)
-                                            .width(searchResultsWidget.getMaxWidth())
-                                            .onClick((mBC, dC) -> onResultClicked(result))
-                                            .build() //
+                    SearchResultDataWidget.builder(0, 0, result)
+                                          .width(searchResultsWidget.getMaxWidth())
+                                          .onClick((mBC, dC) -> onResultClicked(result))
+                                          .build() //
             );
 
             matchCount++;
         }
 
-        searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
+        inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
     }
 
     private void clearResults()
     {
-        searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
+        inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
         this.searchResultsWidget.removeAllChildren();
         hotbarFocusProxy.getWidgets().forEach(widget -> widget.setSearchResultData(null));
     }
@@ -146,7 +146,7 @@ public class SpotlightScreen extends Screen
         }
 
         // Set visual state to searching
-        searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.SEARCHING);
+        inputWidget.setSearchStatus(InputWidget.SearchStatus.SEARCHING);
         this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, true));
         setVisible(this.searchResultsWidget, true);
         setVisible(this.hotbarFocusProxy, true);
@@ -160,9 +160,9 @@ public class SpotlightScreen extends Screen
     {
         if (SpotlightEntryClient.closeSpotlightKeyMapping.matches(keyCode, scanCode))
         {
-            if (searchInputWidget.isFocused() && searchInputWidget.hasText())
+            if (inputWidget.isFocused() && inputWidget.hasText())
             {
-                searchInputWidget.clearText();
+                inputWidget.clearText();
                 clearResults();
                 this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, false));
                 setVisible(this.searchResultsWidget, false);
@@ -181,7 +181,7 @@ public class SpotlightScreen extends Screen
         {
             for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
-                SearchHotbarWidget hotbarWidget = hotbarFocusProxy.getWidgets().get(i);
+                HotbarSlotWidget hotbarWidget = hotbarFocusProxy.getWidgets().get(i);
                 if (hotbarWidget != null && keyCode == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
                                                                                                .getValue())
                 {
