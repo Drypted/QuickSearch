@@ -1,6 +1,9 @@
 package com.drypted.spotlight.client.gui.components;
 
 import com.drypted.spotlight.client.core.models.SearchResultData;
+import com.drypted.spotlight.client.gui.models.RoundedCorners;
+import com.drypted.spotlight.client.gui.utils.Colors;
+import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -21,6 +24,7 @@ public class HotbarWidget extends AbstractWidget
     private SearchHotbarWidget selectedHotbarWidget = null;
 
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
+    private boolean anySlotHighlighted = false;
 
     private Consumer<Boolean> onFocusChanged;
 
@@ -79,12 +83,34 @@ public class HotbarWidget extends AbstractWidget
                 mouseY,
                 partialTick
         ));
+
+        if (this.isFocused())
+        {
+            final int thisHeight = 12;
+            RenderUtils.drawLabelWithScale(
+                    guiGraphics,
+                    hotbarInstructionText.getText(),
+                    1.0f,
+                    this.searchHotbarWidgets.getFirst().getX(),
+                    this.searchHotbarWidgets.getFirst().getY() - 16 - thisHeight,
+                    this.searchHotbarWidgets.getLast().getRight(),
+                    this.searchHotbarWidgets.getLast().getY() - 16,
+                    RoundedCorners.all(),
+                    this.anySlotHighlighted ? Colors.INFO_BLUE : Colors.HIGHLIGHT_YELLOW,
+                    Colors.WHITE
+            );
+        }
     }
 
     /* HOTBAR */
 
     public void highlightSlot(int slotIndex)
     {
+        // update state
+        hotbarInstructionText = HotbarHelpText.SELECTED;
+        anySlotHighlighted = true;
+
+        // unhighlight all first
         searchHotbarWidgets.forEach(widget -> widget.setHighlighted(false));
         // get slot index and set show bind to true for that widget
         searchHotbarWidgets.stream()
@@ -95,6 +121,11 @@ public class HotbarWidget extends AbstractWidget
 
     public void unhighlightAllSlots()
     {
+        // update state
+        anySlotHighlighted = false;
+        hotbarInstructionText = HotbarHelpText.UNSELECTED;
+
+        // unhighlight all
         searchHotbarWidgets.forEach(widget -> widget.setHighlighted(false));
     }
 
@@ -186,8 +217,8 @@ public class HotbarWidget extends AbstractWidget
 
     private enum HotbarHelpText
     {
-        UNSELECTED("[HOTBAR KEY] to move item to that slot, Shift + [HOTBAR KEY] to select slot"),
-        SELECTED("[HOTBAR KEY] to move item to that slot, Esc to unselect");
+        UNSELECTED("key: move to slot - shift + key: select slot"),
+        SELECTED("key: move selected to slot");
 
         private final String text;
 

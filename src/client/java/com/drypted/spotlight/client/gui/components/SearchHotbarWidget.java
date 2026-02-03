@@ -90,7 +90,7 @@ public class SearchHotbarWidget extends AbstractWidget
         {
             final int padding = 4;
 
-            RenderUtils.drawText(
+            RenderUtils.drawLabelWithScale(
                     guiGraphics,
                     hotbarKey,
                     hotbarKeyTextScale,

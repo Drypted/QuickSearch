@@ -393,24 +393,10 @@ public final class RenderUtils
         }
     }
 
-    public static void drawTextAutoSize(GuiGraphics guiGraphics, String text, int posX, int posY)
-    {
-        drawTextAutoSize(
-                guiGraphics,
-                text,
-                posX,
-                posY,
-                4,
-                Colors.BLACK.withHalfAlpha(),
-                Colors.CLEAR,
-                Colors.WHITE
-        );
-    }
-
-    public static void drawTextAutoSize(GuiGraphics guiGraphics, String text, int posX, int posY, int padding, Color backgroundColor, Color outlineColor, Color textColor)
+    public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int padding, Color backgroundColor, Color outlineColor, Color textColor)
     {
         RenderUtils.drawRectangle(
-                guiGraphics,
+                g,
                 posX - padding,
                 posY - padding,
                 posX + Minecraft.getInstance().font.width(text) + padding,
@@ -422,17 +408,10 @@ public final class RenderUtils
                 outlineColor
         );
 
-        guiGraphics.drawString(
-                Minecraft.getInstance().font,
-                text,
-                posX,
-                posY,
-                textColor.asInt(),
-                true
-        );
+        RenderUtils.drawScaledText(g, text, scale, posX, posY, textColor);
     }
 
-    public static void drawText(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
     {
         // background
         RenderUtils.drawRectangle(
@@ -456,6 +435,45 @@ public final class RenderUtils
         int textPosY = startY + (endY - startY) / 2 - (textHeight / 2);
 
         RenderUtils.drawScaledText(g, text, scale, textPosX, textPosY, textColor);
+    }
+
+    public static void drawLabelInBox(GuiGraphics g, String text, int padding, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
+    {
+        RenderUtils.drawRectangle(
+                g,
+                startX,
+                startY,
+                endX,
+                endY,
+                corners,
+                1,
+                true,
+                backgroundColor,
+                backgroundColor
+        );
+
+        int boxWidth = (endX - startX) - (padding * 2);
+        int boxHeight = (endY - startY) - (padding * 2);
+
+        int textWidth = Minecraft.getInstance().font.width(text);
+        int textHeight = Minecraft.getInstance().font.lineHeight;
+
+        if (textWidth <= 0 || boxWidth <= 0 || boxHeight <= 0)
+        {
+            return;
+        }
+
+        float scaleX = (float) boxWidth / textWidth;
+        float scaleY = (float) boxHeight / textHeight;
+        float scale = Math.min(scaleX, scaleY);
+
+        int scaledTextWidth = (int) (textWidth * scale);
+        int scaledTextHeight = (int) (textHeight * scale);
+
+        int textX = startX + padding + ((boxWidth - scaledTextWidth) / 2);
+        int textY = startY + padding + ((boxHeight - scaledTextHeight) / 2);
+
+        drawScaledText(g, text, scale, textX, textY, textColor);
     }
 
     private static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color)
