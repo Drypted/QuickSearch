@@ -1,8 +1,11 @@
 package com.drypted.spotlight.client;
 
+import com.drypted.spotlight.client.config.ModConfig;
 import com.drypted.spotlight.client.core.SearchHandler;
 import com.drypted.spotlight.client.gui.SpotlightScreen;
 import com.mojang.blaze3d.platform.InputConstants;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.KeyMapping;
@@ -14,6 +17,7 @@ public class SpotlightEntryClient implements ClientModInitializer
 {
     public static final String MOD_ID = "spotlight";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    private static ModConfig Config;
 
     public static KeyMapping openSpotlightKeyMapping;
     public static KeyMapping closeSpotlightKeyMapping;
@@ -21,6 +25,10 @@ public class SpotlightEntryClient implements ClientModInitializer
     @Override
     public void onInitializeClient()
     {
+        // initialize config
+        AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new);
+        Config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+
         // register keybind
         openSpotlightKeyMapping = new KeyMapping(
                 "key.spotlight.toggle",
@@ -42,5 +50,10 @@ public class SpotlightEntryClient implements ClientModInitializer
                 client.setScreen(new SpotlightScreen());
             }
         });
+    }
+
+    public static ModConfig getConfig()
+    {
+        return Config;
     }
 }

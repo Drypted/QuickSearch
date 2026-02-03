@@ -1,9 +1,10 @@
 package com.drypted.spotlight.client.gui.components;
 
-import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -84,7 +85,7 @@ public class HotbarWidget extends AbstractWidget
                 partialTick
         ));
 
-        if (this.isFocused())
+        if (SpotlightEntryClient.getConfig().showHotbarHelpText && this.isFocused())
         {
             final int thisHeight = 12;
             RenderUtils.drawLabelWithScale(
