@@ -94,7 +94,7 @@ public class SearchResultsWidgetEntry extends AbstractWidget implements ScrollBo
                 this.outlineThickness,
                 this.selected || renderOutline,
                 this.backgroundColor,
-                this.selected ? Colors.HIGHLIGHT_YELLOW : outlineColor
+                (this.selected && !this.isPressed()) ? Colors.HIGHLIGHT_YELLOW : outlineColor
         );
 
         // icon
@@ -125,6 +125,7 @@ public class SearchResultsWidgetEntry extends AbstractWidget implements ScrollBo
         );
         g.pose().popPose();
 
+        // show bind, will be used to quick nav; disabled for now
         // if (this.shouldShowBind())
         // {
         //     final int size = 8;
@@ -179,21 +180,22 @@ public class SearchResultsWidgetEntry extends AbstractWidget implements ScrollBo
 
     /* State Methods */
 
-    public boolean isPressed()
-    {
-        return pressed;
-    }
+    public boolean isPressed() { return pressed; }
 
     @Override
-    public void select(boolean selected)
-    {
-        this.selected = selected;
-    }
+    public void select(boolean selected) { this.selected = selected; }
 
     @Override
     public void press()
     {
+        this.pressed = true;
         onClickCallback.accept(MouseButtonClick.from(getX(), getY()), true);
+    }
+
+    @Override
+    public void unpress()
+    {
+        this.pressed = false;
     }
 
     /* GETTERS & SETTERS */

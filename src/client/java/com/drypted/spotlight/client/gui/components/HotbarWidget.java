@@ -90,7 +90,7 @@ public class HotbarWidget extends AbstractWidget
             RenderUtils.drawLabelWithScale(
                     guiGraphics,
                     hotbarInstructionText.getText(),
-                    1.0f,
+                    0.75f,
                     this.searchHotbarWidgets.getFirst().getX(),
                     this.searchHotbarWidgets.getFirst().getY() - 16 - thisHeight,
                     this.searchHotbarWidgets.getLast().getRight(),

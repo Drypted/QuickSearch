@@ -390,11 +390,13 @@ public class ScrollBoxWidget extends AbstractWidget
         {
             case GLFW.GLFW_KEY_UP ->
             {
+                unpressAllChildren();
                 changeSelection(-1);
                 return true;
             }
             case GLFW.GLFW_KEY_DOWN ->
             {
+                unpressAllChildren();
                 changeSelection(1);
                 return true;
             }
@@ -409,6 +411,26 @@ public class ScrollBoxWidget extends AbstractWidget
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
+    {
+        if (children.isEmpty())
+            return super.keyPressed(keyCode, scanCode, modifiers);
+
+        // unpress all on any key release; if specified, it breaks when moving up and down while holding pressing key
+        unpressAllChildren();
+
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    private void unpressAllChildren()
+    {
+        if (getChildByIndex(selectedIndex) instanceof ScrollBoxWidgetEntry pressable)
+        {
+            pressable.unpress();
+        }
     }
 
     /**

@@ -94,10 +94,6 @@ public class SearchInputWidget extends AbstractWidget
     {
         // Determine outline color based on state
         Color currentOutlineColor = this.outlineColor;
-        if (hasError)
-        {
-            currentOutlineColor = errorColor;
-        }
 
         // Background
         RenderUtils.drawRectangle(
@@ -149,7 +145,10 @@ public class SearchInputWidget extends AbstractWidget
             }
 
             // Render text
-            Color textColor = isDisabled ? disabledTextColor : normalTextColor;
+            // Priority: disabled > error > normal
+            Color textColor = isDisabled
+                              ? disabledTextColor
+                              : hasError ? errorColor : normalTextColor;
             guiGraphics.drawString(
                     FONT,
                     this.text,
@@ -158,7 +157,6 @@ public class SearchInputWidget extends AbstractWidget
                     textColor.asInt(),
                     false
             );
-
         }
 
         // Render caret
