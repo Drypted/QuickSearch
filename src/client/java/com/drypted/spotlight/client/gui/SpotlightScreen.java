@@ -11,9 +11,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SpotlightScreen extends Screen
@@ -21,18 +19,14 @@ public class SpotlightScreen extends Screen
     private static final int SEARCH_BAR_WIDTH = 200;
     private static final int SEARCH_BAR_HEIGHT = 22;
 
-    private static final int HOTBAR_SLOT_PADDING = 2;
-
     private static final int DISTANCE_FROM_CENTER = 20;
     private static final int RESULTS_HEIGHT = 100;
+
     private static final int HOTBAR_SLOTS = 9;
 
     private SearchInputWidget searchInputWidget;
     private ScrollBoxWidget searchResultsWidget;
-    private final ArrayList<SearchHotbarWidget> searchHotbarWidgets = new ArrayList<>(HOTBAR_SLOTS);
-    private HotbarFocusProxyWidget hotbarFocusProxy;
-
-    private SearchHotbarWidget selectedHotbarWidget = null;
+    private HotbarWidget hotbarFocusProxy;
 
     public SpotlightScreen()
     {
@@ -62,57 +56,25 @@ public class SpotlightScreen extends Screen
                 RESULTS_HEIGHT
         ).showScrollerAlways(true).build();
 
-        generateHotbarWidgets(searchBarY, searchBarX);
-
         this.searchInputWidget.addTypeListener(this::onType);
 
-        this.searchHotbarWidgets.forEach(this::addRenderableOnly);
+        this.hotbarFocusProxy = HotbarWidget.create(
+                SEARCH_BAR_WIDTH,
+                searchBarX,
+                searchBarY,
+                searchInputWidget
+        );
 
-        this.addWidget(hotbarFocusProxy);
+        this.addRenderableWidget(hotbarFocusProxy);
         this.addRenderableWidget(searchResultsWidget);
         this.addRenderableWidget(searchInputWidget);
 
         // show search on open
-        // setVisible(this.searchResultsWidget, false);
-        // setVisible(this.hotbarFocusProxy, false);
-        this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
+        setVisible(this.searchResultsWidget, false);
+        setVisible(this.hotbarFocusProxy, false);
+        this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, false));
 
         this.setFocused(searchInputWidget);
-    }
-
-    private void generateHotbarWidgets(int searchBarY, int searchBarX)
-    {
-        final float iconSize = (SEARCH_BAR_WIDTH - HOTBAR_SLOT_PADDING * (HOTBAR_SLOTS + 1)) / (float) HOTBAR_SLOTS;
-        final int endY = searchBarY - searchInputWidget.getOutlineThickness() - HOTBAR_SLOT_PADDING;
-        final int startY = (int) Math.ceil(endY - iconSize);
-
-        float cursor = searchBarX + HOTBAR_SLOT_PADDING;
-        for (int i = 0; i < HOTBAR_SLOTS; i++)
-        {
-            final SearchHotbarWidget hotbarWidget = SearchHotbarWidget.builder(
-                    i, //
-                    (int) Math.ceil(cursor),
-                    startY,
-                    (int) Math.ceil(iconSize),
-                    (int) Math.ceil(iconSize)
-            ).build();
-            hotbarWidget.setOnClickCallback(mouseButtonClick -> {
-                SearchResultData item = hotbarWidget.getSearchResultData();
-                if (item == null || item.isEmpty())
-                    return;
-
-                onHotbarKeyPressed(hotbarWidget, 0);
-            });
-            this.searchHotbarWidgets.add(hotbarWidget);
-            cursor += iconSize + HOTBAR_SLOT_PADDING;
-        }
-
-        // generate proxy for hotbar focus navigation
-        this.hotbarFocusProxy = HotbarFocusProxyWidget.create(searchHotbarWidgets);
-        this.hotbarFocusProxy.setOnFocusChanged((focused) -> {
-            if (!focused)
-                this.selectedHotbarWidget = null;
-        });
     }
 
     private void displayResults(List<SearchResultData> results)
@@ -132,7 +94,7 @@ public class SpotlightScreen extends Screen
             // fill hotbar for first 9
             if (matchCount < HOTBAR_SLOTS)
             {
-                SearchHotbarWidget widget = searchHotbarWidgets.get(matchCount);
+                SearchHotbarWidget widget = this.hotbarFocusProxy.getWidgets().get(matchCount);
                 if (widget != null)
                 {
                     widget.setSearchResultData(result);
@@ -160,7 +122,7 @@ public class SpotlightScreen extends Screen
     {
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.IDLE);
         this.searchResultsWidget.removeAllChildren();
-        searchHotbarWidgets.forEach(widget -> widget.setSearchResultData(null));
+        hotbarFocusProxy.getWidgets().forEach(widget -> widget.setSearchResultData(null));
     }
 
     private void onResultClicked(SearchResultData block)
@@ -176,7 +138,7 @@ public class SpotlightScreen extends Screen
     {
         if (text == null || text.isEmpty())
         {
-            this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
+            this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, false));
             setVisible(this.searchResultsWidget, false);
             setVisible(this.hotbarFocusProxy, false);
             clearResults();
@@ -185,7 +147,7 @@ public class SpotlightScreen extends Screen
 
         // Set visual state to searching
         searchInputWidget.setSearchStatus(SearchInputWidget.SearchStatus.SEARCHING);
-        this.searchHotbarWidgets.forEach(widget -> setVisible(widget, true));
+        this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, true));
         setVisible(this.searchResultsWidget, true);
         setVisible(this.hotbarFocusProxy, true);
 
@@ -202,7 +164,7 @@ public class SpotlightScreen extends Screen
             {
                 searchInputWidget.clearText();
                 clearResults();
-                this.searchHotbarWidgets.forEach(widget -> setVisible(widget, false));
+                this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, false));
                 setVisible(this.searchResultsWidget, false);
                 setVisible(this.hotbarFocusProxy, false);
                 return true;
@@ -219,68 +181,17 @@ public class SpotlightScreen extends Screen
         {
             for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
-                SearchHotbarWidget hotbarWidget = searchHotbarWidgets.get(i);
+                SearchHotbarWidget hotbarWidget = hotbarFocusProxy.getWidgets().get(i);
                 if (hotbarWidget != null && keyCode == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
                                                                                                .getValue())
                 {
-                    onHotbarKeyPressed(hotbarWidget, modifiers);
+                    hotbarFocusProxy.onHotbarKeyPressed(hotbarWidget, modifiers);
                     return true;
                 }
             }
         }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    private void onHotbarKeyPressed(SearchHotbarWidget widget, int modifiers)
-    {
-        // if shift pressed, select hotbar slot only
-        if (isModifierPressed(modifiers, GLFW.GLFW_MOD_SHIFT))
-        {
-            this.selectedHotbarWidget = widget;
-            this.hotbarFocusProxy.highlightSlot(selectedHotbarWidget.getHotbarIndex());
-            return;
-        }
-
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null)
-        {
-            // if there is item in the selected hotbar slot
-            SearchResultData item = widget.getSearchResultData();
-
-            String identifier = "minecraft:air";
-            int count = 1;
-            // if a slot is already selected, use that slot
-            if (selectedHotbarWidget != null)
-            {
-                if (selectedHotbarWidget.getSearchResultData() != null)
-                {
-                    identifier = selectedHotbarWidget.getSearchResultData()
-                                                     .getIdentifier()
-                                                     .toString();
-                    count = selectedHotbarWidget.getSearchResultData().getIcon().getMaxStackSize();
-                }
-
-                // used this one
-                selectedHotbarWidget = null;
-                this.hotbarFocusProxy.unhighlightAllSlots();
-            }
-            else if (item != null)
-            {
-                identifier = item.getIdentifier().toString();
-                count = item.getMaxStackSize();
-            }
-
-            // replace item in hotbar slot
-            String command = String.format(
-                    "item replace entity @s hotbar.%d with %s %d",
-                    widget.getHotbarIndex(),
-                    identifier,
-                    count
-            );
-
-            player.connection.sendCommand(command);
-        }
     }
 
     @Override
@@ -293,11 +204,6 @@ public class SpotlightScreen extends Screen
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    private static boolean isModifierPressed(int modifiers, int modifierToCheck)
-    {
-        return (modifiers & modifierToCheck) != 0;
     }
 
     /* Overrides for settings */
@@ -320,6 +226,5 @@ public class SpotlightScreen extends Screen
     protected void changeFocus(ComponentPath componentPath)
     {
         super.changeFocus(componentPath);
-        System.out.println("Changed focus to " + componentPath.toString());
     }
 }
