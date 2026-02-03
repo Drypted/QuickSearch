@@ -248,13 +248,19 @@ public class SpotlightScreen extends Screen
             // if there is item in the selected hotbar slot
             SearchResultData item = widget.getSearchResultData();
 
-            String identifier;
-            int count;
+            String identifier = "minecraft:air";
+            int count = 1;
             // if a slot is already selected, use that slot
-            if (selectedHotbarWidget != null && selectedHotbarWidget.getSearchResultData() != null)
+            if (selectedHotbarWidget != null)
             {
-                identifier = selectedHotbarWidget.getSearchResultData().getIdentifier().toString();
-                count = selectedHotbarWidget.getSearchResultData().getIcon().getMaxStackSize();
+                if (selectedHotbarWidget.getSearchResultData() != null)
+                {
+                    identifier = selectedHotbarWidget.getSearchResultData()
+                                                     .getIdentifier()
+                                                     .toString();
+                    count = selectedHotbarWidget.getSearchResultData().getIcon().getMaxStackSize();
+                }
+
                 // used this one
                 selectedHotbarWidget = null;
                 this.hotbarFocusProxy.unhighlightAllSlots();
@@ -263,17 +269,6 @@ public class SpotlightScreen extends Screen
             {
                 identifier = item.getIdentifier().toString();
                 count = item.getMaxStackSize();
-            }
-            else
-            {
-                // clear hotbar slot
-                String command = String.format(
-                        "item replace entity @s hotbar.%d with minecraft:air",
-                        widget.getHotbarIndex()
-                );
-
-                player.connection.sendCommand(command);
-                return;
             }
 
             // replace item in hotbar slot
