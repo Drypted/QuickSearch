@@ -266,6 +266,12 @@ public final class RenderUtils
         }
     }
 
+    public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color, int thickness)
+    {
+        drawThickLine(guiGraphics, startX, startY, endX, endY, thickness, color);
+        drawThickLine(guiGraphics, startX, endY, endX, startY, thickness, color);
+    }
+
     /* LABEL */
 
     public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int padding, Color backgroundColor, Color outlineColor, Color textColor)
@@ -441,34 +447,75 @@ public final class RenderUtils
      */
     private static void drawThickLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness, Color color)
     {
-        // Calculate perpendicular offset for thickness
+        if (thickness <= 0)
+            return;
+
         float dx = x2 - x1;
         float dy = y2 - y1;
         float length = (float) Math.sqrt(dx * dx + dy * dy);
 
-        if (length == 0)
+        if (length == 0.0f)
             return;
 
-        float perpX = -dy / length * thickness / 2.0f;
-        float perpY = dx / length * thickness / 2.0f;
+        float nx = -dy / length;
+        float ny = dx / length;
+        float half = thickness * 0.5f;
 
-        // Draw filled polygon (thick line)
-        int colorInt = color.asInt();
+        float x1a = x1 + nx * half;
+        float y1a = y1 + ny * half;
+        float x1b = x1 - nx * half;
+        float y1b = y1 - ny * half;
+        float x2a = x2 + nx * half;
+        float y2a = y2 + ny * half;
+        float x2b = x2 - nx * half;
+        float y2b = y2 - ny * half;
 
-        for (int t = 0; t < thickness; t++)
+        fillQuad(guiGraphics, x1a, y1a, x2a, y2a, x2b, y2b, x1b, y1b, color.asInt());
+    }
+
+    /**
+     * Fills a convex quadrilateral using scanline rasterization.
+     */
+    private static void fillQuad(GuiGraphics guiGraphics, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int color)
+    {
+        int minY = (int) Math.floor(Math.min(Math.min(y1, y2), Math.min(y3, y4)));
+        int maxY = (int) Math.ceil(Math.max(Math.max(y1, y2), Math.max(y3, y4)));
+
+        for (int y = minY; y <= maxY; y++)
         {
-            float offset = t - thickness / 2.0f;
-            float offsetX = -dy / length * offset;
-            float offsetY = dx / length * offset;
+            float[] xs = new float[4];
+            int count = 0;
 
-            int startX = (int) (x1 + offsetX);
-            int startY = (int) (y1 + offsetY);
-            int endX = (int) (x2 + offsetX);
-            int endY = (int) (y2 + offsetY);
+            count = intersect(xs, count, x1, y1, x2, y2, y);
+            count = intersect(xs, count, x2, y2, x3, y3, y);
+            count = intersect(xs, count, x3, y3, x4, y4, y);
+            count = intersect(xs, count, x4, y4, x1, y1, y);
 
-            // Use Bresenham's line algorithm for pixel-perfect rendering
-            drawBresenhamLine(guiGraphics, startX, startY, endX, endY, colorInt);
+            if (count < 2)
+                continue;
+
+            float minX = xs[0];
+            float maxX = xs[1];
+
+            if (minX > maxX)
+            {
+                float tmp = minX;
+                minX = maxX;
+                maxX = tmp;
+            }
+
+            guiGraphics.fill((int) Math.floor(minX), y, (int) Math.ceil(maxX), y + 1, color);
         }
+    }
+
+    private static int intersect(float[] xs, int count, float x1, float y1, float x2, float y2, int y)
+    {
+        if ((y1 <= y && y2 > y) || (y2 <= y && y1 > y))
+        {
+            float t = (y - y1) / (y2 - y1);
+            xs[count++] = x1 + t * (x2 - x1);
+        }
+        return count;
     }
 
     /**

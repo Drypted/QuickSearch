@@ -57,4 +57,9 @@ public class SpotlightEntryClient implements ClientModInitializer
     {
         return Config;
     }
+
+    public static void saveConfig()
+    {
+        AutoConfig.getConfigHolder(ModConfig.class).save();
+    }
 }

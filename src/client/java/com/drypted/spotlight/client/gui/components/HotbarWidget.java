@@ -21,6 +21,8 @@ public class HotbarWidget extends AbstractWidget
     public static final int HOTBAR_SLOT_PADDING = 2;
     public static final int HOTBAR_SLOTS = 9;
 
+    private static final int CLOSE_BUTTON_PADDING = 3;
+    private static final int CLOSE_BUTTON_SIZE = 5;
     private static final int HELP_TEXT_MARGIN = 16;
     private static final int HELP_TEXT_HEIGHT = 12;
 
@@ -64,6 +66,7 @@ public class HotbarWidget extends AbstractWidget
                 this.selectedHotbarWidget = null;
         });
 
+        // settings bounds
         this.setX(startX);
         this.setY(startY - HELP_TEXT_MARGIN - HELP_TEXT_HEIGHT);
         this.setWidth(width);
@@ -101,7 +104,31 @@ public class HotbarWidget extends AbstractWidget
                     this.anySlotHighlighted ? Colors.INFO_BLUE : Colors.HIGHLIGHT_YELLOW,
                     Colors.WHITE
             );
+
+            drawCloseButton(guiGraphics);
         }
+    }
+
+    /* Close Button */
+
+    public void drawCloseButton(GuiGraphics guiGraphics)
+    {
+        final int startX = this.getX() + CLOSE_BUTTON_PADDING;
+        final int startY = this.getY() + CLOSE_BUTTON_PADDING;
+        final int endX = startX + CLOSE_BUTTON_SIZE;
+        final int endY = startY + CLOSE_BUTTON_SIZE;
+
+        RenderUtils.drawX(guiGraphics, startX, startY, endX, endY, Colors.RED, 1);
+    }
+
+    public boolean isCloseButtonClicked(double mouseX, double mouseY)
+    {
+        final int startX = this.getX() + CLOSE_BUTTON_PADDING;
+        final int startY = this.getY() + CLOSE_BUTTON_PADDING;
+        final int endX = startX + CLOSE_BUTTON_SIZE;
+        final int endY = startY + CLOSE_BUTTON_SIZE;
+
+        return mouseX >= startX && mouseX <= endX && mouseY >= startY && mouseY <= endY;
     }
 
     /* HOTBAR */
@@ -115,10 +142,8 @@ public class HotbarWidget extends AbstractWidget
         // unhighlight all first
         hotbarSlotWidgets.forEach(widget -> widget.setHighlighted(false));
         // get slot index and set show bind to true for that widget
-        hotbarSlotWidgets.stream()
-                         .filter(widget -> widget.getHotbarIndex() == slotIndex)
-                         .findFirst()
-                         .ifPresent(widget -> widget.setHighlighted(true));
+        hotbarSlotWidgets.stream().filter(widget -> widget.getHotbarIndex() == slotIndex)
+                         .findFirst().ifPresent(widget -> widget.setHighlighted(true));
     }
 
     public void unhighlightAllSlots()
@@ -155,8 +180,7 @@ public class HotbarWidget extends AbstractWidget
             {
                 if (selectedHotbarWidget.getSearchResultData() != null)
                 {
-                    identifier = selectedHotbarWidget.getSearchResultData()
-                                                     .getIdentifier()
+                    identifier = selectedHotbarWidget.getSearchResultData().getIdentifier()
                                                      .toString();
                     count = selectedHotbarWidget.getSearchResultData().getIcon().getMaxStackSize();
                 }
@@ -197,7 +221,7 @@ public class HotbarWidget extends AbstractWidget
         return hotbarSlotWidgets;
     }
 
-    /* FOCUS */
+    /* FOCUS & ONCLICK */
 
     @Override
     public void setFocused(boolean focused)
@@ -213,6 +237,18 @@ public class HotbarWidget extends AbstractWidget
     public void setOnFocusChanged(Consumer<Boolean> onFocusChanged)
     {
         this.onFocusChanged = onFocusChanged;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        if (this.isCloseButtonClicked(mouseX, mouseY))
+        {
+            SpotlightEntryClient.getConfig().showHotbarHelpText = false;
+            SpotlightEntryClient.saveConfig();
+        }
+
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     /* PRIVATE HELPERS */

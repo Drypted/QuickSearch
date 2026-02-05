@@ -55,4 +55,26 @@ public class Color
     {
         return this.withAlpha(128);
     }
+
+    /* GETTERS */
+
+    public int getRed()
+    {
+        return (this.color >> 16) & 0xFF;
+    }
+
+    public int getGreen()
+    {
+        return (this.color >> 8) & 0xFF;
+    }
+
+    public int getBlue()
+    {
+        return this.color & 0xFF;
+    }
+
+    public int getAlpha()
+    {
+        return (this.color >> 24) & 0xFF;
+    }
 }
