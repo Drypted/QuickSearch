@@ -18,10 +18,13 @@ import java.util.function.Consumer;
 
 public class HotbarWidget extends AbstractWidget
 {
-    private static final int HOTBAR_SLOT_PADDING = 2;
-    private static final int HOTBAR_SLOTS = 9;
+    public static final int HOTBAR_SLOT_PADDING = 2;
+    public static final int HOTBAR_SLOTS = 9;
 
-    public final ArrayList<HotbarSlotWidget> hotbarSlotWidgets = new ArrayList<>(HOTBAR_SLOTS);
+    private static final int HELP_TEXT_MARGIN = 16;
+    private static final int HELP_TEXT_HEIGHT = 12;
+
+    private final ArrayList<HotbarSlotWidget> hotbarSlotWidgets = new ArrayList<>(HOTBAR_SLOTS);
     private HotbarSlotWidget selectedHotbarWidget = null;
 
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
@@ -29,13 +32,12 @@ public class HotbarWidget extends AbstractWidget
 
     private Consumer<Boolean> onFocusChanged;
 
-    public HotbarWidget(int searchBarWidth, int searchBarX, int searchBarY, InputWidget inputWidget)
+    public HotbarWidget(int startX, int width, int endY)
     {
         super(0, 0, 0, 0, Component.empty());
-        final float iconSize = (searchBarWidth - HOTBAR_SLOT_PADDING * (HOTBAR_SLOTS + 1)) / (float) HOTBAR_SLOTS;
-        final int endY = searchBarY - inputWidget.getOutlineThickness() - HOTBAR_SLOT_PADDING;
+        final float iconSize = (width - HOTBAR_SLOT_PADDING * (HOTBAR_SLOTS + 1)) / (float) HOTBAR_SLOTS;
         final int startY = (int) Math.ceil(endY - iconSize);
-        float cursor = searchBarX + HOTBAR_SLOT_PADDING;
+        float cursor = startX + HOTBAR_SLOT_PADDING;
 
         for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
@@ -61,16 +63,16 @@ public class HotbarWidget extends AbstractWidget
             if (!focused)
                 this.selectedHotbarWidget = null;
         });
+
+        this.setX(startX);
+        this.setY(startY - HELP_TEXT_MARGIN - HELP_TEXT_HEIGHT);
+        this.setWidth(width);
+        this.setHeight(endY - (startY - HELP_TEXT_MARGIN - HELP_TEXT_HEIGHT));
     }
 
-    public static HotbarWidget create(int searchBarWidth, int searchBarX, int searchBarY, InputWidget inputWidget)
+    public static HotbarWidget create(int startX, int width, int endY)
     {
-        return new HotbarWidget(
-                searchBarWidth,     //
-                searchBarX,         //
-                searchBarY,         //
-                inputWidget         //
-        );
+        return new HotbarWidget(startX, width, endY);
     }
 
     /* RENDERING */
@@ -87,15 +89,14 @@ public class HotbarWidget extends AbstractWidget
 
         if (SpotlightEntryClient.getConfig().showHotbarHelpText && this.isFocused())
         {
-            final int thisHeight = 12;
             RenderUtils.drawLabelWithScale(
                     guiGraphics,
                     hotbarInstructionText.getText(),
                     0.75f,
-                    this.hotbarSlotWidgets.getFirst().getX(),
-                    this.hotbarSlotWidgets.getFirst().getY() - 16 - thisHeight,
-                    this.hotbarSlotWidgets.getLast().getRight(),
-                    this.hotbarSlotWidgets.getLast().getY() - 16,
+                    this.getX(),
+                    this.getY(),
+                    this.getRight(),
+                    this.getY() + HELP_TEXT_HEIGHT,
                     RoundedCorners.all(),
                     this.anySlotHighlighted ? Colors.INFO_BLUE : Colors.HIGHLIGHT_YELLOW,
                     Colors.WHITE

@@ -1,0 +1,5 @@
+{
+  "text.autoconfig.spotlight.title": "Spotlight",
+  "text.autoconfig.spotlight.option.showHotbarHelpText": "Show hotbar help text",
+  "text.autoconfig.spotlight.option.showHotbarHelpText.@Tooltip": "Shows instructions above the hotbar"
+}

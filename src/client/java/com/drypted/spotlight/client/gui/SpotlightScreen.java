@@ -58,10 +58,9 @@ public class SpotlightScreen extends Screen
         this.inputWidget.addTextChangeListener(this::onTextChanged);
 
         this.hotbarFocusProxy = HotbarWidget.create(
-                SEARCH_BAR_WIDTH,
                 searchBarX,
-                searchBarY,
-                inputWidget
+                SEARCH_BAR_WIDTH,
+                searchBarY - HotbarWidget.HOTBAR_SLOT_PADDING
         );
 
         this.addRenderableWidget(hotbarFocusProxy);
@@ -69,9 +68,7 @@ public class SpotlightScreen extends Screen
         this.addRenderableWidget(inputWidget);
 
         // show search on open
-        setVisible(this.searchResultsWidget, false);
-        setVisible(this.hotbarFocusProxy, false);
-        this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, false));
+        setResultsVisible(false);
 
         this.setFocused(inputWidget);
     }

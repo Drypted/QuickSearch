@@ -15,6 +15,9 @@
     ],
     "main": [
       "com.drypted.spotlight.SpotlightEntry"
+    ],
+    "modmenu": [
+      "com.drypted.spotlight.client.config.ModMenuIntegration"
     ]
   },
   "mixins": [

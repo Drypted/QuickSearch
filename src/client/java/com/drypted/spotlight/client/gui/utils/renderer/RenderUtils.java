@@ -5,6 +5,7 @@ import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.world.item.ItemStack;
 
 public final class RenderUtils
@@ -352,14 +353,14 @@ public final class RenderUtils
 
     /* DEBUG */
 
-    public static void __debugDrawRect(GuiGraphics g, int startX, int startY, int endX, int endY)
+    public static void __debugDrawWidgetBounds(GuiGraphics g, AbstractWidget widget)
     {
         drawRectangle(
                 g,
-                startX,
-                startY,
-                endX,
-                endY,
+                widget.getX(),
+                widget.getY(),
+                widget.getRight(),
+                widget.getBottom(),
                 RoundedCorners.none(),
                 1,
                 true,
