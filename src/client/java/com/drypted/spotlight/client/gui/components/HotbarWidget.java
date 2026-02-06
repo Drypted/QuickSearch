@@ -211,16 +211,13 @@ public class HotbarWidget extends AbstractWidget
             SearchResultData item = widget.getSearchResultData();
 
             // default air, so if no item selected, it will clear the slot
-            String identifier = "minecraft:air";
-            int count = 1;
+            String command = "item replace entity @s hotbar." + widget.getHotbarIndex() + " with minecraft:air";
             // if a slot is already selected, use that slot
             if (selectedHotbarWidget != null)
             {
                 if (selectedHotbarWidget.getSearchResultData() != null)
-                {
-                    identifier = selectedHotbarWidget.getSearchResultData().getItemDefinition();
-                    count = selectedHotbarWidget.getSearchResultData().getMaxStackSize();
-                }
+                    command = selectedHotbarWidget.getSearchResultData().getHotbarReplaceCommand(
+                            widget.getHotbarIndex());
 
                 // used this one
                 selectedHotbarWidget = null;
@@ -228,17 +225,8 @@ public class HotbarWidget extends AbstractWidget
             }
             else if (item != null)
             {
-                identifier = item.getItemDefinition();
-                count = item.getMaxStackSize();
+                command = item.getHotbarReplaceCommand(widget.getHotbarIndex());
             }
-
-            // replace item in hotbar slot
-            String command = String.format(
-                    "item replace entity @s hotbar.%d with %s %d",
-                    widget.getHotbarIndex(),
-                    identifier,
-                    count
-            );
 
             player.connection.sendCommand(command);
         }
