@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 public class HotbarWidget extends AbstractWidget
 {
@@ -28,13 +27,17 @@ public class HotbarWidget extends AbstractWidget
     private static final int CLOSE_BUTTON_SIZE = HELP_TEXT_HEIGHT - (CLOSE_BUTTON_PADDING * 2) - 1;
     // (- 1) because drawX draws 1 pixel extra in vertical direction
 
+    private static final String CLOSE_BUTTON_TOOLTIP_TEXT = "Hide instructions";
+    public static final float CLOSE_BUTTON_TOOLTIP_SCALE = 0.8f;
+    private static final int CLOSE_BUTTON_TOOLTIP_PADDING_X = 8;
+    private static final int CLOSE_BUTTON_TOOLTIP_PADDING_Y = 3;
+    private static final int CLOSE_BUTTON_TOOLTIP_OFFSET_Y = 1;
+
     private final ArrayList<HotbarSlotWidget> hotbarSlotWidgets = new ArrayList<>(HOTBAR_SLOTS);
     private HotbarSlotWidget selectedHotbarWidget = null;
 
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
-
-    private Consumer<Boolean> onFocusChanged;
 
     public HotbarWidget(int startX, int width, int endY)
     {
@@ -62,11 +65,6 @@ public class HotbarWidget extends AbstractWidget
             this.hotbarSlotWidgets.add(hotbarWidget);
             cursor += iconSize + HOTBAR_SLOT_PADDING;
         }
-
-        this.setOnFocusChanged((focused) -> {
-            if (!focused)
-                this.selectedHotbarWidget = null;
-        });
 
         // settings bounds
         this.setX(startX);
@@ -108,12 +106,17 @@ public class HotbarWidget extends AbstractWidget
             );
 
             drawCloseButton(guiGraphics);
+
+            if (this.isOverCloseButton(mouseX, mouseY))
+            {
+                drawCloseButtonTooltip(guiGraphics, mouseX, mouseY);
+            }
         }
     }
 
     /* Close Button */
 
-    public void drawCloseButton(GuiGraphics guiGraphics)
+    private void drawCloseButton(GuiGraphics guiGraphics)
     {
         final int startX = this.getX() + CLOSE_BUTTON_PADDING;
         final int startY = this.getY() + CLOSE_BUTTON_PADDING;
@@ -123,19 +126,52 @@ public class HotbarWidget extends AbstractWidget
         RenderUtils.drawX(guiGraphics, startX, startY, endX, endY, Colors.RED, 1, true);
     }
 
-    public boolean isOverCloseButton(double mouseX, double mouseY)
+    private void drawCloseButtonTooltip(GuiGraphics guiGraphics, double mouseX, double mouseY)
+    {
+        final int zOrder = 500;
+
+        final float scale = CLOSE_BUTTON_TOOLTIP_SCALE;
+
+        final float textWidth = Minecraft.getInstance().font.width(CLOSE_BUTTON_TOOLTIP_TEXT) * scale;
+        final float textHeight = Minecraft.getInstance().font.lineHeight * scale;
+
+        final int posX = (int) (mouseX - (textWidth - CLOSE_BUTTON_TOOLTIP_PADDING_X) / 2.0f);
+        final int posY = this.getY() - (int) textHeight - CLOSE_BUTTON_TOOLTIP_PADDING_Y - CLOSE_BUTTON_TOOLTIP_OFFSET_Y;
+
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0.0F, 0.0F, zOrder);
+
+        RenderUtils.drawLabel(
+                guiGraphics,
+                CLOSE_BUTTON_TOOLTIP_TEXT,
+                posX,
+                posY,
+                scale,
+                CLOSE_BUTTON_TOOLTIP_PADDING_X,
+                CLOSE_BUTTON_TOOLTIP_PADDING_Y,
+                RoundedCorners.all(),
+                Colors.RED.withAlpha(192),
+                Colors.WHITE,
+                Colors.WHITE
+        );
+
+        guiGraphics.pose().popPose();
+    }
+
+    private boolean isOverCloseButton(double mouseX, double mouseY)
     {
         final int startX = this.getX() + CLOSE_BUTTON_PADDING;
         final int startY = this.getY() + CLOSE_BUTTON_PADDING;
         final int endX = startX + CLOSE_BUTTON_SIZE;
-        final int endY = startY + CLOSE_BUTTON_SIZE;
+        final int endY = startY + CLOSE_BUTTON_SIZE + 2;
+        // increase bounds by 2 pixels to match the drawn X bounds, because drawX draws 1 pixel extra in vertical direction
 
         return mouseX >= startX && mouseX <= endX && mouseY >= startY && mouseY <= endY;
     }
 
     /* HOTBAR */
 
-    public void highlightSlot(int slotIndex)
+    private void highlightSlot(int slotIndex)
     {
         // update state
         hotbarInstructionText = HotbarHelpText.SELECTED;
@@ -148,7 +184,7 @@ public class HotbarWidget extends AbstractWidget
                          .findFirst().ifPresent(widget -> widget.setHighlighted(true));
     }
 
-    public void unhighlightAllSlots()
+    private void unhighlightAllSlots()
     {
         // update state
         anySlotHighlighted = false;
@@ -229,16 +265,10 @@ public class HotbarWidget extends AbstractWidget
     public void setFocused(boolean focused)
     {
         super.setFocused(focused);
-        if (onFocusChanged != null)
-        {
-            onFocusChanged.accept(focused);
-        }
-        hotbarSlotWidgets.forEach(w -> w.setShowBind(focused));
-    }
+        if (!focused)
+            this.selectedHotbarWidget = null;
 
-    public void setOnFocusChanged(Consumer<Boolean> onFocusChanged)
-    {
-        this.onFocusChanged = onFocusChanged;
+        hotbarSlotWidgets.forEach(w -> w.setShowBind(focused));
     }
 
     @Override
