@@ -387,6 +387,13 @@ public final class RenderUtils
 
     public static void __debugDrawWidgetBounds(GuiGraphics g, AbstractWidget widget)
     {
+        __debugDrawWidgetBounds(g, widget, true);
+    }
+
+    public static void __debugDrawWidgetBounds(GuiGraphics g, AbstractWidget widget, boolean above)
+    {
+        g.pose().pushPose();
+        g.pose().translate(0, 0, above ? 100 : -100); // set z order
         drawRectangle(
                 g,
                 widget.getX(),
@@ -399,6 +406,7 @@ public final class RenderUtils
                 Colors.DEBUG_RECT_FILL,
                 Colors.DEBUG_RECT_OUTLINE
         );
+        g.pose().popPose();
     }
 
     /* MINI-FUNCTIONS */
