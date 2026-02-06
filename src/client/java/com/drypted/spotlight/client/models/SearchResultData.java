@@ -18,15 +18,15 @@ public final class SearchResultData
     private final String name;
     private final ResourceLocation identifier;
     private final int maxStackSize;
-    private final String commandString;
+    private final String itemDefinition;
 
-    public SearchResultData(ItemStack icon, String name, ResourceLocation identifier, int maxStackSize)
+    public SearchResultData(ItemStack icon, String name, ResourceLocation identifier)
     {
         this.icon = icon;
         this.name = name;
         this.identifier = identifier;
-        this.maxStackSize = maxStackSize;
-        this.commandString = buildGiveCommand(icon);
+        this.maxStackSize = icon.getMaxStackSize();
+        this.itemDefinition = buildItemDefinition(icon);
     }
 
     public static SearchResultData fromItem(Item item)
@@ -38,9 +38,8 @@ public final class SearchResultData
 
         final String name = item.getName(stack).getString();
         final ResourceLocation identifier = BuiltInRegistries.ITEM.getKey(item);
-        final int maxStackSize = item.getDefaultMaxStackSize();
 
-        return new SearchResultData(stack, name, identifier, maxStackSize);
+        return new SearchResultData(stack, name, identifier);
     }
 
     public static SearchResultData fromItemStack(ItemStack stack)
@@ -51,17 +50,14 @@ public final class SearchResultData
         final Item item = stack.getItem();
         final String name = item.getName(stack).getString();
         final ResourceLocation identifier = BuiltInRegistries.ITEM.getKey(item);
-        final int maxStackSize = item.getDefaultMaxStackSize();
 
-        return new SearchResultData(stack, name, identifier, maxStackSize);
+        return new SearchResultData(stack, name, identifier);
     }
 
-    private static String buildGiveCommand(ItemStack stack)
+    private static String buildItemDefinition(ItemStack stack)
     {
         if (stack == null || stack == ItemStack.EMPTY || stack.getItem() == Items.AIR)
-            return "give @s air 1";
-
-        int count = stack.getMaxStackSize();
+            return "minecraft:air";
 
         ResourceKey<Item> itemKey = BuiltInRegistries.ITEM.getResourceKey(stack.getItem())
                                                           .orElseThrow();
@@ -73,11 +69,11 @@ public final class SearchResultData
         Level level = Minecraft.getInstance().level;
         if (level == null)
         {
-            return "give @s " + itemKey.location() + " " + count;
+            return itemKey.location().toString();
         }
 
-        String itemPart = input.serialize(level.registryAccess());
-        return "give @s " + itemPart + " " + count;
+        // serialize the item input to a command string (e.g. "minecraft:diamond_sword[max_stack_size=1]")
+        return input.serialize(level.registryAccess());
     }
 
     /* PUBLIC HELPERS */
@@ -92,6 +88,21 @@ public final class SearchResultData
         final String lowerText = text.toLowerCase();
         return name.toLowerCase().contains(lowerText) || //
                 identifier.getPath().toLowerCase().contains(lowerText);
+    }
+
+    public String getGiveCommand()
+    {
+        return String.format("/give @p %s %d", itemDefinition, maxStackSize);
+    }
+
+    public String getHotbarReplaceCommand(int hotbarSlot)
+    {
+        return String.format(
+                "item replace entity @s hotbar.%d with %s %d",
+                hotbarSlot,
+                identifier,
+                maxStackSize
+        );
     }
 
     /* GETTERS */
@@ -111,9 +122,9 @@ public final class SearchResultData
         return identifier;
     }
 
-    public String getCommandString()
+    public String getItemDefinition()
     {
-        return commandString;
+        return itemDefinition;
     }
 
     public int getMaxStackSize()
@@ -126,7 +137,6 @@ public final class SearchResultData
     public static final SearchResultData EMPTY = new SearchResultData(
             ItemStack.EMPTY,
             "",
-            ResourceLocation.fromNamespaceAndPath("spotlight", "search_result_data_empty"),
-            0
+            ResourceLocation.fromNamespaceAndPath("spotlight", "search_result_data_empty")
     );
 }

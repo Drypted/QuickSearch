@@ -218,9 +218,8 @@ public class HotbarWidget extends AbstractWidget
             {
                 if (selectedHotbarWidget.getSearchResultData() != null)
                 {
-                    identifier = selectedHotbarWidget.getSearchResultData().getIdentifier()
-                                                     .toString();
-                    count = selectedHotbarWidget.getSearchResultData().getIcon().getMaxStackSize();
+                    identifier = selectedHotbarWidget.getSearchResultData().getItemDefinition();
+                    count = selectedHotbarWidget.getSearchResultData().getMaxStackSize();
                 }
 
                 // used this one
@@ -229,7 +228,7 @@ public class HotbarWidget extends AbstractWidget
             }
             else if (item != null)
             {
-                identifier = item.getIdentifier().toString();
+                identifier = item.getItemDefinition();
                 count = item.getMaxStackSize();
             }
 

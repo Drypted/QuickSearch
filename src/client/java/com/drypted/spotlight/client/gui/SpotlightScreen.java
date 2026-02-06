@@ -175,8 +175,7 @@ public class SpotlightScreen extends Screen
             this.searchResultsWidget.addChildRow( //
                     SearchResultDataWidget.builder(0, 0, result)
                                           .width(searchResultsWidget.getMaxWidth())
-                                          .onClick((mBC, dC) -> onResultClicked(result))
-                                          .build() //
+                                          .onClick((mBC, dC) -> onResultClicked(result)).build() //
             );
 
             matchCount++;
@@ -189,7 +188,7 @@ public class SpotlightScreen extends Screen
     {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null)
-            player.connection.sendCommand(data.getCommandString());
+            player.connection.sendCommand(data.getGiveCommand());
     }
 
     /* Overrides for settings */

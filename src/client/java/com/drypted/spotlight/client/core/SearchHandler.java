@@ -39,7 +39,7 @@ public class SearchHandler
         CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems().stream()).forEach(
                 stack -> {
                     SearchResultData data = SearchResultData.fromItemStack(stack);
-                    combined.putIfAbsent(data.getCommandString(), data);
+                    combined.putIfAbsent(data.getItemDefinition(), data);
                 });
 
         // 2. Registry fallback (includes hidden mod items)
@@ -47,7 +47,7 @@ public class SearchHandler
             try
             {
                 SearchResultData data = SearchResultData.fromItem(item);
-                combined.putIfAbsent(data.getCommandString(), data);
+                combined.putIfAbsent(data.getItemDefinition(), data);
             }
             catch (Exception ignored)
             {
