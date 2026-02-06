@@ -21,10 +21,12 @@ public class HotbarWidget extends AbstractWidget
     public static final int HOTBAR_SLOT_PADDING = 2;
     public static final int HOTBAR_SLOTS = 9;
 
-    private static final int CLOSE_BUTTON_PADDING = 3;
-    private static final int CLOSE_BUTTON_SIZE = 5;
     private static final int HELP_TEXT_MARGIN = 16;
     private static final int HELP_TEXT_HEIGHT = 12;
+
+    private static final int CLOSE_BUTTON_PADDING = 3;
+    private static final int CLOSE_BUTTON_SIZE = HELP_TEXT_HEIGHT - (CLOSE_BUTTON_PADDING * 2) - 1;
+    // (- 1) because drawX draws 1 pixel extra in vertical direction
 
     private final ArrayList<HotbarSlotWidget> hotbarSlotWidgets = new ArrayList<>(HOTBAR_SLOTS);
     private HotbarSlotWidget selectedHotbarWidget = null;
@@ -118,10 +120,10 @@ public class HotbarWidget extends AbstractWidget
         final int endX = startX + CLOSE_BUTTON_SIZE;
         final int endY = startY + CLOSE_BUTTON_SIZE;
 
-        RenderUtils.drawX(guiGraphics, startX, startY, endX, endY, Colors.RED, 1);
+        RenderUtils.drawX(guiGraphics, startX, startY, endX, endY, Colors.RED, 1, true);
     }
 
-    public boolean isCloseButtonClicked(double mouseX, double mouseY)
+    public boolean isOverCloseButton(double mouseX, double mouseY)
     {
         final int startX = this.getX() + CLOSE_BUTTON_PADDING;
         final int startY = this.getY() + CLOSE_BUTTON_PADDING;
@@ -242,7 +244,7 @@ public class HotbarWidget extends AbstractWidget
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
-        if (this.isCloseButtonClicked(mouseX, mouseY))
+        if (this.isOverCloseButton(mouseX, mouseY))
         {
             SpotlightEntryClient.getConfig().showHotbarHelpText = false;
             SpotlightEntryClient.saveConfig();
