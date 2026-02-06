@@ -55,13 +55,23 @@ public class SmartSearch
 
         Set<Integer> candidates = getCandidatesFromIndex(q);
 
-        if (candidates.isEmpty() || candidates.size() < 10)
+        if (candidates.isEmpty())
         {
-            candidates = new HashSet<>();
             for (int i = 0; i < items.size(); i++)
             {
-                candidates.add(i);
+                SearchResultData item = items.get(i);
+
+                double similarity = Math.max(
+                        calculateTrigramSimilarity(q, item.getName().toLowerCase()),
+                        calculateTrigramSimilarity(q, item.getIdentifier().getPath().toLowerCase())
+                );
+
+                if (similarity >= 0.4)
+                {
+                    candidates.add(i);
+                }
             }
+
         }
 
         return candidates.stream() //
@@ -333,6 +343,16 @@ public class SmartSearch
 
         // Display name word starts with query
         String[] displayWords = displayName.split("[_\\-\\s]+");
+
+        // Exact word match in display name
+        for (String word : displayWords)
+        {
+            if (word.equals(query))
+            {
+                return new ScoringResult(2, "exact_display_word");
+            }
+        }
+
         for (String word : displayWords)
         {
             if (word.startsWith(query))
@@ -352,6 +372,14 @@ public class SmartSearch
 
         // Split identifier into words
         String[] identifierParts = identifier.split("_");
+
+        for (String part : identifierParts)
+        {
+            if (part.equals(query))
+            {
+                return new ScoringResult(3, "exact_identifier_word");
+            }
+        }
 
         // Any word starts with query
         boolean anyWordStarts = false;
