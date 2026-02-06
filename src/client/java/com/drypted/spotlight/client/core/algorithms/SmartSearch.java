@@ -5,116 +5,224 @@ import com.drypted.spotlight.client.models.SearchResultData;
 import java.util.*;
 import java.util.stream.Stream;
 
+/**
+ * A comprehensive search system that implements multiple matching strategies to find relevant items.
+ * <p>
+ * This class provides intelligent search capabilities including:
+ * - Exact string matching
+ * - Prefix matching (e.g., "dia" matches "diamond")
+ * - Fuzzy matching to handle typos (e.g., "dimond" matches "diamond")
+ * - Trigram-based similarity for partial matches
+ * - Subsequence matching (e.g., "dmnd" matches "diamond")
+ * <p>
+ * The search uses inverted indices and trigram indices for efficient candidate selection,
+ * then scores each candidate to rank results by relevance.
+ */
 public class SmartSearch
 {
-    private static final int FUZZY_THRESHOLD = 3; // Maximum edit distance for fuzzy matching
-    private static final double TRIGRAM_THRESHOLD = 0.3; // Minimum similarity score (0-1)
-
-    // Items managed by this instance
-    private List<SearchResultData> items = Collections.emptyList();
-
-    // Inverted index: word -> list of item indices
-    private Map<String, List<Integer>> InvertedIndex = Collections.emptyMap();
-
-    // Trigram index for fuzzy matching
-    private Map<String, Set<Integer>> TrigramIndex = Collections.emptyMap();
+    /* CONSTANTS */
 
     /**
-     * Construct a SmartSearch instance and build indices for the provided items.
+     * Maximum allowed edit distance for fuzzy matching using Levenshtein distance.
+     * An edit distance of 3 means up to 3 character changes (insertions, deletions, substitutions)
+     * are tolerated when matching. For example: "dimond" → "diamond" has distance 1.
+     */
+    private static final int MAXIMUM_FUZZY_EDIT_DISTANCE = 3;
+
+    /**
+     * Minimum similarity score (0.0 to 1.0) required for trigram-based matching.
+     * A trigram is a sequence of 3 consecutive characters. This threshold determines
+     * how similar two strings must be based on their shared trigrams.
+     * 0.3 means at least 30% of trigrams must match.
+     */
+    private static final double MINIMUM_TRIGRAM_SIMILARITY_THRESHOLD = 0.3;
+
+    /* INSTANCE FIELDS */
+
+    /**
+     * The complete list of searchable items managed by this search instance.
+     * This list is immutable after being set via constructor or rebuildIndices().
+     */
+    private List<SearchResultData> searchableItems = Collections.emptyList();
+
+    /**
+     * Inverted index mapping individual words to the indices of items containing those words.
+     * <p>
+     * Example structure:
+     * "diamond" → [0, 5, 12]  (items at positions 0, 5, and 12 contain "diamond")
+     * "sword" → [3, 8, 15]
+     * <p>
+     * This enables fast lookup of items containing specific words without scanning all items.
+     */
+    private Map<String, List<Integer>> wordToItemIndicesMap = Collections.emptyMap();
+
+    /**
+     * Trigram index mapping trigrams to the indices of items containing those trigrams.
+     * <p>
+     * A trigram is a sequence of 3 consecutive characters. For example, "diamond" contains:
+     * "  d", " di", "dia", "iam", "amo", "mon", "ond", "nd ", "d  "
+     * (padded with spaces at start/end)
+     * <p>
+     * This index enables fuzzy matching by finding items with similar character sequences.
+     */
+    private Map<String, Set<Integer>> trigramToItemIndicesMap = Collections.emptyMap();
+
+    /* CONSTRUCTORS */
+
+    /**
+     * Constructs a SmartSearch instance and builds search indices for the provided items.
+     *
+     * @param items The list of searchable items to index. If null, an empty list is used.
      */
     public SmartSearch(List<SearchResultData> items)
     {
         if (items != null)
         {
-            this.items = new ArrayList<>(items);
+            this.searchableItems = new ArrayList<>(items);
         }
 
-        rebuildIndices(this.items);
+        rebuildIndices(this.searchableItems);
     }
 
+    /* PUBLIC API */
+
     /**
-     * Rebuild indices for a new list of items. Replaces the current item list.
+     * Replaces the current item list and rebuilds all search indices.
+     * <p>
+     * This is useful when the searchable dataset changes and you need to update the indices
+     * to reflect the new data.
+     *
+     * @param items The new list of items to search. If null, the search will be empty.
      */
     public void rebuildIndices(List<SearchResultData> items)
     {
         if (items == null)
         {
-            this.items = Collections.emptyList();
+            this.searchableItems = Collections.emptyList();
         }
         else
         {
-            this.items = new ArrayList<>(items);
-        }
-        buildInvertedIndex();
-        buildTrigramIndex();
-    }
-
-    public Stream<SearchResultData> search(String query, int maxResults)
-    {
-        String q = query.toLowerCase();
-
-        Set<Integer> candidates = getCandidatesFromIndex(q);
-
-        if (candidates.isEmpty())
-        {
-            for (int i = 0; i < items.size(); i++)
-            {
-                SearchResultData item = items.get(i);
-
-                double similarity = Math.max(
-                        calculateTrigramSimilarity(q, item.getName().toLowerCase()),
-                        calculateTrigramSimilarity(q, item.getIdentifier().getPath().toLowerCase())
-                );
-
-                if (similarity >= 0.4)
-                {
-                    candidates.add(i);
-                }
-            }
-
+            this.searchableItems = new ArrayList<>(items);
         }
 
-        return candidates.stream() //
-                         .map(i -> {
-                             SearchResultData item = items.get(i);
-                             ScoringResult score = scoreItem(item, q);
-
-                             if (score.totalScore() >= 1000)
-                             {
-                                 return null;
-                             }
-
-                             return new SearchResult(item, score.totalScore(), i);
-                         }).filter(Objects::nonNull)
-                         .sorted(Comparator.comparingInt(SearchResult::score)
-                                           .thenComparingInt(SearchResult::originalIndex)).limit(
-                        maxResults > 0 ? maxResults : Integer.MAX_VALUE).map(SearchResult::item);
+        buildWordToItemIndicesMap();
+        buildTrigramToItemIndicesMap();
     }
 
     /**
-     * Builds an inverted index mapping words to item indices for faster searching.
+     * Searches for items matching the query and returns the best matches sorted by relevance.
+     * <p>
+     * The search process:
+     * 1. Finds candidate items using indices (inverted index and trigram index)
+     * 2. Scores each candidate based on match quality (exact, prefix, fuzzy, etc.)
+     * 3. Returns items sorted by score (lower scores = better matches)
+     *
+     * @param searchQuery    The text to search for (case-insensitive)
+     * @param maximumResults Maximum number of results to return. Use 0 or negative for unlimited.
+     *
+     * @return A stream of matching items, sorted by relevance (best matches first)
      */
-    private void buildInvertedIndex()
+    public Stream<SearchResultData> search(String searchQuery, int maximumResults)
     {
-        Map<String, List<Integer>> index = new HashMap<>();
+        if (searchQuery == null)
+            return Stream.empty();
 
-        for (int i = 0; i < items.size(); i++)
+        String normalizedQuery = searchQuery.toLowerCase();
+
+        // Step 1: Get candidate items that might match
+        Set<Integer> candidateItemIndices = findCandidateItemIndices(normalizedQuery);
+
+        // If no candidates found through indices, try direct trigram similarity on all items
+        if (candidateItemIndices.isEmpty())
         {
-            SearchResultData item = items.get(i);
+            for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
+            {
+                SearchResultData item = searchableItems.get(itemIndex);
 
-            // Index the identifier path
-            String path = item.getIdentifier().getPath().toLowerCase();
-            String[] pathWords = path.split("[_\\-\\s]+");
+                double nameSimilarity = calculateTrigramSimilarity(
+                        normalizedQuery,
+                        item.getName().toLowerCase()
+                );
+
+                double pathSimilarity = calculateTrigramSimilarity(
+                        normalizedQuery,
+                        item.getIdentifier().getPath()
+                            .toLowerCase()
+                );
+
+                double bestSimilarity = Math.max(nameSimilarity, pathSimilarity);
+
+                // Use a higher threshold for direct comparison since we're checking everything
+                if (bestSimilarity >= 0.4)
+                {
+                    candidateItemIndices.add(itemIndex);
+                }
+            }
+        }
+
+        // Step 2: Score candidates and filter out poor matches
+        return candidateItemIndices.stream().map(itemIndex -> {
+                                       SearchResultData item = searchableItems.get(itemIndex);
+                                       ItemScoreResult scoreResult = calculateItemScore(item, normalizedQuery);
+
+                                       // Filter out items with no match (score >= 1000)
+                                       if (scoreResult.totalScore() >= 1000)
+                                       {
+                                           return null;
+                                       }
+
+                                       return new SearchResultWithScore(item, scoreResult.totalScore(), itemIndex);
+                                   }).filter(Objects::nonNull)
+                                   // Step 3: Sort by score (lower is better), then by original position for stability
+                                   .sorted(Comparator.comparingInt(SearchResultWithScore::score)
+                                                     .thenComparingInt(SearchResultWithScore::originalIndex))
+                                   .limit(maximumResults > 0 ? maximumResults : Integer.MAX_VALUE)
+                                   .map(SearchResultWithScore::item);
+    }
+
+    /* INDEX BUILDING */
+
+    /**
+     * Builds the inverted index that maps individual words to item indices.
+     * <p>
+     * An inverted index allows fast lookup of "which items contain this word?"
+     * without having to scan through all items.
+     * <p>
+     * The index includes:
+     * - Individual words from item names (split on spaces, hyphens, underscores)
+     * - Individual words from item paths
+     * - Full names and paths (for exact matching)
+     * <p>
+     * Example:
+     * Item 0: name="Diamond Sword", path="items/diamond_sword"
+     * Index entries created:
+     * "diamond" → [0]
+     * "sword" → [0]
+     * "items" → [0]
+     * "diamond sword" → [0]
+     * "items/diamond_sword" → [0]
+     */
+    private void buildWordToItemIndicesMap()
+    {
+        Map<String, List<Integer>> indexMap = new HashMap<>();
+
+        for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
+        {
+            SearchResultData item = searchableItems.get(itemIndex);
+
+            // Index the identifier path (e.g., "minecraft:diamond_sword")
+            String itemPath = item.getIdentifier().getPath().toLowerCase();
+            String[] pathWords = itemPath.split("[_\\-\\s]+");
 
             for (String word : pathWords)
             {
                 if (!word.isEmpty())
                 {
-                    index.computeIfAbsent(word, k -> new ArrayList<>()).add(i);
+                    indexMap.computeIfAbsent(word, key -> new ArrayList<>()).add(itemIndex);
                 }
             }
 
-            // Index the display name
+            // Index the display name (e.g., "Diamond Sword")
             String displayName = item.getName().toLowerCase();
             String[] nameWords = displayName.split("[_\\-\\s]+");
 
@@ -122,380 +230,587 @@ public class SmartSearch
             {
                 if (!word.isEmpty())
                 {
-                    index.computeIfAbsent(word, k -> new ArrayList<>()).add(i);
+                    indexMap.computeIfAbsent(word, key -> new ArrayList<>()).add(itemIndex);
                 }
             }
 
-            // Also index the full strings
-            index.computeIfAbsent(path, k -> new ArrayList<>()).add(i);
-            index.computeIfAbsent(displayName, k -> new ArrayList<>()).add(i);
+            // Also index the complete strings for exact matching
+            indexMap.computeIfAbsent(itemPath, key -> new ArrayList<>()).add(itemIndex);
+            indexMap.computeIfAbsent(displayName, key -> new ArrayList<>()).add(itemIndex);
         }
 
-        InvertedIndex = Collections.unmodifiableMap(index);
+        wordToItemIndicesMap = Collections.unmodifiableMap(indexMap);
     }
 
     /**
-     * Builds a trigram index for fuzzy matching support.
+     * Builds the trigram index for fuzzy matching support.
+     * <p>
+     * A trigram is a sequence of 3 consecutive characters. For example:
+     * "cat" produces: "  c", " ca", "cat", "at ", "t  "
+     * (spaces are added as padding at the beginning and end)
+     * <p>
+     * Trigrams are useful for fuzzy matching because similar strings share many trigrams.
+     * For example:
+     * "diamond" and "dimond" share most trigrams despite the typo
+     * "quick" and "quit" share fewer trigrams, indicating less similarity
+     * <p>
+     * This index maps each trigram to all items containing that trigram, allowing
+     * efficient fuzzy search.
      */
-    private void buildTrigramIndex()
+    private void buildTrigramToItemIndicesMap()
     {
-        Map<String, Set<Integer>> index = new HashMap<>();
+        Map<String, Set<Integer>> indexMap = new HashMap<>();
 
-        for (int i = 0; i < items.size(); i++)
+        for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
         {
-            SearchResultData item = items.get(i);
+            SearchResultData item = searchableItems.get(itemIndex);
 
-            // Generate trigrams from identifier path
-            String path = item.getIdentifier().getPath().toLowerCase();
-            Set<String> pathTrigrams = generateTrigrams(path);
+            // Generate trigrams from the item's path identifier
+            String itemPath = item.getIdentifier().getPath().toLowerCase();
+            Set<String> pathTrigrams = generateTrigramsFromText(itemPath);
 
             for (String trigram : pathTrigrams)
             {
-                index.computeIfAbsent(trigram, k -> new HashSet<>()).add(i);
+                indexMap.computeIfAbsent(trigram, key -> new HashSet<>()).add(itemIndex);
             }
 
-            // Generate trigrams from display name
+            // Generate trigrams from the item's display name
             String displayName = item.getName().toLowerCase();
-            Set<String> nameTrigrams = generateTrigrams(displayName);
+            Set<String> nameTrigrams = generateTrigramsFromText(displayName);
 
             for (String trigram : nameTrigrams)
             {
-                index.computeIfAbsent(trigram, k -> new HashSet<>()).add(i);
+                indexMap.computeIfAbsent(trigram, key -> new HashSet<>()).add(itemIndex);
             }
         }
 
-        TrigramIndex = Collections.unmodifiableMap(index);
+        trigramToItemIndicesMap = Collections.unmodifiableMap(indexMap);
     }
 
+    /* TRIGRAM OPERATIONS */
+
     /**
-     * Generates trigrams from a string for fuzzy matching.
+     * Generates all trigrams from the given text.
+     * <p>
+     * A trigram is a sequence of exactly 3 consecutive characters. This method adds
+     * padding (two spaces) at the beginning and end of the text to capture edge trigrams.
+     * <p>
+     * Examples:
+     * "cat" → {"  c", " ca", "cat", "at ", "t  "}
+     * "go" → {"go"} (text shorter than 3 chars is returned as-is)
+     * "test" → {"  t", " te", "tes", "est", "st ", "t  "}
+     * <p>
+     * The padding ensures that the first and last characters are properly weighted
+     * in similarity calculations.
+     *
+     * @param text The text to generate trigrams from
+     *
+     * @return A set of all trigrams found in the text
      */
-    private Set<String> generateTrigrams(String text)
+    private Set<String> generateTrigramsFromText(String text)
     {
         Set<String> trigrams = new HashSet<>();
 
+        // If text is shorter than 3 characters, return it as a single "trigram"
         if (text.length() < 3)
         {
             trigrams.add(text);
             return trigrams;
         }
 
-        // Add padding for beginning and end
-        String padded = "  " + text + "  ";
+        // Add padding: two spaces before and after
+        // This ensures edge characters are captured in trigrams
+        String paddedText = "  " + text + "  ";
 
-        for (int i = 0; i < padded.length() - 2; i++)
+        // Extract all consecutive 3-character sequences
+        for (int position = 0; position < paddedText.length() - 2; position++)
         {
-            trigrams.add(padded.substring(i, i + 3));
+            trigrams.add(paddedText.substring(position, position + 3));
         }
 
         return trigrams;
     }
 
     /**
-     * Calculates trigram similarity between two strings (0-1, higher is more similar).
+     * Calculates the similarity between two strings using trigram analysis.
+     * <p>
+     * This method uses the Jaccard similarity coefficient on trigram sets:
+     * similarity = (number of shared trigrams) / (total number of unique trigrams)
+     * <p>
+     * The result ranges from 0.0 (completely different) to 1.0 (identical).
+     * <p>
+     * Examples:
+     * "diamond" vs "diamond" → 1.0 (identical)
+     * "diamond" vs "dimond" → ~0.7 (one letter different)
+     * "cat" vs "dog" → ~0.0 (completely different)
+     * <p>
+     * This is useful for fuzzy matching as it's tolerant of small differences like typos.
+     *
+     * @param firstText  The first string to compare
+     * @param secondText The second string to compare
+     *
+     * @return A similarity score between 0.0 and 1.0, where 1.0 means identical
      */
-    private double calculateTrigramSimilarity(String s1, String s2)
+    private double calculateTrigramSimilarity(String firstText, String secondText)
     {
-        Set<String> trigrams1 = generateTrigrams(s1);
-        Set<String> trigrams2 = generateTrigrams(s2);
+        Set<String> firstTrigrams = generateTrigramsFromText(firstText);
+        Set<String> secondTrigrams = generateTrigramsFromText(secondText);
 
-        if (trigrams1.isEmpty() && trigrams2.isEmpty())
+        // If both strings are empty, consider them identical
+        if (firstTrigrams.isEmpty() && secondTrigrams.isEmpty())
+        {
             return 1.0;
+        }
 
-        Set<String> intersection = new HashSet<>(trigrams1);
-        intersection.retainAll(trigrams2);
+        // Calculate intersection: trigrams present in both sets
+        Set<String> sharedTrigrams = new HashSet<>(firstTrigrams);
+        sharedTrigrams.retainAll(secondTrigrams);
 
-        Set<String> union = new HashSet<>(trigrams1);
-        union.addAll(trigrams2);
+        // Calculate union: all unique trigrams from both sets
+        Set<String> allUniqueTrigrams = new HashSet<>(firstTrigrams);
+        allUniqueTrigrams.addAll(secondTrigrams);
 
-        return union.isEmpty() ? 0.0 : (double) intersection.size() / union.size();
+        // Jaccard similarity = |intersection| / |union|
+        return allUniqueTrigrams.isEmpty()
+               ? 0.0
+               : (double) sharedTrigrams.size() / allUniqueTrigrams.size();
     }
 
+    /* FUZZY MATCHING - LEVENSHTEIN DISTANCE */
+
     /**
-     * Calculates Levenshtein distance between two strings.
+     * Calculates the Levenshtein distance between two strings.
+     * <p>
+     * The Levenshtein distance (also called edit distance) is the minimum number of
+     * single-character edits (insertions, deletions, or substitutions) needed to
+     * change one string into another.
+     * <p>
+     * Examples:
+     * "cat" → "cat" : distance = 0 (identical)
+     * "cat" → "hat" : distance = 1 (substitute c→h)
+     * "cat" → "cats" : distance = 1 (insert s)
+     * "saturday" → "sunday" : distance = 3
+     * <p>
+     * This is implemented using dynamic programming for efficiency.
+     * Time complexity: O(m × n) where m and n are the string lengths.
+     *
+     * @param firstString  The first string
+     * @param secondString The second string
+     *
+     * @return The minimum number of edits needed to transform firstString into secondString
      */
-    private int levenshteinDistance(String s1, String s2)
+    private int calculateLevenshteinDistance(String firstString, String secondString)
     {
-        int[][] dp = new int[s1.length() + 1][s2.length() + 1];
+        // Create a 2D array to store distances
+        // distanceTable[i][j] = distance between first i chars of firstString and first j chars of secondString
+        int[][] distanceTable = new int[firstString.length() + 1][secondString.length() + 1];
 
-        for (int i = 0; i <= s1.length(); i++)
+        // Initialize first column: distance from empty string to firstString prefixes
+        for (int i = 0; i <= firstString.length(); i++)
         {
-            dp[i][0] = i;
+            distanceTable[i][0] = i;
         }
 
-        for (int j = 0; j <= s2.length(); j++)
+        // Initialize first row: distance from empty string to secondString prefixes
+        for (int j = 0; j <= secondString.length(); j++)
         {
-            dp[0][j] = j;
+            distanceTable[0][j] = j;
         }
 
-        for (int i = 1; i <= s1.length(); i++)
+        // Fill the table using dynamic programming
+        for (int i = 1; i <= firstString.length(); i++)
         {
-            for (int j = 1; j <= s2.length(); j++)
+            for (int j = 1; j <= secondString.length(); j++)
             {
-                int cost = s1.charAt(i - 1) == s2.charAt(j - 1) ? 0 : 1;
+                // Cost is 0 if characters match, 1 if substitution needed
+                int substitutionCost = firstString.charAt(i - 1) == secondString.charAt(j - 1)
+                                       ? 0
+                                       : 1;
 
-                dp[i][j] = Math.min(
-                        Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1),
-                        dp[i - 1][j - 1] + cost
+                // Take minimum of three operations:
+                distanceTable[i][j] = Math.min(
+                        Math.min(
+                                distanceTable[i - 1][j] + 1,      // deletion
+                                distanceTable[i][j - 1] + 1       // insertion
+                        ), distanceTable[i - 1][j - 1] + substitutionCost  // substitution
                 );
             }
         }
 
-        return dp[s1.length()][s2.length()];
+        return distanceTable[firstString.length()][secondString.length()];
     }
 
-    /**
-     * Gets candidate item indices from the inverted index.
-     */
-    private Set<Integer> getCandidatesFromIndex(String query)
-    {
-        Set<Integer> candidates = new HashSet<>();
+    /* CANDIDATE SELECTION */
 
-        // Check for exact word matches
-        if (InvertedIndex.containsKey(query))
+    /**
+     * Finds candidate items that might match the search query using the indices.
+     * <p>
+     * This method uses three strategies to find candidates:
+     * <p>
+     * 1. Exact word matches: Items containing the exact query as a word
+     * Example: query "diamond" finds items with "diamond" in their name/path
+     * <p>
+     * 2. Prefix matches: Items containing words that start with the query
+     * Example: query "dia" finds items with "diamond", "diagonal", etc.
+     * <p>
+     * 3. Trigram matches: Items sharing enough trigrams with the query
+     * Example: query "dimond" finds items with "diamond" (fuzzy match)
+     * <p>
+     * This pre-filtering step dramatically improves performance by reducing the number
+     * of items that need detailed scoring.
+     *
+     * @param normalizedQuery The search query in lowercase
+     *
+     * @return A set of item indices that are potential matches
+     */
+    private Set<Integer> findCandidateItemIndices(String normalizedQuery)
+    {
+        Set<Integer> candidateIndices = new HashSet<>();
+
+        // Strategy 1: Check for exact word matches in the inverted index
+        if (wordToItemIndicesMap.containsKey(normalizedQuery))
         {
-            candidates.addAll(InvertedIndex.get(query));
+            candidateIndices.addAll(wordToItemIndicesMap.get(normalizedQuery));
         }
 
-        // Check for prefix matches
-        String[] queryWords = query.split("[_\\-\\s]+");
-        for (String word : queryWords)
+        // Strategy 2: Check for prefix matches
+        // Split query into words and find items where any indexed word starts with a query word
+        String[] queryWords = normalizedQuery.split("[_\\-\\s]+");
+        for (String queryWord : queryWords)
         {
-            if (!word.isEmpty())
+            if (!queryWord.isEmpty())
             {
-                InvertedIndex.forEach((indexedWord, indices) -> {
-                    if (indexedWord.startsWith(word))
+                wordToItemIndicesMap.forEach((indexedWord, itemIndices) -> {
+                    if (indexedWord.startsWith(queryWord))
                     {
-                        candidates.addAll(indices);
+                        candidateIndices.addAll(itemIndices);
                     }
                 });
             }
         }
 
-        // Add fuzzy matches using trigram index
-        Set<String> queryTrigrams = generateTrigrams(query);
+        // Strategy 3: Add fuzzy matches using the trigram index
+        Set<String> queryTrigrams = generateTrigramsFromText(normalizedQuery);
         if (!queryTrigrams.isEmpty())
         {
-            Map<Integer, Integer> trigramCounts = new HashMap<>();
+            // Count how many query trigrams each item contains
+            Map<Integer, Integer> itemTrigramCounts = new HashMap<>();
 
             for (String trigram : queryTrigrams)
             {
-                Set<Integer> matches = TrigramIndex.getOrDefault(trigram, Collections.emptySet());
-                for (Integer idx : matches)
+                Set<Integer> matchingItems = trigramToItemIndicesMap.getOrDefault(
+                        trigram,
+                        Collections.emptySet()
+                );
+
+                for (Integer itemIndex : matchingItems)
                 {
-                    trigramCounts.merge(idx, 1, Integer::sum);
+                    itemTrigramCounts.merge(itemIndex, 1, Integer::sum);
                 }
             }
 
-            // Add items with significant trigram overlap
-            int threshold = Math.max(1, queryTrigrams.size() / 3);
-            trigramCounts.forEach((idx, count) -> {
-                if (count >= threshold)
+            // Add items that share at least 1/3 of the query's trigrams
+            // This threshold balances between finding fuzzy matches and avoiding too many false positives
+            int minimumTrigramOverlap = Math.max(1, queryTrigrams.size() / 3);
+            itemTrigramCounts.forEach((itemIndex, trigramCount) -> {
+                if (trigramCount >= minimumTrigramOverlap)
                 {
-                    candidates.add(idx);
+                    candidateIndices.add(itemIndex);
                 }
             });
         }
 
-        return candidates;
+        return candidateIndices;
     }
 
+    /* SCORING */
+
     /**
-     * Comprehensive scoring for search results.
-     * Lower scores are better (0 = perfect match).
+     * Calculates a comprehensive relevance score for how well an item matches the query.
+     * <p>
+     * LOWER SCORES ARE BETTER (0 = perfect match, 1000 = no match)
+     * <p>
+     * Scoring priority tiers (from best to worst):
+     * <p>
+     * EXACT MATCHES (scores 0-3):
+     * 0  - Display name exactly matches query
+     * 1  - Identifier/path exactly matches query
+     * 2  - A complete word in display name exactly matches query
+     * 3  - A complete word in identifier exactly matches query
+     * <p>
+     * PREFIX MATCHES (scores 5-30):
+     * 5  - Display name starts with query
+     * 10 - A word in display name starts with query
+     * 15 - A word in identifier starts with query
+     * 20 - Display name contains query
+     * 25 - Identifier starts with query
+     * 30 - Identifier contains query
+     * <p>
+     * FUZZY MATCHES (scores 40-90):
+     * 40-55 - Levenshtein distance match in display name (closer = better)
+     * 50-65 - Levenshtein distance match in identifier (closer = better)
+     * 60-80 - Trigram similarity match in display name
+     * 70-90 - Trigram similarity match in identifier
+     * <p>
+     * SUBSEQUENCE MATCHES (scores 100-110):
+     * 100 - Query is a subsequence of display name (e.g., "dmnd" in "diamond")
+     * 110 - Query is a subsequence of identifier
+     * <p>
+     * NO MATCH:
+     * 1000 - Item doesn't match query in any meaningful way
+     *
+     * @param item            The item to score
+     * @param normalizedQuery The search query in lowercase
+     *
+     * @return Scoring result containing the total score and match type
      */
-    private ScoringResult scoreItem(SearchResultData item, String query)
+    private ItemScoreResult calculateItemScore(SearchResultData item, String normalizedQuery)
     {
         String displayName = item.getName().toLowerCase();
-        String identifier = item.getIdentifier().toString().toLowerCase();
-        String path = item.getIdentifier().getPath().toLowerCase();
+        String identifierPath = item.getIdentifier().getPath().toLowerCase();
+        String fullIdentifier = item.getIdentifier().toString().toLowerCase();
 
-        // Remove namespace from identifier if present
-        int colonIdx = identifier.indexOf(':');
-        if (colonIdx >= 0 && colonIdx + 1 < identifier.length())
+        // Remove namespace prefix from identifier if present (e.g., "minecraft:diamond" → "diamond")
+        int namespaceColonIndex = fullIdentifier.indexOf(':');
+        if (namespaceColonIndex >= 0 && namespaceColonIndex + 1 < fullIdentifier.length())
         {
-            identifier = identifier.substring(colonIdx + 1);
+            fullIdentifier = fullIdentifier.substring(namespaceColonIndex + 1);
         }
 
-        int score = 1000; // Default: no match
+        int bestScore = 1000; // Default: no match
 
-        // === EXACT MATCHES (Highest Priority) ===
+        /* === EXACT MATCHES (Highest Priority) === */
 
-        // Perfect display name match
-        if (displayName.equals(query))
+        // Perfect display name match (e.g., query "diamond sword" exactly matches item name)
+        if (displayName.equals(normalizedQuery))
         {
-            return new ScoringResult(0, "exact_display_name");
+            return new ItemScoreResult(0, ResultMatchType.EXACT_DISPLAY_NAME);
         }
 
-        // Perfect identifier match
-        if (identifier.equals(query) || path.equals(query))
+        // Perfect identifier match (e.g., query "diamond_sword" exactly matches item path)
+        if (fullIdentifier.equals(normalizedQuery) || identifierPath.equals(normalizedQuery))
         {
-            return new ScoringResult(1, "exact_identifier");
+            return new ItemScoreResult(1, ResultMatchType.EXACT_IDENTIFIER);
         }
 
-        // === DISPLAY NAME MATCHING (High Priority) ===
+        /* === DISPLAY NAME MATCHING (High Priority) === */
 
-        // Display name starts with query
-        if (displayName.startsWith(query))
+        // Display name starts with query (e.g., "dia" matches "diamond")
+        if (displayName.startsWith(normalizedQuery))
         {
-            score = Math.min(score, 5);
+            // bestScore = Math.min(bestScore, 5); Simplifies to 5
+            bestScore = 5;
         }
 
-        // Display name word starts with query
-        String[] displayWords = displayName.split("[_\\-\\s]+");
+        // Split display name into individual words
+        String[] displayNameWords = displayName.split("[_\\-\\s]+");
 
-        // Exact word match in display name
-        for (String word : displayWords)
+        // Exact word match in display name (e.g., "sword" matches "Diamond Sword")
+        for (String word : displayNameWords)
         {
-            if (word.equals(query))
+            if (word.equals(normalizedQuery))
             {
-                return new ScoringResult(2, "exact_display_word");
+                return new ItemScoreResult(2, ResultMatchType.EXACT_DISPLAY_WORD);
             }
         }
 
-        for (String word : displayWords)
+        // Any word in display name starts with query (e.g., "dia" matches "Diamond Sword")
+        for (String word : displayNameWords)
         {
-            if (word.startsWith(query))
+            if (word.startsWith(normalizedQuery))
             {
-                score = Math.min(score, 10);
+                bestScore = Math.min(bestScore, 10);
                 break;
             }
         }
 
-        // Display name contains query
-        if (displayName.contains(query))
+        // Display name contains query anywhere (e.g., "mond" matches "Diamond Sword")
+        if (displayName.contains(normalizedQuery))
         {
-            score = Math.min(score, 20);
+            bestScore = Math.min(bestScore, 20);
         }
 
-        // === IDENTIFIER MATCHING (Medium Priority) ===
+        /* === IDENTIFIER MATCHING (Medium Priority) === */
 
-        // Split identifier into words
-        String[] identifierParts = identifier.split("_");
+        // Split identifier into words (e.g., "diamond_sword" → ["diamond", "sword"])
+        String[] identifierWords = fullIdentifier.split("_");
 
-        for (String part : identifierParts)
+        // Exact word match in identifier
+        for (String word : identifierWords)
         {
-            if (part.equals(query))
+            if (word.equals(normalizedQuery))
             {
-                return new ScoringResult(3, "exact_identifier_word");
+                return new ItemScoreResult(3, ResultMatchType.EXACT_IDENTIFIER_WORD);
             }
         }
 
-        // Any word starts with query
-        boolean anyWordStarts = false;
-        for (String part : identifierParts)
+        // Any identifier word starts with query
+        boolean anyIdentifierWordStartsWithQuery = false;
+        for (String word : identifierWords)
         {
-            if (part.startsWith(query))
+            if (word.startsWith(normalizedQuery))
             {
-                anyWordStarts = true;
+                anyIdentifierWordStartsWithQuery = true;
                 break;
             }
         }
 
-        if (anyWordStarts)
+        if (anyIdentifierWordStartsWithQuery)
         {
-            score = Math.min(score, 15);
+            bestScore = Math.min(bestScore, 15);
         }
 
         // Identifier starts with query
-        if (identifier.startsWith(query))
+        if (fullIdentifier.startsWith(normalizedQuery))
         {
-            score = Math.min(score, 25);
+            bestScore = Math.min(bestScore, 25);
         }
 
         // Identifier contains query
-        if (identifier.contains(query))
+        if (fullIdentifier.contains(normalizedQuery))
         {
-            score = Math.min(score, 30);
+            bestScore = Math.min(bestScore, 30);
         }
 
-        // === FUZZY MATCHING (Lower Priority) ===
+        /* === FUZZY MATCHING (Lower Priority) === */
 
-        // Levenshtein distance for short queries (typo tolerance)
-        if (query.length() >= 3)
+        // Levenshtein distance matching for short queries to handle typos
+        // Only check if query is at least 3 characters (too short is unreliable)
+        if (normalizedQuery.length() >= 3)
         {
-            // Check against display name words
-            for (String word : displayWords)
+            // Check against each word in display name
+            for (String word : displayNameWords)
             {
                 if (word.length() >= 3)
                 {
-                    int distance = levenshteinDistance(query, word);
-                    if (distance <= FUZZY_THRESHOLD)
+                    int editDistance = calculateLevenshteinDistance(normalizedQuery, word);
+                    if (editDistance <= MAXIMUM_FUZZY_EDIT_DISTANCE)
                     {
-                        score = Math.min(score, 40 + distance * 5);
+                        // Score: 40 + (edit distance × 5)
+                        // Examples: distance 1 = score 45, distance 2 = score 50, distance 3 = score 55
+                        bestScore = Math.min(bestScore, 40 + editDistance * 5);
                     }
                 }
             }
 
-            // Check against identifier parts
-            for (String part : identifierParts)
+            // Check against each word in identifier
+            for (String word : identifierWords)
             {
-                if (part.length() >= 3)
+                if (word.length() >= 3)
                 {
-                    int distance = levenshteinDistance(query, part);
-                    if (distance <= FUZZY_THRESHOLD)
+                    int editDistance = calculateLevenshteinDistance(normalizedQuery, word);
+                    if (editDistance <= MAXIMUM_FUZZY_EDIT_DISTANCE)
                     {
-                        score = Math.min(score, 50 + distance * 5);
+                        // Score: 50 + (edit distance × 5)
+                        bestScore = Math.min(bestScore, 50 + editDistance * 5);
                     }
                 }
             }
         }
 
-        // Trigram similarity for longer queries
-        if (query.length() >= 4)
+        // Trigram similarity for longer queries (handles partial matches)
+        // Only check if query is at least 4 characters (too short produces unreliable trigrams)
+        if (normalizedQuery.length() >= 4)
         {
-            double displaySimilarity = calculateTrigramSimilarity(query, displayName);
-            if (displaySimilarity >= TRIGRAM_THRESHOLD)
+            double displayNameSimilarity = calculateTrigramSimilarity(normalizedQuery, displayName);
+            if (displayNameSimilarity >= MINIMUM_TRIGRAM_SIMILARITY_THRESHOLD)
             {
-                score = Math.min(score, 60 + (int) ((1.0 - displaySimilarity) * 20));
+                // Score: 60 + (dissimilarity × 20)
+                // Examples: similarity 0.8 = score 64, similarity 0.5 = score 70, similarity 0.3 = score 74
+                bestScore = Math.min(bestScore, 60 + (int) ((1.0 - displayNameSimilarity) * 20));
             }
 
-            double identifierSimilarity = calculateTrigramSimilarity(query, identifier);
-            if (identifierSimilarity >= TRIGRAM_THRESHOLD)
+            double identifierSimilarity = calculateTrigramSimilarity(
+                    normalizedQuery,
+                    fullIdentifier
+            );
+            if (identifierSimilarity >= MINIMUM_TRIGRAM_SIMILARITY_THRESHOLD)
             {
-                score = Math.min(score, 70 + (int) ((1.0 - identifierSimilarity) * 20));
+                // Score: 70 + (dissimilarity × 20)
+                bestScore = Math.min(bestScore, 70 + (int) ((1.0 - identifierSimilarity) * 20));
             }
         }
 
-        // === SUBSEQUENCE MATCHING (Lowest Priority) ===
+        /* === SUBSEQUENCE MATCHING (Lowest Priority) === */
 
-        // Check if query is a subsequence of display name or identifier
-        if (isSubsequence(query, displayName))
+        // Check if query characters appear in order within the string
+        // Example: "dmnd" is a subsequence of "diamond" (d-i-a-m-o-n-d)
+        if (isSubsequenceOf(normalizedQuery, displayName))
         {
-            score = Math.min(score, 100);
+            bestScore = Math.min(bestScore, 100);
         }
-        else if (isSubsequence(query, identifier))
+        else if (isSubsequenceOf(normalizedQuery, fullIdentifier))
         {
-            score = Math.min(score, 110);
+            bestScore = Math.min(bestScore, 110);
         }
 
-        return new ScoringResult(score, "default");
+        return new ItemScoreResult(bestScore, ResultMatchType.DEFAULT);
     }
 
     /**
-     * Checks if needle is a subsequence of haystack.
+     * Checks if the needle string is a subsequence of the haystack string.
+     * <p>
+     * A subsequence means all characters from needle appear in haystack in the same order,
+     * but not necessarily consecutively.
+     * <p>
+     * Examples:
+     * isSubsequenceOf("ace", "abcde") → true (a-b-c-d-e contains a-c-e in order)
+     * isSubsequenceOf("aec", "abcde") → false (e comes before c in haystack)
+     * isSubsequenceOf("dmnd", "diamond") → true (d-i-a-m-o-n-d contains d-m-n-d in order)
+     * <p>
+     * This is useful for matching abbreviations or partial typing patterns.
+     *
+     * @param needle   The sequence to search for
+     * @param haystack The string to search within
+     *
+     * @return true if needle is a subsequence of haystack, false otherwise
      */
-    private boolean isSubsequence(String needle, String haystack)
+    private boolean isSubsequenceOf(String needle, String haystack)
     {
-        int needleIdx = 0;
+        int needlePosition = 0;
 
-        for (int i = 0; i < haystack.length() && needleIdx < needle.length(); i++)
+        for (int haystackPosition = 0; haystackPosition < haystack.length() && needlePosition < needle.length(); haystackPosition++)
         {
-            if (haystack.charAt(i) == needle.charAt(needleIdx))
+            if (haystack.charAt(haystackPosition) == needle.charAt(needlePosition))
             {
-                needleIdx++;
+                needlePosition++;
             }
         }
 
-        return needleIdx == needle.length();
+        // If we've matched all characters from needle, it's a subsequence
+        return needlePosition == needle.length();
     }
 
+    /* HELPER CLASSES */
 
-    /* Helper Classes */
-
-    private record SearchResult(SearchResultData item, int score, int originalIndex)
+    /**
+     * Represents a search result with its associated score and original position.
+     * <p>
+     * This is an internal data structure used during the scoring and sorting phase.
+     * The originalIndex preserves the item's position in the source list, which is used
+     * as a tiebreaker when scores are equal (to maintain stable sorting).
+     */
+    private record SearchResultWithScore(SearchResultData item, int score, int originalIndex)
     { }
 
-    private record ScoringResult(int totalScore, String matchType)
+    /**
+     * Represents the score assigned to an item along with the type of match that produced it.
+     * <p>
+     * The matchType is useful for debugging and understanding why an item was scored a certain way.
+     * Examples: "exact_display_name", "prefix_match", "fuzzy_match", etc.
+     */
+    private record ItemScoreResult(int totalScore, ResultMatchType matchType)
     { }
+
+    private enum ResultMatchType
+    {
+        EXACT_DISPLAY_NAME,
+        EXACT_IDENTIFIER,
+        EXACT_DISPLAY_WORD,
+        EXACT_IDENTIFIER_WORD,
+        PREFIX_MATCH,
+        FUZZY_MATCH,
+        SUBSEQUENCE_MATCH,
+        DEFAULT
+    }
 }
