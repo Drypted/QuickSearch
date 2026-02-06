@@ -37,6 +37,13 @@ public class SmartSearch
      */
     private static final double MINIMUM_TRIGRAM_SIMILARITY_THRESHOLD = 0.3;
 
+    /**
+     * Maximum prefix length to index for efficient prefix lookups.
+     * Indexing prefixes up to 3 characters provides good balance between memory usage
+     * and query performance for typical search queries.
+     */
+    private static final int MAXIMUM_PREFIX_LENGTH = 3;
+
     /* INSTANCE FIELDS */
 
     /**
@@ -55,6 +62,23 @@ public class SmartSearch
      * This enables fast lookup of items containing specific words without scanning all items.
      */
     private Map<String, List<Integer>> wordToItemIndicesMap = Collections.emptyMap();
+
+    /**
+     * Prefix index mapping word prefixes (first 1-3 characters) to full words in the inverted index.
+     * <p>
+     * This enables efficient prefix matching without scanning all indexed words.
+     * For each word, we store mappings for prefixes of length 1, 2, and 3.
+     * <p>
+     * Example structure:
+     * "d" → ["diamond", "door", "dirt"]
+     * "di" → ["diamond", "dirt"]
+     * "dia" → ["diamond"]
+     * <p>
+     * When searching for "dia", we can directly lookup matching words instead of
+     * scanning through all indexed words. This reduces prefix matching from O(#words)
+     * to O(#words_with_prefix), a significant improvement for large datasets.
+     */
+    private Map<String, Set<String>> prefixToWordsMap = Collections.emptyMap();
 
     /**
      * Trigram index mapping trigrams to the indices of items containing those trigrams.
@@ -125,7 +149,9 @@ public class SmartSearch
     public Stream<SearchResultData> search(String searchQuery, int maximumResults)
     {
         if (searchQuery == null)
+        {
             return Stream.empty();
+        }
 
         String normalizedQuery = searchQuery.toLowerCase();
 
@@ -190,7 +216,7 @@ public class SmartSearch
      * <p>
      * The index includes:
      * - Individual words from item names (split on spaces, hyphens, underscores)
-     * - Individual words from item paths
+     * - Individual words from item paths (split on spaces, hyphens, underscores, slashes, colons, backslashes)
      * - Full names and paths (for exact matching)
      * <p>
      * Example:
@@ -201,24 +227,29 @@ public class SmartSearch
      * "items" → [0]
      * "diamond sword" → [0]
      * "items/diamond_sword" → [0]
+     * <p>
+     * Additionally builds a prefix index for efficient prefix matching (see prefixToWordsMap).
      */
     private void buildWordToItemIndicesMap()
     {
         Map<String, List<Integer>> indexMap = new HashMap<>();
+        Map<String, Set<String>> prefixMap = new HashMap<>();
 
         for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
         {
             SearchResultData item = searchableItems.get(itemIndex);
 
             // Index the identifier path (e.g., "minecraft:diamond_sword")
+            // Split on common separators: underscore, hyphen, space, slash, colon, backslash
             String itemPath = item.getIdentifier().getPath().toLowerCase();
-            String[] pathWords = itemPath.split("[_\\-\\s]+");
+            String[] pathWords = itemPath.split("[_\\-\\s/:\\\\]+");
 
             for (String word : pathWords)
             {
                 if (!word.isEmpty())
                 {
                     indexMap.computeIfAbsent(word, key -> new ArrayList<>()).add(itemIndex);
+                    addWordToPrefixIndex(word, prefixMap);
                 }
             }
 
@@ -231,15 +262,44 @@ public class SmartSearch
                 if (!word.isEmpty())
                 {
                     indexMap.computeIfAbsent(word, key -> new ArrayList<>()).add(itemIndex);
+                    addWordToPrefixIndex(word, prefixMap);
                 }
             }
 
             // Also index the complete strings for exact matching
             indexMap.computeIfAbsent(itemPath, key -> new ArrayList<>()).add(itemIndex);
             indexMap.computeIfAbsent(displayName, key -> new ArrayList<>()).add(itemIndex);
+
+            addWordToPrefixIndex(itemPath, prefixMap);
+            addWordToPrefixIndex(displayName, prefixMap);
         }
 
         wordToItemIndicesMap = Collections.unmodifiableMap(indexMap);
+        prefixToWordsMap = Collections.unmodifiableMap(prefixMap);
+    }
+
+    /**
+     * Adds a word to the prefix index for all its prefixes (up to MAXIMUM_PREFIX_LENGTH).
+     * <p>
+     * For example, "diamond" will add:
+     * - "d" → ["diamond"]
+     * - "di" → ["diamond"]
+     * - "dia" → ["diamond"]
+     * <p>
+     * This allows fast lookup of words starting with a given prefix.
+     *
+     * @param word      The word to index
+     * @param prefixMap The prefix map to update
+     */
+    private void addWordToPrefixIndex(String word, Map<String, Set<String>> prefixMap)
+    {
+        int maxLength = Math.min(word.length(), MAXIMUM_PREFIX_LENGTH);
+
+        for (int prefixLength = 1; prefixLength <= maxLength; prefixLength++)
+        {
+            String prefix = word.substring(0, prefixLength);
+            prefixMap.computeIfAbsent(prefix, key -> new HashSet<>()).add(word);
+        }
     }
 
     /**
@@ -379,7 +439,7 @@ public class SmartSearch
     /* FUZZY MATCHING - LEVENSHTEIN DISTANCE */
 
     /**
-     * Calculates the Levenshtein distance between two strings.
+     * Calculates the Levenshtein distance between two strings with early termination.
      * <p>
      * The Levenshtein distance (also called edit distance) is the minimum number of
      * single-character edits (insertions, deletions, or substitutions) needed to
@@ -391,35 +451,44 @@ public class SmartSearch
      * "cat" → "cats" : distance = 1 (insert s)
      * "saturday" → "sunday" : distance = 3
      * <p>
-     * This is implemented using dynamic programming for efficiency.
+     * This implementation uses a space-optimized algorithm with two rolling rows
+     * instead of a full 2D matrix, reducing memory usage from O(m×n) to O(n).
+     * It also supports early termination when the distance exceeds the maximum
+     * threshold, further improving performance.
+     * <p>
      * Time complexity: O(m × n) where m and n are the string lengths.
+     * Space complexity: O(n) where n is the length of the second string.
      *
-     * @param firstString  The first string
-     * @param secondString The second string
+     * @param firstString     The first string
+     * @param secondString    The second string
+     * @param maximumDistance The maximum distance to calculate. If exceeded, returns Integer.MAX_VALUE.
      *
-     * @return The minimum number of edits needed to transform firstString into secondString
+     * @return The minimum number of edits needed, or Integer.MAX_VALUE if it exceeds maximumDistance
      */
-    private int calculateLevenshteinDistance(String firstString, String secondString)
+    private int calculateLevenshteinDistance(String firstString, String secondString, int maximumDistance)
     {
-        // Create a 2D array to store distances
-        // distanceTable[i][j] = distance between first i chars of firstString and first j chars of secondString
-        int[][] distanceTable = new int[firstString.length() + 1][secondString.length() + 1];
-
-        // Initialize first column: distance from empty string to firstString prefixes
-        for (int i = 0; i <= firstString.length(); i++)
+        // Quick optimization: if length difference exceeds max distance, no need to calculate
+        if (Math.abs(firstString.length() - secondString.length()) > maximumDistance)
         {
-            distanceTable[i][0] = i;
+            return Integer.MAX_VALUE;
         }
+
+        // Use rolling arrays instead of full 2D matrix to save memory
+        int[] previousRow = new int[secondString.length() + 1];
+        int[] currentRow = new int[secondString.length() + 1];
 
         // Initialize first row: distance from empty string to secondString prefixes
         for (int j = 0; j <= secondString.length(); j++)
         {
-            distanceTable[0][j] = j;
+            previousRow[j] = j;
         }
 
-        // Fill the table using dynamic programming
+        // Fill the table row by row using dynamic programming
         for (int i = 1; i <= firstString.length(); i++)
         {
+            currentRow[0] = i;  // Distance from empty string to firstString prefix
+            int minimumInRow = currentRow[0];
+
             for (int j = 1; j <= secondString.length(); j++)
             {
                 // Cost is 0 if characters match, 1 if substitution needed
@@ -428,16 +497,29 @@ public class SmartSearch
                                        : 1;
 
                 // Take minimum of three operations:
-                distanceTable[i][j] = Math.min(
+                currentRow[j] = Math.min(
                         Math.min(
-                                distanceTable[i - 1][j] + 1,      // deletion
-                                distanceTable[i][j - 1] + 1       // insertion
-                        ), distanceTable[i - 1][j - 1] + substitutionCost  // substitution
+                                previousRow[j] + 1,           // deletion
+                                currentRow[j - 1] + 1         // insertion
+                        ), previousRow[j - 1] + substitutionCost  // substitution
                 );
+
+                minimumInRow = Math.min(minimumInRow, currentRow[j]);
             }
+
+            // Early termination: if minimum value in current row exceeds threshold, abort
+            if (minimumInRow > maximumDistance)
+            {
+                return Integer.MAX_VALUE;
+            }
+
+            // Swap rows for next iteration
+            int[] temp = previousRow;
+            previousRow = currentRow;
+            currentRow = temp;
         }
 
-        return distanceTable[firstString.length()][secondString.length()];
+        return previousRow[secondString.length()];
     }
 
     /* CANDIDATE SELECTION */
@@ -452,6 +534,7 @@ public class SmartSearch
      * <p>
      * 2. Prefix matches: Items containing words that start with the query
      * Example: query "dia" finds items with "diamond", "diagonal", etc.
+     * Uses the prefix index for O(#words_with_prefix) performance instead of O(#all_words)
      * <p>
      * 3. Trigram matches: Items sharing enough trigrams with the query
      * Example: query "dimond" finds items with "diamond" (fuzzy match)
@@ -473,19 +556,36 @@ public class SmartSearch
             candidateIndices.addAll(wordToItemIndicesMap.get(normalizedQuery));
         }
 
-        // Strategy 2: Check for prefix matches
-        // Split query into words and find items where any indexed word starts with a query word
-        String[] queryWords = normalizedQuery.split("[_\\-\\s]+");
+        // Strategy 2: Check for prefix matches using the prefix index
+        // This is MUCH faster than scanning all words in the inverted index
+        String[] queryWords = normalizedQuery.split("[_\\-\\s/:\\\\]+");
+
         for (String queryWord : queryWords)
         {
             if (!queryWord.isEmpty())
             {
-                wordToItemIndicesMap.forEach((indexedWord, itemIndices) -> {
-                    if (indexedWord.startsWith(queryWord))
+                // Use prefix index to find matching words efficiently
+                int prefixLength = Math.min(queryWord.length(), MAXIMUM_PREFIX_LENGTH);
+                String prefix = queryWord.substring(0, prefixLength);
+
+                Set<String> matchingWords = prefixToWordsMap.getOrDefault(
+                        prefix,
+                        Collections.emptySet()
+                );
+
+                for (String word : matchingWords)
+                {
+                    // Verify the word actually starts with the full query word
+                    // (prefix index only stores up to 3 chars, query might be longer)
+                    if (word.startsWith(queryWord))
                     {
-                        candidateIndices.addAll(itemIndices);
+                        List<Integer> itemIndices = wordToItemIndicesMap.get(word);
+                        if (itemIndices != null)
+                        {
+                            candidateIndices.addAll(itemIndices);
+                        }
                     }
-                });
+                }
             }
         }
 
@@ -578,6 +678,7 @@ public class SmartSearch
         }
 
         int bestScore = 1000; // Default: no match
+        ResultMatchType bestMatchType = ResultMatchType.NO_MATCH;
 
         /* === EXACT MATCHES (Highest Priority) === */
 
@@ -598,8 +699,8 @@ public class SmartSearch
         // Display name starts with query (e.g., "dia" matches "diamond")
         if (displayName.startsWith(normalizedQuery))
         {
-            // bestScore = Math.min(bestScore, 5); Simplifies to 5
             bestScore = 5;
+            bestMatchType = ResultMatchType.PREFIX_MATCH;
         }
 
         // Split display name into individual words
@@ -619,7 +720,11 @@ public class SmartSearch
         {
             if (word.startsWith(normalizedQuery))
             {
-                bestScore = Math.min(bestScore, 10);
+                if (10 < bestScore)
+                {
+                    bestScore = 10;
+                    bestMatchType = ResultMatchType.PREFIX_MATCH;
+                }
                 break;
             }
         }
@@ -627,13 +732,17 @@ public class SmartSearch
         // Display name contains query anywhere (e.g., "mond" matches "Diamond Sword")
         if (displayName.contains(normalizedQuery))
         {
-            bestScore = Math.min(bestScore, 20);
+            if (20 < bestScore)
+            {
+                bestScore = 20;
+                bestMatchType = ResultMatchType.SUBSTRING_MATCH;
+            }
         }
 
         /* === IDENTIFIER MATCHING (Medium Priority) === */
 
         // Split identifier into words (e.g., "diamond_sword" → ["diamond", "sword"])
-        String[] identifierWords = fullIdentifier.split("_");
+        String[] identifierWords = fullIdentifier.split("[_/:\\\\]+");
 
         // Exact word match in identifier
         for (String word : identifierWords)
@@ -645,31 +754,37 @@ public class SmartSearch
         }
 
         // Any identifier word starts with query
-        boolean anyIdentifierWordStartsWithQuery = false;
         for (String word : identifierWords)
         {
             if (word.startsWith(normalizedQuery))
             {
-                anyIdentifierWordStartsWithQuery = true;
+                if (15 < bestScore)
+                {
+                    bestScore = 15;
+                    bestMatchType = ResultMatchType.PREFIX_MATCH;
+                }
                 break;
             }
-        }
-
-        if (anyIdentifierWordStartsWithQuery)
-        {
-            bestScore = Math.min(bestScore, 15);
         }
 
         // Identifier starts with query
         if (fullIdentifier.startsWith(normalizedQuery))
         {
-            bestScore = Math.min(bestScore, 25);
+            if (25 < bestScore)
+            {
+                bestScore = 25;
+                bestMatchType = ResultMatchType.PREFIX_MATCH;
+            }
         }
 
         // Identifier contains query
         if (fullIdentifier.contains(normalizedQuery))
         {
-            bestScore = Math.min(bestScore, 30);
+            if (30 < bestScore)
+            {
+                bestScore = 30;
+                bestMatchType = ResultMatchType.SUBSTRING_MATCH;
+            }
         }
 
         /* === FUZZY MATCHING (Lower Priority) === */
@@ -683,12 +798,22 @@ public class SmartSearch
             {
                 if (word.length() >= 3)
                 {
-                    int editDistance = calculateLevenshteinDistance(normalizedQuery, word);
+                    int editDistance = calculateLevenshteinDistance(
+                            normalizedQuery,
+                            word,
+                            MAXIMUM_FUZZY_EDIT_DISTANCE
+                    );
+
                     if (editDistance <= MAXIMUM_FUZZY_EDIT_DISTANCE)
                     {
                         // Score: 40 + (edit distance × 5)
                         // Examples: distance 1 = score 45, distance 2 = score 50, distance 3 = score 55
-                        bestScore = Math.min(bestScore, 40 + editDistance * 5);
+                        int score = 40 + editDistance * 5;
+                        if (score < bestScore)
+                        {
+                            bestScore = score;
+                            bestMatchType = ResultMatchType.FUZZY_MATCH;
+                        }
                     }
                 }
             }
@@ -698,11 +823,21 @@ public class SmartSearch
             {
                 if (word.length() >= 3)
                 {
-                    int editDistance = calculateLevenshteinDistance(normalizedQuery, word);
+                    int editDistance = calculateLevenshteinDistance(
+                            normalizedQuery,
+                            word,
+                            MAXIMUM_FUZZY_EDIT_DISTANCE
+                    );
+
                     if (editDistance <= MAXIMUM_FUZZY_EDIT_DISTANCE)
                     {
                         // Score: 50 + (edit distance × 5)
-                        bestScore = Math.min(bestScore, 50 + editDistance * 5);
+                        int score = 50 + editDistance * 5;
+                        if (score < bestScore)
+                        {
+                            bestScore = score;
+                            bestMatchType = ResultMatchType.FUZZY_MATCH;
+                        }
                     }
                 }
             }
@@ -717,7 +852,12 @@ public class SmartSearch
             {
                 // Score: 60 + (dissimilarity × 20)
                 // Examples: similarity 0.8 = score 64, similarity 0.5 = score 70, similarity 0.3 = score 74
-                bestScore = Math.min(bestScore, 60 + (int) ((1.0 - displayNameSimilarity) * 20));
+                int score = 60 + (int) ((1.0 - displayNameSimilarity) * 20);
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    bestMatchType = ResultMatchType.FUZZY_MATCH;
+                }
             }
 
             double identifierSimilarity = calculateTrigramSimilarity(
@@ -727,7 +867,12 @@ public class SmartSearch
             if (identifierSimilarity >= MINIMUM_TRIGRAM_SIMILARITY_THRESHOLD)
             {
                 // Score: 70 + (dissimilarity × 20)
-                bestScore = Math.min(bestScore, 70 + (int) ((1.0 - identifierSimilarity) * 20));
+                int score = 70 + (int) ((1.0 - identifierSimilarity) * 20);
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    bestMatchType = ResultMatchType.FUZZY_MATCH;
+                }
             }
         }
 
@@ -737,14 +882,22 @@ public class SmartSearch
         // Example: "dmnd" is a subsequence of "diamond" (d-i-a-m-o-n-d)
         if (isSubsequenceOf(normalizedQuery, displayName))
         {
-            bestScore = Math.min(bestScore, 100);
+            if (100 < bestScore)
+            {
+                bestScore = 100;
+                bestMatchType = ResultMatchType.SUBSEQUENCE_MATCH;
+            }
         }
         else if (isSubsequenceOf(normalizedQuery, fullIdentifier))
         {
-            bestScore = Math.min(bestScore, 110);
+            if (110 < bestScore)
+            {
+                bestScore = 110;
+                bestMatchType = ResultMatchType.SUBSEQUENCE_MATCH;
+            }
         }
 
-        return new ItemScoreResult(bestScore, ResultMatchType.DEFAULT);
+        return new ItemScoreResult(bestScore, bestMatchType);
     }
 
     /**
@@ -796,21 +949,63 @@ public class SmartSearch
     /**
      * Represents the score assigned to an item along with the type of match that produced it.
      * <p>
-     * The matchType is useful for debugging and understanding why an item was scored a certain way.
-     * Examples: "exact_display_name", "prefix_match", "fuzzy_match", etc.
+     * The matchType indicates which matching strategy produced the best score, which is
+     * useful for debugging, telemetry, and understanding search behavior.
      */
     private record ItemScoreResult(int totalScore, ResultMatchType matchType)
     { }
 
+    /**
+     * Enumeration of all possible match types that can produce a score.
+     * <p>
+     * Each type corresponds to a specific matching strategy used during scoring.
+     * The match type in ItemScoreResult indicates which strategy produced the best score.
+     */
     private enum ResultMatchType
     {
+        /**
+         * Display name exactly equals the query
+         */
         EXACT_DISPLAY_NAME,
+
+        /**
+         * Identifier or path exactly equals the query
+         */
         EXACT_IDENTIFIER,
+
+        /**
+         * A complete word in display name exactly equals the query
+         */
         EXACT_DISPLAY_WORD,
+
+        /**
+         * A complete word in identifier exactly equals the query
+         */
         EXACT_IDENTIFIER_WORD,
+
+        /**
+         * Display name or identifier starts with query, or a word starts with query
+         */
         PREFIX_MATCH,
+
+        /**
+         * Display name or identifier contains query as a substring
+         */
+        SUBSTRING_MATCH,
+
+        /**
+         * Match found through Levenshtein distance or trigram similarity
+         */
         FUZZY_MATCH,
+
+        /**
+         * Query characters appear in order within display name or identifier
+         */
         SUBSEQUENCE_MATCH,
-        DEFAULT
+
+        /**
+         * No meaningful match found
+         */
+        NO_MATCH
     }
 }
