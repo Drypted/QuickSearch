@@ -298,15 +298,15 @@ public final class RenderUtils
 
     /* LABEL */
 
-    public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int padding, Color backgroundColor, Color outlineColor, Color textColor)
+    public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int paddingX, int paddingY, RoundedCorners rounded, Color backgroundColor, Color outlineColor, Color textColor)
     {
         RenderUtils.drawRectangle(
                 g,
-                posX - padding,
-                posY - padding,
-                posX + Minecraft.getInstance().font.width(text) + padding,
-                posY + Minecraft.getInstance().font.lineHeight + padding,
-                RoundedCorners.all(),
+                posX - paddingX,
+                posY - paddingY,
+                posX + Minecraft.getInstance().font.width(text) + paddingX,
+                posY + Minecraft.getInstance().font.lineHeight + paddingY,
+                rounded,
                 1,
                 !outlineColor.equals(Colors.CLEAR), // draw outline if its not clear
                 backgroundColor,
