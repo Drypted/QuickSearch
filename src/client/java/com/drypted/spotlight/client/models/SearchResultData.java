@@ -92,7 +92,7 @@ public final class SearchResultData
 
     public String getGiveCommand()
     {
-        return String.format("/give @p %s %d", itemDefinition, maxStackSize);
+        return String.format("give @p %s %d", itemDefinition, maxStackSize);
     }
 
     public String getHotbarReplaceCommand(int hotbarSlot)
@@ -100,7 +100,7 @@ public final class SearchResultData
         return String.format(
                 "item replace entity @s hotbar.%d with %s %d",
                 hotbarSlot,
-                identifier,
+                itemDefinition,
                 maxStackSize
         );
     }
