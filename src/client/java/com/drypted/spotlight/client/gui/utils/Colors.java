@@ -21,6 +21,9 @@ public class Colors
     public static final int iYELLOW = Colors.YELLOW.asInt();
     public static final int iGRAY = Colors.GRAY.asInt();
 
+    // Shadow
+    public static final Color SHADOW = BLACK.withAlpha(64);
+
     // More refined colors for UI indicators
     public static final Color SUCCESS_GREEN = Color.fromRGBA(34, 197, 94, 255);     // Modern green
     public static final Color HIGHLIGHT_YELLOW = Color.fromRGBA(234, 179, 8, 255);  // Modern yellow

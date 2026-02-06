@@ -53,7 +53,7 @@ public class Color
 
     public Color withHalfAlpha()
     {
-        return this.withAlpha(128);
+        return this.withAlpha(this.getAlpha() / 2);
     }
 
     /* GETTERS */

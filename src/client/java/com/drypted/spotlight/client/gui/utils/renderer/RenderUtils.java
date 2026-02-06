@@ -266,8 +266,32 @@ public final class RenderUtils
         }
     }
 
-    public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color, int thickness)
+    /**
+     * Draws an X
+     *
+     * @param guiGraphics  `GuiGraphics` context to draw on
+     * @param startX       Start X position
+     * @param startY       Start Y position
+     * @param endX         End X position
+     * @param endY         End Y position
+     * @param color        Color of the X
+     * @param thickness    Thickness of the X lines in pixels
+     * @param drawShadow   Whether to draw a shadow
+     * @param shadowOffset Offset of the shadow in pixels (allows floats)
+     */
+    public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color, int thickness, boolean drawShadow, float shadowOffset)
     {
+        if (drawShadow)
+        {
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(thickness * shadowOffset, thickness * shadowOffset, 0.0f);
+
+            drawThickLine(guiGraphics, startX, startY, endX, endY, thickness, Colors.SHADOW);
+            drawThickLine(guiGraphics, startX, endY, endX, startY, thickness, Colors.SHADOW);
+
+            guiGraphics.pose().popPose();
+        }
+
         drawThickLine(guiGraphics, startX, startY, endX, endY, thickness, color);
         drawThickLine(guiGraphics, startX, endY, endX, startY, thickness, color);
     }
@@ -557,5 +581,24 @@ public final class RenderUtils
         g.pose().scale(scale, scale, 1.0F);
         g.drawString(Minecraft.getInstance().font, text, 0, 0, color.asInt());
         g.pose().popPose();
+    }
+
+    /* OVERLOADS */
+
+    /**
+     * Draws an X
+     *
+     * @param guiGraphics `GuiGraphics` context to draw on
+     * @param startX      Start X position
+     * @param startY      Start Y position
+     * @param endX        End X position
+     * @param endY        End Y position
+     * @param color       color of the X
+     * @param thickness   Thickness of the X lines in pixels
+     * @param drawShadow  Whether to draw a shadow
+     */
+    public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color, int thickness, boolean drawShadow)
+    {
+        drawX(guiGraphics, startX, startY, endX, endY, color, thickness, drawShadow, 0.5F);
     }
 }
