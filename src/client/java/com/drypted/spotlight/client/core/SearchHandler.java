@@ -39,7 +39,7 @@ public class SearchHandler
         CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems().stream()).forEach(
                 stack -> {
                     SearchResultData data = SearchResultData.fromItemStack(stack);
-                    combined.putIfAbsent(data.getIdentifier().toString(), data);
+                    combined.putIfAbsent(data.getCommandString(), data);
                 });
 
         // 2. Registry fallback (includes hidden mod items)
@@ -47,8 +47,9 @@ public class SearchHandler
             try
             {
                 SearchResultData data = SearchResultData.fromItem(item);
-                combined.putIfAbsent(data.getIdentifier().toString(), data);
-            } catch (Exception ignored)
+                combined.putIfAbsent(data.getCommandString(), data);
+            }
+            catch (Exception ignored)
             {
                 // Some items are not safe to instantiate
             }
@@ -100,9 +101,7 @@ public class SearchHandler
         // 3. Run search in background
         ActiveSearchTask = CompletableFuture.supplyAsync(() -> {
             // This runs in the common ForkJoinPool
-            return GameItems.stream()
-                            .filter(item -> item.containsText(query))
-                            .limit(MAX_RESULTS)
+            return GameItems.stream().filter(item -> item.containsText(query)).limit(MAX_RESULTS)
                             .collect(Collectors.toList());
         }).thenAcceptAsync(results -> {
             // 4. Return results to the Main Thread safely

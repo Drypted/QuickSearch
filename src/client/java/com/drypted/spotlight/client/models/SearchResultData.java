@@ -1,11 +1,16 @@
 package com.drypted.spotlight.client.models;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.arguments.item.ItemInput;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.Level;
 
 public final class SearchResultData
 {
@@ -21,39 +26,7 @@ public final class SearchResultData
         this.name = name;
         this.identifier = identifier;
         this.maxStackSize = maxStackSize;
-        this.commandString = ("give @s " + identifier.toString() + " " + maxStackSize);
-    }
-
-    public SearchResultData(ItemStack icon, String name, ResourceLocation identifier, int maxStackSize, String commandString)
-    {
-        this.icon = icon;
-        this.name = name;
-        this.identifier = identifier;
-        this.maxStackSize = maxStackSize;
-        this.commandString = commandString;
-    }
-
-    public boolean isEmpty()
-    {
-        return this == EMPTY;
-    }
-
-    public boolean containsText(String text)
-    {
-        final String lowerText = text.toLowerCase();
-        return name.toLowerCase().contains(lowerText) || identifier.getPath()
-                                                                   .toLowerCase()
-                                                                   .contains(lowerText);
-    }
-
-    public static SearchResultData fromBlock(Block block)
-    {
-        final ItemStack icon = block.asItem().getDefaultInstance();
-        final String name = block.getName().getString();
-        final ResourceLocation identifier = BuiltInRegistries.BLOCK.getKey(block);
-        final int maxStackSize = block.asItem().getDefaultMaxStackSize();
-
-        return new SearchResultData(icon, name, identifier, maxStackSize);
+        this.commandString = buildGiveCommand(icon);
     }
 
     public static SearchResultData fromItem(Item item)
@@ -83,7 +56,45 @@ public final class SearchResultData
         return new SearchResultData(stack, name, identifier, maxStackSize);
     }
 
-    /* GETTERS & SETTERS */
+    private static String buildGiveCommand(ItemStack stack)
+    {
+        if (stack == null || stack == ItemStack.EMPTY || stack.getItem() == Items.AIR)
+            return "give @s air 1";
+
+        int count = stack.getMaxStackSize();
+
+        ResourceKey<Item> itemKey = BuiltInRegistries.ITEM.getResourceKey(stack.getItem())
+                                                          .orElseThrow();
+        Holder<Item> holder = BuiltInRegistries.ITEM.getHolderOrThrow(itemKey);
+
+        DataComponentPatch patch = stack.getComponentsPatch();
+        ItemInput input = new ItemInput(holder, patch);
+
+        Level level = Minecraft.getInstance().level;
+        if (level == null)
+        {
+            return "give @s " + itemKey.location() + " " + count;
+        }
+
+        String itemPart = input.serialize(level.registryAccess());
+        return "give @s " + itemPart + " " + count;
+    }
+
+    /* PUBLIC HELPERS */
+
+    public boolean isEmpty()
+    {
+        return this == EMPTY;
+    }
+
+    public boolean containsText(String text)
+    {
+        final String lowerText = text.toLowerCase();
+        return name.toLowerCase().contains(lowerText) || //
+                identifier.getPath().toLowerCase().contains(lowerText);
+    }
+
+    /* GETTERS */
 
     public ItemStack getIcon()
     {
@@ -110,7 +121,8 @@ public final class SearchResultData
         return maxStackSize;
     }
 
-    /* Predefined */
+    /* PRE DEFINED */
+
     public static final SearchResultData EMPTY = new SearchResultData(
             ItemStack.EMPTY,
             "",

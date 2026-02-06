@@ -185,11 +185,11 @@ public class SpotlightScreen extends Screen
         inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
     }
 
-    private void onResultClicked(SearchResultData block)
+    private void onResultClicked(SearchResultData data)
     {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null)
-            player.connection.sendCommand(block.getCommandString());
+            player.connection.sendCommand(data.getCommandString());
     }
 
     /* Overrides for settings */
