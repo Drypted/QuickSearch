@@ -1,6 +1,3 @@
-/**
- * NOT IMPLEMENTED YET; KNOW NOTHING OF WITHER
- */
 package com.drypted.spotlight.client.core.algorithms;
 
 import com.drypted.spotlight.client.models.SearchResultData;
@@ -13,19 +10,46 @@ public class SmartSearch
     private static final int FUZZY_THRESHOLD = 3; // Maximum edit distance for fuzzy matching
     private static final double TRIGRAM_THRESHOLD = 0.3; // Minimum similarity score (0-1)
 
+    // Items managed by this instance
+    private List<SearchResultData> items = Collections.emptyList();
+
     // Inverted index: word -> list of item indices
-    private static Map<String, List<Integer>> InvertedIndex = Collections.emptyMap();
+    private Map<String, List<Integer>> InvertedIndex = Collections.emptyMap();
 
     // Trigram index for fuzzy matching
-    private static Map<String, Set<Integer>> TrigramIndex = Collections.emptyMap();
+    private Map<String, Set<Integer>> TrigramIndex = Collections.emptyMap();
 
-    public static void rebuildIndices(List<SearchResultData> items)
+    /**
+     * Construct a SmartSearch instance and build indices for the provided items.
+     */
+    public SmartSearch(List<SearchResultData> items)
     {
-        buildInvertedIndex(items);
-        buildTrigramIndex(items);
+        if (items != null)
+        {
+            this.items = new ArrayList<>(items);
+        }
+
+        rebuildIndices(this.items);
     }
 
-    public static Stream<SearchResultData> search(List<SearchResultData> items, String query, int maxResults)
+    /**
+     * Rebuild indices for a new list of items. Replaces the current item list.
+     */
+    public void rebuildIndices(List<SearchResultData> items)
+    {
+        if (items == null)
+        {
+            this.items = Collections.emptyList();
+        }
+        else
+        {
+            this.items = new ArrayList<>(items);
+        }
+        buildInvertedIndex();
+        buildTrigramIndex();
+    }
+
+    public Stream<SearchResultData> search(String query, int maxResults)
     {
         String q = query.toLowerCase();
 
@@ -51,17 +75,16 @@ public class SmartSearch
                              }
 
                              return new SearchResult(item, score.totalScore(), i);
-                         })
-                         .filter(Objects::nonNull)
-                         .sorted(Comparator.comparingInt((SearchResult r) -> r.score)
-                                           .thenComparingInt(r -> r.originalIndex))
-                         .map(r -> r.item);
+                         }).filter(Objects::nonNull)
+                         .sorted(Comparator.comparingInt(SearchResult::score)
+                                           .thenComparingInt(SearchResult::originalIndex)).limit(
+                        maxResults > 0 ? maxResults : Integer.MAX_VALUE).map(SearchResult::item);
     }
 
     /**
      * Builds an inverted index mapping words to item indices for faster searching.
      */
-    private static void buildInvertedIndex(List<SearchResultData> items)
+    private void buildInvertedIndex()
     {
         Map<String, List<Integer>> index = new HashMap<>();
 
@@ -104,7 +127,7 @@ public class SmartSearch
     /**
      * Builds a trigram index for fuzzy matching support.
      */
-    private static void buildTrigramIndex(List<SearchResultData> items)
+    private void buildTrigramIndex()
     {
         Map<String, Set<Integer>> index = new HashMap<>();
 
@@ -137,7 +160,7 @@ public class SmartSearch
     /**
      * Generates trigrams from a string for fuzzy matching.
      */
-    private static Set<String> generateTrigrams(String text)
+    private Set<String> generateTrigrams(String text)
     {
         Set<String> trigrams = new HashSet<>();
 
@@ -161,7 +184,7 @@ public class SmartSearch
     /**
      * Calculates trigram similarity between two strings (0-1, higher is more similar).
      */
-    private static double calculateTrigramSimilarity(String s1, String s2)
+    private double calculateTrigramSimilarity(String s1, String s2)
     {
         Set<String> trigrams1 = generateTrigrams(s1);
         Set<String> trigrams2 = generateTrigrams(s2);
@@ -181,7 +204,7 @@ public class SmartSearch
     /**
      * Calculates Levenshtein distance between two strings.
      */
-    private static int levenshteinDistance(String s1, String s2)
+    private int levenshteinDistance(String s1, String s2)
     {
         int[][] dp = new int[s1.length() + 1][s2.length() + 1];
 
@@ -214,7 +237,7 @@ public class SmartSearch
     /**
      * Gets candidate item indices from the inverted index.
      */
-    private static Set<Integer> getCandidatesFromIndex(String query)
+    private Set<Integer> getCandidatesFromIndex(String query)
     {
         Set<Integer> candidates = new HashSet<>();
 
@@ -271,7 +294,7 @@ public class SmartSearch
      * Comprehensive scoring for search results.
      * Lower scores are better (0 = perfect match).
      */
-    private static SmartSearch.ScoringResult scoreItem(SearchResultData item, String query)
+    private ScoringResult scoreItem(SearchResultData item, String query)
     {
         String displayName = item.getName().toLowerCase();
         String identifier = item.getIdentifier().toString().toLowerCase();
@@ -291,13 +314,13 @@ public class SmartSearch
         // Perfect display name match
         if (displayName.equals(query))
         {
-            return new SmartSearch.ScoringResult(0, "exact_display_name");
+            return new ScoringResult(0, "exact_display_name");
         }
 
         // Perfect identifier match
         if (identifier.equals(query) || path.equals(query))
         {
-            return new SmartSearch.ScoringResult(1, "exact_identifier");
+            return new ScoringResult(1, "exact_identifier");
         }
 
         // === DISPLAY NAME MATCHING (High Priority) ===
@@ -418,13 +441,13 @@ public class SmartSearch
             score = Math.min(score, 110);
         }
 
-        return new SmartSearch.ScoringResult(score, "default");
+        return new ScoringResult(score, "default");
     }
 
     /**
      * Checks if needle is a subsequence of haystack.
      */
-    private static boolean isSubsequence(String needle, String haystack)
+    private boolean isSubsequence(String needle, String haystack)
     {
         int needleIdx = 0;
 

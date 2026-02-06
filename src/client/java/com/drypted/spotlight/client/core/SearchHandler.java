@@ -1,5 +1,7 @@
 package com.drypted.spotlight.client.core;
 
+import com.drypted.spotlight.client.core.algorithms.SimpleSearch;
+import com.drypted.spotlight.client.core.algorithms.SmartSearch;
 import com.drypted.spotlight.client.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -20,6 +22,9 @@ public class SearchHandler
 
     private static List<SearchResultData> GameItems = Collections.emptyList();
 
+    private static SmartSearch smartSearch;
+    private static SearchMode searchMode = SearchMode.SMART;
+
     // Keep track of the active search to allow cancellation
     private static CompletableFuture<Void> ActiveSearchTask;
 
@@ -30,6 +35,7 @@ public class SearchHandler
         if (minecraft.level == null)
         {
             GameItems = Collections.emptyList();
+            smartSearch = new SmartSearch(GameItems);
             return;
         }
 
@@ -56,6 +62,9 @@ public class SearchHandler
         });
 
         GameItems = List.copyOf(combined.values());
+
+        // Rebuild/replace smart search instance with the new items
+        smartSearch = new SmartSearch(GameItems);
     }
 
     public static void requestCreativeTabRebuild()
@@ -76,14 +85,26 @@ public class SearchHandler
     }
 
     /**
+     * Performs an asynchronous search using the default search mode (simple search by default).
+     *
+     * @param query      The text to search for.
+     * @param onComplete Callback to run on the main thread with the results.
+     */
+    public static void searchAsync(String query, Consumer<List<SearchResultData>> onComplete)
+    {
+        searchAsync(query, onComplete, searchMode);
+    }
+
+    /**
      * Performs an asynchronous search.
      * Cancels any currently running search, filters the data on a background thread,
      * and executes the callback on the Minecraft Main Thread.
      *
      * @param query      The text to search for.
      * @param onComplete Callback to run on the main thread with the results.
+     * @param mode       The search mode to use (simple or smart).
      */
-    public static void searchAsync(String query, Consumer<List<SearchResultData>> onComplete)
+    public static void searchAsync(String query, Consumer<List<SearchResultData>> onComplete, SearchMode mode)
     {
         // 1. Cancel existing search if it's still running
         if (ActiveSearchTask != null && !ActiveSearchTask.isDone())
@@ -99,23 +120,56 @@ public class SearchHandler
         }
 
         // 3. Run search in background
-        ActiveSearchTask = CompletableFuture.supplyAsync(() -> {
-            // This runs in the common ForkJoinPool
-            return GameItems.stream().filter(item -> item.containsText(query)).limit(MAX_RESULTS)
-                            .collect(Collectors.toList());
+        ActiveSearchTask = CompletableFuture.supplyAsync(() -> switch (searchMode)
+        {
+            case SMART ->
+            {
+                // Ensure smartSearch exists
+                if (smartSearch == null)
+                {
+                    smartSearch = new SmartSearch(GameItems);
+                }
+
+                // SmartSearch.search returns a Stream; collect up to MAX_RESULTS
+                yield smartSearch.search(query, MAX_RESULTS).collect(Collectors.toList());
+            }
+            case null, default -> SimpleSearch.search(GameItems, query, MAX_RESULTS);
         }).thenAcceptAsync(results -> {
             // 4. Return results to the Main Thread safely
             Minecraft.getInstance().execute(() -> onComplete.accept(results));
         }).exceptionally(e -> {
-            // Handle cancellation (CompletionException wrapping CancellationException)
+            // Handle cancellation (CompletionException wrapping CancellationException) and other errors
             return null;
         });
     }
 
-    /* Getters */
+    /* GETTERS & SETTERS */
 
     public static List<SearchResultData> getGameItems()
     {
         return GameItems;
+    }
+
+    public static SmartSearch getSmartSearchInstance()
+    {
+        return smartSearch;
+    }
+
+    public static SearchMode getSearchMode()
+    {
+        return searchMode;
+    }
+
+    public static void setSearchMode(SearchMode searchMode)
+    {
+        SearchHandler.searchMode = searchMode;
+    }
+
+    /* HELPERS CLASSES & ENUMS */
+
+    public enum SearchMode
+    {
+        SIMPLE,
+        SMART
     }
 }
