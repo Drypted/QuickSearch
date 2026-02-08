@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.core.algorithms;
+package com.drypted.spotlight.client.core.search.algorithms;
 
 import com.drypted.spotlight.client.models.SearchResultData;
 

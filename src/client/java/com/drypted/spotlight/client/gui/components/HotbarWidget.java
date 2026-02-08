@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.gui.components;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.core.functions.Actions;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
@@ -216,8 +217,11 @@ public class HotbarWidget extends AbstractWidget
             if (selectedHotbarWidget != null)
             {
                 if (selectedHotbarWidget.getSearchResultData() != null)
-                    command = selectedHotbarWidget.getSearchResultData().getHotbarReplaceCommand(
-                            widget.getHotbarIndex());
+                    Actions.replaceHotbarItem(
+                            player,
+                            selectedHotbarWidget.getSearchResultData(),
+                            widget.getHotbarIndex()
+                    );
 
                 // used this one
                 selectedHotbarWidget = null;
@@ -225,10 +229,8 @@ public class HotbarWidget extends AbstractWidget
             }
             else if (item != null)
             {
-                command = item.getHotbarReplaceCommand(widget.getHotbarIndex());
+                Actions.replaceHotbarItem(player, item, widget.getHotbarIndex());
             }
-
-            player.connection.sendCommand(command);
         }
     }
 

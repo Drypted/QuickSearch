@@ -1,7 +1,8 @@
 package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
-import com.drypted.spotlight.client.core.SearchHandler;
+import com.drypted.spotlight.client.core.functions.Actions;
+import com.drypted.spotlight.client.core.search.SearchHandler;
 import com.drypted.spotlight.client.gui.components.*;
 import com.drypted.spotlight.client.models.SearchResultData;
 import net.minecraft.client.Minecraft;
@@ -188,7 +189,8 @@ public class SpotlightScreen extends Screen
     {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null)
-            player.connection.sendCommand(data.getGiveCommand());
+            Actions.giveItem(player, data);
+        // player.connection.sendCommand(data.getGiveCommand());
     }
 
     /* Overrides for settings */

@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.mixin;
 
-import com.drypted.spotlight.client.core.SearchHandler;
+import com.drypted.spotlight.client.core.search.SearchHandler;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import org.spongepowered.asm.mixin.Mixin;

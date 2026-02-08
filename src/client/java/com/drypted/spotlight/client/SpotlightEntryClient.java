@@ -1,15 +1,15 @@
 package com.drypted.spotlight.client;
 
 import com.drypted.spotlight.client.config.ModConfig;
-import com.drypted.spotlight.client.core.SearchHandler;
+import com.drypted.spotlight.client.core.search.SearchHandler;
 import com.drypted.spotlight.client.gui.SpotlightScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.world.InteractionResult;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +43,9 @@ public class SpotlightEntryClient implements ClientModInitializer
                 GLFW.GLFW_KEY_ESCAPE,
                 KeyMapping.CATEGORY_MISC
         );
+
+        KeyBindingHelper.registerKeyBinding(openSpotlightKeyMapping);
+        KeyBindingHelper.registerKeyBinding(closeSpotlightKeyMapping);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openSpotlightKeyMapping.consumeClick())

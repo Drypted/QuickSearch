@@ -1,7 +1,7 @@
-package com.drypted.spotlight.client.core;
+package com.drypted.spotlight.client.core.search;
 
-import com.drypted.spotlight.client.core.algorithms.SimpleSearch;
-import com.drypted.spotlight.client.core.algorithms.SmartSearch;
+import com.drypted.spotlight.client.core.search.algorithms.SimpleSearch;
+import com.drypted.spotlight.client.core.search.algorithms.SmartSearch;
 import com.drypted.spotlight.client.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -45,7 +45,7 @@ public class SearchHandler
         CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems().stream()).forEach(
                 stack -> {
                     SearchResultData data = SearchResultData.fromItemStack(stack);
-                    combined.putIfAbsent(data.getItemDefinition(), data);
+                    combined.putIfAbsent(data.getSerializedDefinition(), data);
                 });
 
         // 2. Registry fallback (includes hidden mod items)
@@ -53,7 +53,7 @@ public class SearchHandler
             try
             {
                 SearchResultData data = SearchResultData.fromItem(item);
-                combined.putIfAbsent(data.getItemDefinition(), data);
+                combined.putIfAbsent(data.getSerializedDefinition(), data);
             }
             catch (Exception ignored)
             {

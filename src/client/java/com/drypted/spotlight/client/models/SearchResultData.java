@@ -18,7 +18,7 @@ public final class SearchResultData
     private final String name;
     private final ResourceLocation identifier;
     private final int maxStackSize;
-    private final String itemDefinition;
+    private final ItemInput definition;
 
     public SearchResultData(ItemStack icon, String name, ResourceLocation identifier)
     {
@@ -26,7 +26,7 @@ public final class SearchResultData
         this.name = name;
         this.identifier = identifier;
         this.maxStackSize = icon.getMaxStackSize();
-        this.itemDefinition = buildItemDefinition(icon);
+        this.definition = buildItemInput(icon);
     }
 
     public static SearchResultData fromItem(Item item)
@@ -54,26 +54,17 @@ public final class SearchResultData
         return new SearchResultData(stack, name, identifier);
     }
 
-    private static String buildItemDefinition(ItemStack stack)
+    private static ItemInput buildItemInput(ItemStack stack)
     {
         if (stack == null || stack == ItemStack.EMPTY || stack.getItem() == Items.AIR)
-            return "minecraft:air";
+            return null;
 
         ResourceKey<Item> itemKey = BuiltInRegistries.ITEM.getResourceKey(stack.getItem())
                                                           .orElseThrow();
         Holder<Item> holder = BuiltInRegistries.ITEM.getHolderOrThrow(itemKey);
 
         DataComponentPatch patch = stack.getComponentsPatch();
-        ItemInput input = new ItemInput(holder, patch);
-
-        Level level = Minecraft.getInstance().level;
-        if (level == null)
-        {
-            return itemKey.location().toString();
-        }
-
-        // serialize the item input to a command string (e.g. "minecraft:diamond_sword[max_stack_size=1]")
-        return input.serialize(level.registryAccess());
+        return new ItemInput(holder, patch);
     }
 
     /* PUBLIC HELPERS */
@@ -92,7 +83,7 @@ public final class SearchResultData
 
     public String getGiveCommand()
     {
-        return String.format("give @p %s %d", itemDefinition, maxStackSize);
+        return String.format("give @p %s %d", definition, maxStackSize);
     }
 
     public String getHotbarReplaceCommand(int hotbarSlot)
@@ -100,7 +91,7 @@ public final class SearchResultData
         return String.format(
                 "item replace entity @s hotbar.%d with %s %d",
                 hotbarSlot,
-                itemDefinition,
+                definition,
                 maxStackSize
         );
     }
@@ -122,14 +113,25 @@ public final class SearchResultData
         return identifier;
     }
 
-    public String getItemDefinition()
+    public ItemInput getDefinition()
     {
-        return itemDefinition;
+        return definition;
     }
 
     public int getMaxStackSize()
     {
         return maxStackSize;
+    }
+
+    public String getSerializedDefinition()
+    {
+        Level level = Minecraft.getInstance().level;
+        if (level == null)
+        {
+            return "";
+        }
+
+        return definition == null ? "" : definition.serialize(level.registryAccess());
     }
 
     /* PRE DEFINED */
