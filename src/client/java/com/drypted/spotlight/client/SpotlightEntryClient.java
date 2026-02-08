@@ -20,6 +20,7 @@ public class SpotlightEntryClient implements ClientModInitializer
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static ModConfig Config;
 
+    public static final String KEY_CATEGORY_SPOTLIGHT = "key.categories.spotlight";
     public static KeyMapping openSpotlightKeyMapping;
     public static KeyMapping closeSpotlightKeyMapping;
 
@@ -35,13 +36,13 @@ public class SpotlightEntryClient implements ClientModInitializer
                 "key.spotlight.toggle",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_Y,
-                KeyMapping.CATEGORY_MISC
+                KEY_CATEGORY_SPOTLIGHT
         );
         closeSpotlightKeyMapping = new KeyMapping(
                 "key.spotlight.close",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_ESCAPE,
-                KeyMapping.CATEGORY_MISC
+                KEY_CATEGORY_SPOTLIGHT
         );
 
         KeyBindingHelper.registerKeyBinding(openSpotlightKeyMapping);

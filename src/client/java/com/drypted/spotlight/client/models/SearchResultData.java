@@ -83,7 +83,7 @@ public final class SearchResultData
 
     public String getGiveCommand()
     {
-        return String.format("give @p %s %d", definition, maxStackSize);
+        return String.format("give @p %s %d", getSerializedDefinition(), maxStackSize);
     }
 
     public String getHotbarReplaceCommand(int hotbarSlot)
@@ -91,7 +91,7 @@ public final class SearchResultData
         return String.format(
                 "item replace entity @s hotbar.%d with %s %d",
                 hotbarSlot,
-                definition,
+                getSerializedDefinition(),
                 maxStackSize
         );
     }
