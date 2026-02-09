@@ -138,6 +138,15 @@ public class SpotlightScreen extends Screen
     }
 
     @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
+    {
+        if (isHotbarEnabledInConfig() && this.hotbarWidget != null)
+            this.hotbarWidget.onAnyKeyReleased();
+
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button)
     {
         if (!super.mouseClicked(mouseX, mouseY, button))
@@ -173,7 +182,7 @@ public class SpotlightScreen extends Screen
                 if (widget != null)
                 {
                     widget.setSearchResultData(result);
-                    widget.setOnClickCallback(mouseButtonClick -> {
+                    widget.onClick(mouseButtonClick -> {
                         onResultClicked(result);
                         widget.setFocused(true);
                     });

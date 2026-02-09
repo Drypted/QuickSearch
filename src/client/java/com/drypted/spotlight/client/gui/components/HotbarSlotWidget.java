@@ -1,11 +1,11 @@
 package com.drypted.spotlight.client.gui.components;
 
-import com.drypted.spotlight.client.models.SearchResultData;
 import com.drypted.spotlight.client.gui.models.MouseButtonClick;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.models.SearchResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -25,8 +25,9 @@ public class HotbarSlotWidget extends AbstractWidget
     private final Color backgroundColor;
     private final Color textColor;
     private final Color outlineColor;
-    private final Color focusedOutlineColor;
-    private final Color highlightedOutlineColor;
+    private final Color focusedColor;
+    private final Color highlightedColor;
+    private final Color clickedColor;
 
     private Consumer<MouseButtonClick> onClickCallback;
 
@@ -34,7 +35,9 @@ public class HotbarSlotWidget extends AbstractWidget
     private boolean showBind = false;
     private boolean highlighted = false;
 
-    public HotbarSlotWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedOutlineColor, Color outlineColor, Color highlightedOutlineColor, Consumer<MouseButtonClick> onClickCallback)
+    private boolean pressed = false;
+
+    public HotbarSlotWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedColor, Color outlineColor, Color highlightedColor, Color clickedColor, Consumer<MouseButtonClick> onClickCallback)
     {
         super(x, y, width, height, Component.empty());
         this.hotbarIndex = hotbarIndex;
@@ -45,8 +48,9 @@ public class HotbarSlotWidget extends AbstractWidget
         this.backgroundColor = backgroundColor;
         this.textColor = textColor;
         this.outlineColor = outlineColor;
-        this.focusedOutlineColor = focusedOutlineColor;
-        this.highlightedOutlineColor = highlightedOutlineColor;
+        this.focusedColor = focusedColor;
+        this.highlightedColor = highlightedColor;
+        this.clickedColor = clickedColor;
         this.onClickCallback = onClickCallback;
 
         this.hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
@@ -67,9 +71,11 @@ public class HotbarSlotWidget extends AbstractWidget
                 this.outlineThickness,
                 true,
                 this.backgroundColor,
-                this.highlighted
-                ? this.highlightedOutlineColor
-                : this.shouldShowBind() ? this.focusedOutlineColor : this.outlineColor
+                this.pressed
+                ? this.clickedColor
+                : this.highlighted
+                  ? this.highlightedColor
+                  : this.shouldShowBind() ? this.focusedColor : this.outlineColor
         );
 
         // show icon if search result data is available
@@ -99,7 +105,9 @@ public class HotbarSlotWidget extends AbstractWidget
                     this.getRight() - padding,
                     this.getY(),
                     RoundedCorners.fromVerticalSides(true, false),
-                    this.highlighted ? highlightedOutlineColor : focusedOutlineColor,
+                    this.pressed
+                    ? this.clickedColor
+                    : this.highlighted ? highlightedColor : focusedColor,
                     textColor
             );
         }
@@ -132,7 +140,7 @@ public class HotbarSlotWidget extends AbstractWidget
         this.searchResultData = searchResultData;
     }
 
-    public void setOnClickCallback(Consumer<MouseButtonClick> onClickCallback)
+    public void onClick(Consumer<MouseButtonClick> onClickCallback)
     {
         this.onClickCallback = onClickCallback;
     }
@@ -145,6 +153,16 @@ public class HotbarSlotWidget extends AbstractWidget
     public void setShowBind(boolean showBind)
     {
         this.showBind = showBind;
+    }
+
+    public boolean isPressed()
+    {
+        return pressed;
+    }
+
+    public void setPressed(boolean pressed)
+    {
+        this.pressed = pressed;
     }
 
     public boolean isHighlighted()
@@ -183,9 +201,10 @@ public class HotbarSlotWidget extends AbstractWidget
         private float hotbarTextScale = 0.8f;
         private Color backgroundColor = Colors.BLACK.withHalfAlpha();
         private Color textColor = Colors.WHITE;
-        private Color unfocusedOutlineColor = Colors.WHITE;
-        private Color focusedOutlineColor = Colors.HIGHLIGHT_YELLOW;
-        private Color highlightedOutlineColor = Colors.INFO_BLUE;
+        private Color unfocusedColor = Colors.WHITE;
+        private Color focusedColor = Colors.HIGHLIGHT_YELLOW;
+        private Color highlightedColor = Colors.INFO_BLUE;
+        private Color clickedColor = Colors.YELLOW;
 
         private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
 
@@ -234,21 +253,27 @@ public class HotbarSlotWidget extends AbstractWidget
             return this;
         }
 
-        public Builder unfocusedOutlineColor(Color unfocusedOutlineColor)
+        public Builder unfocusedColor(Color unfocusedColor)
         {
-            this.unfocusedOutlineColor = unfocusedOutlineColor;
+            this.unfocusedColor = unfocusedColor;
             return this;
         }
 
-        public Builder focusedOutlineColor(Color focusedOutlineColor)
+        public Builder focusedColor(Color focusedColor)
         {
-            this.focusedOutlineColor = focusedOutlineColor;
+            this.focusedColor = focusedColor;
             return this;
         }
 
-        public Builder highlightedOutlineColor(Color highlightedOutlineColor)
+        public Builder highlightedColor(Color highlightedColor)
         {
-            this.highlightedOutlineColor = highlightedOutlineColor;
+            this.highlightedColor = highlightedColor;
+            return this;
+        }
+
+        public Builder clickedColor(Color clickedColor)
+        {
+            this.clickedColor = clickedColor;
             return this;
         }
 
@@ -272,9 +297,10 @@ public class HotbarSlotWidget extends AbstractWidget
                     hotbarTextScale,
                     backgroundColor,
                     textColor,
-                    focusedOutlineColor,
-                    unfocusedOutlineColor,
-                    highlightedOutlineColor,
+                    focusedColor,
+                    unfocusedColor,
+                    highlightedColor,
+                    clickedColor,
                     onClickCallback
             );
         }

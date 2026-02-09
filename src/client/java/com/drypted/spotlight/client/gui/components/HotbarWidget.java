@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class HotbarWidget extends AbstractWidget
     private static final int CLOSE_BUTTON_TOOLTIP_OFFSET_Y = 1;
 
     private final ArrayList<HotbarSlotWidget> hotbarSlotWidgets = new ArrayList<>(HOTBAR_SLOTS);
-    private HotbarSlotWidget selectedHotbarWidget = null;
+    private @Nullable HotbarSlotWidget selectedHotbarWidget = null;
 
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
@@ -56,7 +57,7 @@ public class HotbarWidget extends AbstractWidget
                     (int) Math.ceil(iconSize),
                     (int) Math.ceil(iconSize)
             ).build();
-            hotbarWidget.setOnClickCallback(mouseButtonClick -> {
+            hotbarWidget.onClick(mouseButtonClick -> {
                 SearchResultData item = hotbarWidget.getSearchResultData();
                 if (item == null || item.isEmpty())
                     return;
@@ -197,6 +198,8 @@ public class HotbarWidget extends AbstractWidget
 
     public void onHotbarKeyPressed(HotbarSlotWidget widget, int modifiers)
     {
+        widget.setPressed(true);
+
         // if shift pressed, select hotbar slot only
         if (isModifierPressed(modifiers, GLFW.GLFW_MOD_SHIFT))
         {
@@ -211,8 +214,6 @@ public class HotbarWidget extends AbstractWidget
             // if there is item in the selected hotbar slot
             SearchResultData item = widget.getSearchResultData();
 
-            // default air, so if no item selected, it will clear the slot
-            String command = "item replace entity @s hotbar." + widget.getHotbarIndex() + " with minecraft:air";
             // if a slot is already selected, use that slot
             if (selectedHotbarWidget != null)
             {
@@ -232,6 +233,11 @@ public class HotbarWidget extends AbstractWidget
                 Actions.replaceHotbarItem(player, item, widget.getHotbarIndex());
             }
         }
+    }
+
+    public void onAnyKeyReleased()
+    {
+        this.hotbarSlotWidgets.forEach(widget -> widget.setPressed(false));
     }
 
     /* STATICS */
