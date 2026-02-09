@@ -11,22 +11,23 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class SpotlightScreen extends Screen
 {
-    private static final int SEARCH_BAR_WIDTH = 200;
+    // private static final int searchBarWidth = 200;
     private static final int SEARCH_BAR_HEIGHT = 22;
 
     private static final int DISTANCE_FROM_CENTER = 20;
-    private static final int RESULTS_HEIGHT = 100;
+    // private static final int resultsHeight = 100;
 
     private static final int HOTBAR_SLOTS = 9;
 
     private InputWidget inputWidget;
     private ScrollBoxWidget searchResultsWidget;
-    private HotbarWidget hotbarFocusProxy;
+    private @Nullable HotbarWidget hotbarWidget;
 
     public SpotlightScreen()
     {
@@ -36,13 +37,16 @@ public class SpotlightScreen extends Screen
     @Override
     protected void init()
     {
-        final int searchBarX = (this.width - SEARCH_BAR_WIDTH) / 2;
+        final int searchBarWidth = SpotlightEntryClient.getConfig().searchBarWidth;
+        final int resultsHeight = SpotlightEntryClient.getConfig().resultsBoxHeight;
+
+        final int searchBarX = (this.width - searchBarWidth) / 2;
         final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FROM_CENTER;
 
         this.inputWidget = InputWidget.builder(
                 searchBarX,
                 searchBarY,
-                SEARCH_BAR_WIDTH,
+                searchBarWidth,
                 SEARCH_BAR_HEIGHT
         ).build();
         this.inputWidget.setPlaceholder("Search items for blocks ...");
@@ -53,18 +57,21 @@ public class SpotlightScreen extends Screen
                 searchBarX,
                 inputWidget.getY() + SEARCH_BAR_HEIGHT - inputWidget.getOutlineThickness(),
                 inputWidget.getWidth(),
-                RESULTS_HEIGHT
+                resultsHeight
         ).showScrollerAlways(true).build();
 
         this.inputWidget.addTextChangeListener(this::onTextChanged);
 
-        this.hotbarFocusProxy = HotbarWidget.create(
-                searchBarX,
-                SEARCH_BAR_WIDTH,
-                searchBarY - HotbarWidget.HOTBAR_SLOT_PADDING
-        );
+        if (isHotbarEnabledInConfig())
+        {
+            this.hotbarWidget = HotbarWidget.create(
+                    searchBarX,
+                    searchBarWidth,
+                    searchBarY - HotbarWidget.HOTBAR_SLOT_PADDING
+            );
+            this.addRenderableWidget(hotbarWidget);
+        }
 
-        this.addRenderableWidget(hotbarFocusProxy);
         this.addRenderableWidget(searchResultsWidget);
         this.addRenderableWidget(inputWidget);
 
@@ -113,15 +120,15 @@ public class SpotlightScreen extends Screen
             return super.keyPressed(keyCode, scanCode, modifiers);
 
         // only allow key when hotbar is focused
-        if (hotbarFocusProxy.isFocused())
+        if (isHotbarEnabledInConfig() && this.hotbarWidget != null && hotbarWidget.isFocused())
         {
             for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
-                HotbarSlotWidget hotbarWidget = hotbarFocusProxy.getWidgets().get(i);
+                HotbarSlotWidget hotbarWidget = this.hotbarWidget.getWidgets().get(i);
                 if (hotbarWidget != null && keyCode == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
                                                                                                .getValue())
                 {
-                    hotbarFocusProxy.onHotbarKeyPressed(hotbarWidget, modifiers);
+                    this.hotbarWidget.onHotbarKeyPressed(hotbarWidget, modifiers);
                     return true;
                 }
             }
@@ -160,9 +167,9 @@ public class SpotlightScreen extends Screen
         for (SearchResultData result : results)
         {
             // fill hotbar for first 9
-            if (matchCount < HOTBAR_SLOTS)
+            if (isHotbarEnabledInConfig() && this.hotbarWidget != null && matchCount < HOTBAR_SLOTS)
             {
-                HotbarSlotWidget widget = this.hotbarFocusProxy.getWidgets().get(matchCount);
+                HotbarSlotWidget widget = this.hotbarWidget.getWidgets().get(matchCount);
                 if (widget != null)
                 {
                     widget.setSearchResultData(result);
@@ -190,7 +197,6 @@ public class SpotlightScreen extends Screen
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null)
             Actions.giveItem(player, data);
-        // player.connection.sendCommand(data.getGiveCommand());
     }
 
     /* Overrides for settings */
@@ -205,21 +211,34 @@ public class SpotlightScreen extends Screen
 
     public void setVisible(AbstractWidget widget, boolean visible)
     {
+        if (widget == null)
+            return;
+
         widget.visible = visible;
         widget.active = visible;
     }
 
     private void setResultsVisible(boolean visible)
     {
-        this.hotbarFocusProxy.getWidgets().forEach(widget -> setVisible(widget, visible));
+        if (isHotbarEnabledInConfig() && this.hotbarWidget != null)
+        {
+            this.hotbarWidget.getWidgets().forEach(widget -> setVisible(widget, visible));
+            setVisible(this.hotbarWidget, visible);
+        }
+
         setVisible(this.searchResultsWidget, visible);
-        setVisible(this.hotbarFocusProxy, visible);
     }
 
     private void clearResults()
     {
-        inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
+        this.inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
         this.searchResultsWidget.removeAllChildren();
-        hotbarFocusProxy.getWidgets().forEach(widget -> widget.setSearchResultData(null));
+        if (isHotbarEnabledInConfig() && this.hotbarWidget != null)
+            this.hotbarWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
+    }
+
+    private boolean isHotbarEnabledInConfig()
+    {
+        return SpotlightEntryClient.getConfig().showHotbarSlots;
     }
 }

@@ -2,6 +2,12 @@
   "text.autoconfig.spotlight.title": "Spotlight",
   "text.autoconfig.spotlight.option.showHotbarHelpText": "Show hotbar help text",
   "text.autoconfig.spotlight.option.showHotbarHelpText.@Tooltip": "Shows instructions above the hotbar",
+  "text.autoconfig.spotlight.option.searchBarWidth": "Search bar width",
+  "text.autoconfig.spotlight.option.searchBarWidth.@Tooltip": "The width of the search bar",
+  "text.autoconfig.spotlight.option.resultsBoxHeight": "Results box height",
+  "text.autoconfig.spotlight.option.resultsBoxHeight.@Tooltip": "The height of the results box",
+  "text.autoconfig.spotlight.option.showHotbarSlots": "Show hotbar slots",
+  "text.autoconfig.spotlight.option.showHotbarSlots.@Tooltip": "Shows the hotbar slots while spotlight is open",
   "key.categories.spotlight": "Spotlight",
   "key.spotlight.toggle": "Toggle Spotlight",
   "key.spotlight.close": "Close Spotlight"
