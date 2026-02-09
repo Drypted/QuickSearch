@@ -26,6 +26,11 @@ public class Color
         return new Color(((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF));
     }
 
+    public static Color fromInt(int aarrggbb)
+    {
+        return new Color(aarrggbb);
+    }
+
     public void applyAlpha(int alpha)
     {
         this.color = (this.color & 0x00FFFFFF) | ((alpha & 0xFF) << 24);

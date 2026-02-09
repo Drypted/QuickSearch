@@ -17,7 +17,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
-public class HotbarWidget extends AbstractWidget
+public class HotbarCollectionWidget extends AbstractWidget
 {
     public static final int HOTBAR_SLOT_PADDING = 2;
     public static final int HOTBAR_SLOTS = 9;
@@ -41,7 +41,7 @@ public class HotbarWidget extends AbstractWidget
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
 
-    public HotbarWidget(int startX, int width, int endY)
+    public HotbarCollectionWidget(int startX, int width, int endY)
     {
         super(0, 0, 0, 0, Component.empty());
         final float iconSize = (width - HOTBAR_SLOT_PADDING * (HOTBAR_SLOTS + 1)) / (float) HOTBAR_SLOTS;
@@ -75,9 +75,9 @@ public class HotbarWidget extends AbstractWidget
         this.setHeight(endY - (startY - HELP_TEXT_MARGIN - HELP_TEXT_HEIGHT));
     }
 
-    public static HotbarWidget create(int startX, int width, int endY)
+    public static HotbarCollectionWidget create(int startX, int width, int endY)
     {
-        return new HotbarWidget(startX, width, endY);
+        return new HotbarCollectionWidget(startX, width, endY);
     }
 
     /* RENDERING */

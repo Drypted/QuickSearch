@@ -27,7 +27,7 @@ public class SpotlightScreen extends Screen
 
     private InputWidget inputWidget;
     private ScrollBoxWidget searchResultsWidget;
-    private @Nullable HotbarWidget hotbarWidget;
+    private @Nullable HotbarCollectionWidget hotbarCollectionWidget;
 
     public SpotlightScreen()
     {
@@ -64,12 +64,12 @@ public class SpotlightScreen extends Screen
 
         if (isHotbarEnabledInConfig())
         {
-            this.hotbarWidget = HotbarWidget.create(
+            this.hotbarCollectionWidget = HotbarCollectionWidget.create(
                     searchBarX,
                     searchBarWidth,
-                    searchBarY - HotbarWidget.HOTBAR_SLOT_PADDING
+                    searchBarY - HotbarCollectionWidget.HOTBAR_SLOT_PADDING
             );
-            this.addRenderableWidget(hotbarWidget);
+            this.addRenderableWidget(hotbarCollectionWidget);
         }
 
         this.addRenderableWidget(searchResultsWidget);
@@ -120,15 +120,15 @@ public class SpotlightScreen extends Screen
             return super.keyPressed(keyCode, scanCode, modifiers);
 
         // only allow key when hotbar is focused
-        if (isHotbarEnabledInConfig() && this.hotbarWidget != null && hotbarWidget.isFocused())
+        if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null && hotbarCollectionWidget.isFocused())
         {
             for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
-                HotbarSlotWidget hotbarWidget = this.hotbarWidget.getWidgets().get(i);
+                HotbarSlotWidget hotbarWidget = this.hotbarCollectionWidget.getWidgets().get(i);
                 if (hotbarWidget != null && keyCode == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
                                                                                                .getValue())
                 {
-                    this.hotbarWidget.onHotbarKeyPressed(hotbarWidget, modifiers);
+                    this.hotbarCollectionWidget.onHotbarKeyPressed(hotbarWidget, modifiers);
                     return true;
                 }
             }
@@ -140,8 +140,8 @@ public class SpotlightScreen extends Screen
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers)
     {
-        if (isHotbarEnabledInConfig() && this.hotbarWidget != null)
-            this.hotbarWidget.onAnyKeyReleased();
+        if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
+            this.hotbarCollectionWidget.onAnyKeyReleased();
 
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
@@ -176,9 +176,9 @@ public class SpotlightScreen extends Screen
         for (SearchResultData result : results)
         {
             // fill hotbar for first 9
-            if (isHotbarEnabledInConfig() && this.hotbarWidget != null && matchCount < HOTBAR_SLOTS)
+            if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null && matchCount < HOTBAR_SLOTS)
             {
-                HotbarSlotWidget widget = this.hotbarWidget.getWidgets().get(matchCount);
+                HotbarSlotWidget widget = this.hotbarCollectionWidget.getWidgets().get(matchCount);
                 if (widget != null)
                 {
                     widget.setSearchResultData(result);
@@ -229,10 +229,10 @@ public class SpotlightScreen extends Screen
 
     private void setResultsVisible(boolean visible)
     {
-        if (isHotbarEnabledInConfig() && this.hotbarWidget != null)
+        if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
         {
-            this.hotbarWidget.getWidgets().forEach(widget -> setVisible(widget, visible));
-            setVisible(this.hotbarWidget, visible);
+            this.hotbarCollectionWidget.getWidgets().forEach(widget -> setVisible(widget, visible));
+            setVisible(this.hotbarCollectionWidget, visible);
         }
 
         setVisible(this.searchResultsWidget, visible);
@@ -242,8 +242,8 @@ public class SpotlightScreen extends Screen
     {
         this.inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
         this.searchResultsWidget.removeAllChildren();
-        if (isHotbarEnabledInConfig() && this.hotbarWidget != null)
-            this.hotbarWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
+        if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
+            this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
     }
 
     private boolean isHotbarEnabledInConfig()
