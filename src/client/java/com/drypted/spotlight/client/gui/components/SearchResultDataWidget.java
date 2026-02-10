@@ -303,9 +303,9 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         private boolean isRounded = false;
         private Color backgroundColor = Styles.ResultData.BACKGROUND_COLOR;
         private Color textColor = Styles.ResultData.TEXT_COLOR;
-        private Color hoverColor = Styles.ResultData.HOVER_COLOR;
-        private Color clickColor = Styles.ResultData.CLICK_COLOR;
-        private Color selectedColor = Styles.ResultData.SELECTED_COLOR;
+        private Color hoverColor = Styles.ResultData.HOVER_OUTLINE_COLOR;
+        private Color clickColor = Styles.ResultData.CLICKED_OUTLINE_COLOR;
+        private Color selectedColor = Styles.ResultData.SELECTED_OUTLINE_COLOR;
         private Color outlineColor = Colors.CLEAR;
         private boolean pressed = false;
         private boolean showOutline = false;
