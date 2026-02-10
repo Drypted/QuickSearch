@@ -3,8 +3,8 @@ package com.drypted.spotlight.client.gui.components;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
 import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -539,10 +539,10 @@ public class ScrollBoxWidget extends AbstractWidget
         private int spacing = margin; // by default, spacing = margin
         private boolean showScrollerAlways = false;
 
-        private Color bgColor = Colors.BLACK.withHalfAlpha();
-        private Color outlineColor = Colors.WHITE;
-        private Color scrollbarColor = Colors.CLEAR;
-        private Color scrollerColor = Colors.WHITE;
+        private Color bgColor = Styles.ScrollBox.BACKGROUND_COLOR;
+        private Color outlineColor = Styles.ScrollBox.OUTLINE_COLOR;
+        private Color scrollbarColor = Styles.ScrollBox.SCROLLBAR_COLOR;
+        private Color scrollerColor = Styles.ScrollBox.SCROLLER_COLOR;
 
         private Builder(int x, int y, int width, int height)
         {

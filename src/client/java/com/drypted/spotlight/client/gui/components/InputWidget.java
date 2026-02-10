@@ -2,8 +2,8 @@ package com.drypted.spotlight.client.gui.components;
 
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -69,6 +69,8 @@ public class InputWidget extends AbstractWidget
     private final ArrayList<Consumer<String>> onSubmitCallbacks = new ArrayList<>();
     private final ArrayList<Consumer<Boolean>> onFocusChangeCallbacks = new ArrayList<>();
     private Predicate<String> validator = null;
+
+    private final Color LoaderColor = Styles.Input.LOADER_COLOR;
 
     public InputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor, Color errorColor)
     {
@@ -238,7 +240,7 @@ public class InputWidget extends AbstractWidget
                 loadingX,
                 loadingY,
                 size,
-                Colors.INFO_BLUE,
+                LoaderColor,
                 System.currentTimeMillis()
         );
     }
@@ -1064,15 +1066,15 @@ public class InputWidget extends AbstractWidget
         private int height;
         private boolean isRounded = false;
         private int outlineThickness = 1;
-        private Color backgroundColor = Colors.BLACK.withHalfAlpha();
-        private Color outlineColor = Colors.WHITE;
-        private Color caretColor = Colors.WHITE;
-        private Color normalTextColor = Colors.WHITE;
-        private Color disabledTextColor = Colors.GRAY;
-        private Color selectionBackgroundColor = Colors.SELECTION_BG;
-        private Color selectionTextColor = Colors.SELECTION_TEXT;
-        private Color placeholderColor = Colors.WHITE.withAlpha(128);
-        private Color errorColor = Colors.RED;
+        private Color backgroundColor = Styles.Input.BACKGROUND_COLOR;
+        private Color outlineColor = Styles.Input.OUTLINE_COLOR;
+        private Color caretColor = Styles.Input.CARET_COLOR;
+        private Color normalTextColor = Styles.Input.TEXT_COLOR;
+        private Color disabledTextColor = Styles.Input.DISABLED_TEXT;
+        private Color selectionBackgroundColor = Styles.Input.SELECTION_BACKGROUND;
+        private Color selectionTextColor = Styles.Input.SELECTION_TEXT;
+        private Color placeholderColor = Styles.Input.PLACEHOLDER_TEXT;
+        private Color errorColor = Styles.Input.ERROR_COLOR;
         private String placeholder = "";
         private int maxLength = 256;
         private Predicate<String> validator = null;

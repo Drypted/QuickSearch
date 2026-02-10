@@ -3,9 +3,9 @@ package com.drypted.spotlight.client.gui.components;
 import com.drypted.spotlight.client.gui.models.MouseButtonClick;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
 import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -199,12 +199,12 @@ public class HotbarSlotWidget extends AbstractWidget
         private RoundedCorners roundedCorners = RoundedCorners.all();
         private int outlineThickness = 1;
         private float hotbarTextScale = 0.8f;
-        private Color backgroundColor = Colors.BLACK.withHalfAlpha();
-        private Color textColor = Colors.WHITE;
-        private Color unfocusedColor = Colors.WHITE;
-        private Color focusedColor = Colors.HIGHLIGHT_YELLOW;
-        private Color highlightedColor = Colors.INFO_BLUE;
-        private Color clickedColor = Colors.YELLOW;
+        private Color backgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
+        private Color textColor = Styles.Hotbar.HELP_TEXT_COLOR;
+        private Color unfocusedColor = Styles.Hotbar.TOOLTIP_OUTLINE_COLOR;
+        private Color focusedColor = Styles.Hotbar.SLOT_FOCUSED_COLOR;
+        private Color highlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
+        private Color clickedColor = Styles.Hotbar.SLOT_CLICKED_COLOR;
 
         private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
 

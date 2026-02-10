@@ -3,9 +3,10 @@ package com.drypted.spotlight.client.gui.components;
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.functions.Actions;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
-import com.drypted.spotlight.client.gui.utils.Colors;
+import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
 import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -30,7 +31,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     // (- 1) because drawX draws 1 pixel extra in vertical direction
 
     private static final String CLOSE_BUTTON_TOOLTIP_TEXT = "Hide instructions";
-    public static final float CLOSE_BUTTON_TOOLTIP_SCALE = 0.8f;
+    private static final float CLOSE_BUTTON_TOOLTIP_SCALE = 0.8f;
     private static final int CLOSE_BUTTON_TOOLTIP_PADDING_X = 8;
     private static final int CLOSE_BUTTON_TOOLTIP_PADDING_Y = 3;
     private static final int CLOSE_BUTTON_TOOLTIP_OFFSET_Y = 1;
@@ -40,6 +41,14 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
+
+    private final Color SlotHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
+    private final Color SlotFocusedColor = Styles.Hotbar.SLOT_FOCUSED_COLOR;
+    private final Color HotbarInstructionTextColor = Styles.Hotbar.HELP_TEXT_COLOR;
+    private final Color CloseButtonColor = Styles.Hotbar.HELP_TEXT_CLOSE_BUTTON_COLOR;
+    private final Color TooltipBackgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
+    private final Color TooltipOutlineColor = Styles.Hotbar.TOOLTIP_OUTLINE_COLOR;
+    private final Color TooltipTextColor = Styles.Hotbar.TOOLTIP_TEXT_COLOR;
 
     public HotbarCollectionWidget(int startX, int width, int endY)
     {
@@ -103,8 +112,8 @@ public class HotbarCollectionWidget extends AbstractWidget
                     this.getRight(),
                     this.getY() + HELP_TEXT_HEIGHT,
                     RoundedCorners.all(),
-                    this.anySlotHighlighted ? Colors.INFO_BLUE : Colors.HIGHLIGHT_YELLOW,
-                    Colors.WHITE
+                    this.anySlotHighlighted ? SlotHighlightedColor : SlotFocusedColor,
+                    HotbarInstructionTextColor
             );
 
             drawCloseButton(guiGraphics);
@@ -125,7 +134,7 @@ public class HotbarCollectionWidget extends AbstractWidget
         final int endX = startX + CLOSE_BUTTON_SIZE;
         final int endY = startY + CLOSE_BUTTON_SIZE;
 
-        RenderUtils.drawX(guiGraphics, startX, startY, endX, endY, Colors.RED, 1, true);
+        RenderUtils.drawX(guiGraphics, startX, startY, endX, endY, CloseButtonColor, 1, true);
     }
 
     private void drawCloseButtonTooltip(GuiGraphics guiGraphics, double mouseX, double mouseY)
@@ -152,9 +161,9 @@ public class HotbarCollectionWidget extends AbstractWidget
                 CLOSE_BUTTON_TOOLTIP_PADDING_X,
                 CLOSE_BUTTON_TOOLTIP_PADDING_Y,
                 RoundedCorners.all(),
-                Colors.RED.withAlpha(192),
-                Colors.WHITE,
-                Colors.WHITE
+                TooltipBackgroundColor,
+                TooltipOutlineColor,
+                TooltipTextColor
         );
 
         guiGraphics.pose().popPose();

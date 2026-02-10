@@ -1,12 +1,13 @@
 package com.drypted.spotlight.client.gui.components;
 
-import com.drypted.spotlight.client.models.SearchResultData;
 import com.drypted.spotlight.client.gui.models.MouseButtonClick;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -30,10 +31,11 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
     private Color textColor;
     private Color hoverColor;
     private Color clickColor;
+    private Color selectedColor;
+    private Color outlineColor;
     private boolean pressed;
     private boolean selected;
-
-    private Color outlineColor = Colors.CLEAR;
+    private boolean showOutline;
 
     private static final int ICON_SIZE = 16;
     private static final int ICON_PADDING = 6;
@@ -44,7 +46,7 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public SearchResultDataWidget(int x, int y, int width, SearchResultData data, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor)
+    public SearchResultDataWidget(int x, int y, int width, SearchResultData data, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
     {
         super(x, y, width, 0, Component.empty());
         this.data = data;
@@ -55,6 +57,8 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         this.textColor = textColor;
         this.hoverColor = hoverColor;
         this.clickColor = clickColor;
+        this.selectedColor = selectedColor;
+        this.outlineColor = outlineColor;
 
         this.setHeight((2 * padding) + Math.max(
                 ICON_PADDING,
@@ -74,7 +78,7 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         final int endPosY = startPosY + height;
 
         Color outlineColor;
-        if (this.getOutlineColor() != Colors.CLEAR)
+        if (showOutline)
             outlineColor = this.getOutlineColor();
         else if (this.pressed)
             outlineColor = clickColor;
@@ -95,7 +99,7 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
                 this.outlineThickness,
                 this.selected || renderOutline,
                 this.backgroundColor,
-                (this.selected && !this.isPressed()) ? Colors.HIGHLIGHT_YELLOW : outlineColor
+                (this.selected && !this.isPressed()) ? selectedColor : outlineColor
         );
 
         // icon
@@ -256,6 +260,21 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         this.outlineColor = outlineColor;
     }
 
+    public Color getSelectedColor()
+    {
+        return selectedColor;
+    }
+
+    public void setSelectedColor(Color selectedColor)
+    {
+        this.selectedColor = selectedColor;
+    }
+
+    public void setOutlineEnabled(boolean enabled)
+    {
+        this.showOutline = enabled;
+    }
+
     // public boolean shouldShowBind()
     // {
     //     return showBind;
@@ -282,13 +301,15 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
 
         private int padding = 5;
         private boolean isRounded = false;
-        private Color backgroundColor = Colors.GRAY.withHalfAlpha();
-        private Color textColor = Colors.WHITE;
-        private Color hoverColor = Colors.WHITE;
-        private Color clickColor = Colors.YELLOW;
-        private boolean pressed = false;
-
+        private Color backgroundColor = Styles.ResultData.BACKGROUND_COLOR;
+        private Color textColor = Styles.ResultData.TEXT_COLOR;
+        private Color hoverColor = Styles.ResultData.HOVER_COLOR;
+        private Color clickColor = Styles.ResultData.CLICK_COLOR;
+        private Color selectedColor = Styles.ResultData.SELECTED_COLOR;
         private Color outlineColor = Colors.CLEAR;
+        private boolean pressed = false;
+        private boolean showOutline = false;
+
         private int outlineThickness = 1;
 
         private BiConsumer<MouseButtonClick, Boolean> onClick = (e, pressed) -> {
@@ -343,15 +364,27 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
             return this;
         }
 
-        public Builder pressed(boolean pressed)
+        public Builder selectedColor(Color selectedColor)
         {
-            this.pressed = pressed;
+            this.selectedColor = selectedColor;
             return this;
         }
 
         public Builder outlineColor(Color outlineColor)
         {
             this.outlineColor = outlineColor;
+            return this;
+        }
+
+        public Builder pressed(boolean pressed)
+        {
+            this.pressed = pressed;
+            return this;
+        }
+
+        public Builder showOutline(boolean showOutline)
+        {
+            this.showOutline = showOutline;
             return this;
         }
 
@@ -380,11 +413,13 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
                     this.backgroundColor,
                     this.textColor,
                     this.hoverColor,
-                    this.clickColor
+                    this.clickColor,
+                    this.selectedColor,
+                    this.outlineColor
             );
 
-            button.setOutlineColor(this.outlineColor);
             button.setOnClickCallback(onClick);
+            button.setOutlineEnabled(showOutline);
 
             button.pressed = this.pressed;
 
