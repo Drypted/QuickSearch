@@ -210,7 +210,7 @@ public final class RenderUtils
 
             // Calculate opacity using sine wave (0.3 to 1.0)
             float alpha = 0.3f + 0.7f * (float) Math.abs(Math.sin(progress * Math.PI * 2));
-            Color dotColor = color.withAlpha((int) (255 * alpha));
+            Color dotColor = color.withOpacity((int) (255 * alpha));
 
             // Draw dot
             int dotX = startX + (i * spacing);
@@ -256,7 +256,7 @@ public final class RenderUtils
 
             // Opacity effect
             float alpha = 0.5f + 0.5f * Math.abs(waveValue);
-            Color dotColor = color.withAlpha((int) (255 * alpha));
+            Color dotColor = color.withOpacity((int) (255 * alpha));
 
             // Draw dot
             int dotX = startX + (i * spacing) - (dotSize - baseDotSize) / 2;
