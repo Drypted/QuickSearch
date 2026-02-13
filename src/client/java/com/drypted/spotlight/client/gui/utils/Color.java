@@ -107,13 +107,13 @@ public class Color
      * @param h     hue (0.0-1.0, represents 0-360 degrees)
      * @param s     saturation (0.0-1.0, where 0 is gray and 1 is full color)
      * @param l     lightness (0.0-1.0, where 0 is black and 1 is white)
-     * @param alpha alpha component (0-255)
+     * @param alpha alpha component (0.0-1.0, where 0 is transparent and 1 is opaque)
      *
      * @return a new Color instance
      *
      * @see #toHSL()
      */
-    public static Color fromHSL(float h, float s, float l, int alpha)
+    public static Color fromHSL(float h, float s, float l, float alpha)
     {
         float r, g, b;
 
@@ -134,7 +134,7 @@ public class Color
             b = hueToRGB(p, q, h - 1f / 3f);
         }
 
-        return fromRGBA((int) (r * 255f), (int) (g * 255f), (int) (b * 255f), alpha);
+        return fromRGBA((int) (r * 255f), (int) (g * 255f), (int) (b * 255f), (int) (alpha * 255f));
     }
 
 
