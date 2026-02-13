@@ -27,7 +27,7 @@ public class Color
     /**
      * Internal RGBA color representation as 32-bit integer (0xAARRGGBB)
      */
-    private final int color;
+    private int color;
 
     /* CONSTRUCTORS */
 
@@ -179,6 +179,12 @@ public class Color
         return toHex(false);
     }
 
+    /* MUTABLE OPS */
+
+    public void makeOpaque()
+    {
+        this.color = (this.color & 0x00FFFFFF) | 0xFF000000;
+    }
 
     /* IMMUTABLE OPS */
 
