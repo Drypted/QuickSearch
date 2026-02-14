@@ -33,11 +33,11 @@
 #
 #       Busybox and similar reduced shells will NOT work, because this script
 #       requires all of these POSIX shell features:
-#         * functions;
+#         * actions;
 #         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
 #           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
-#         * compound functions having a testable exit status, especially «case»;
-#         * various built-in functions including «command», «set», and «ulimit».
+#         * compound actions having a testable exit status, especially «case»;
+#         * various built-in actions including «command», «set», and «ulimit».
 #
 #   Important for patching:
 #

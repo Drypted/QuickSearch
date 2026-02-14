@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
-import com.drypted.spotlight.client.core.functions.Actions;
+import com.drypted.spotlight.client.core.actions.Actions;
 import com.drypted.spotlight.client.core.search.SearchHandler;
 import com.drypted.spotlight.client.gui.components.*;
 import com.drypted.spotlight.client.models.SearchResultData;
@@ -96,8 +96,9 @@ public class SpotlightScreen extends Screen
         inputWidget.setSearchStatus(InputWidget.SearchStatus.SEARCHING);
         setResultsVisible(true);
 
-        // Delegate logic to Handler
-        SearchHandler.searchAsync(text, this::displayResults);
+        // Delegate logic to appropriate handler
+        if (!text.contains("/"))
+            SearchHandler.searchAsync(text, this::displayResults);
     }
 
     @Override
@@ -243,7 +244,8 @@ public class SpotlightScreen extends Screen
         this.inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
         this.searchResultsWidget.removeAllChildren();
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
-            this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
+            this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(
+                    null));
     }
 
     private boolean isHotbarEnabledInConfig()

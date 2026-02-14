@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.gui.components;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
-import com.drypted.spotlight.client.core.functions.Actions;
+import com.drypted.spotlight.client.core.actions.Actions;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
