@@ -16,11 +16,17 @@ public class GiveItemAction extends Action
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.gameMode == null)
+        {
+            handleError(player, ERROR.UNINITIALIZED);
             return;
+        }
 
         // Must be in creative mode
         if (notInCreative(player))
+        {
+            handleError(player, ERROR.NOT_IN_CREATIVE);
             return;
+        }
 
         ItemStack stack;
         try
@@ -30,11 +36,13 @@ public class GiveItemAction extends Action
         }
         catch (CommandSyntaxException ignored)
         {
+            handleError(player, ERROR.INVALID_ITEM);
             return;
         }
 
         if (stack.isEmpty())
         {
+            handleError(player, ERROR.INVALID_ITEM);
             return;
         }
 
