@@ -202,9 +202,9 @@ public class HotbarSlotWidget extends AbstractWidget
         private Color backgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
         private Color textColor = Styles.Hotbar.HELP_TEXT_COLOR;
         private Color unfocusedColor = Styles.Hotbar.TOOLTIP_OUTLINE_COLOR;
-        private Color focusedColor = Styles.Hotbar.SLOT_FOCUSED_COLOR;
+        private Color focusedColor = Styles.Hotbar.FOCUSED_COLOR;
         private Color highlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
-        private Color clickedColor = Styles.Hotbar.SLOT_CLICKED_COLOR;
+        private Color clickedColor = Styles.Hotbar.SLOT_PRESSED_COLOR;
 
         private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
 

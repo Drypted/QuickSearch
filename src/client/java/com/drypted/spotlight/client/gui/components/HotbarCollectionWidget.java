@@ -43,7 +43,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     private boolean anySlotHighlighted = false;
 
     private final Color SlotHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
-    private final Color SlotFocusedColor = Styles.Hotbar.SLOT_FOCUSED_COLOR;
+    private final Color SlotFocusedColor = Styles.Hotbar.FOCUSED_COLOR;
     private final Color HotbarInstructionTextColor = Styles.Hotbar.HELP_TEXT_COLOR;
     private final Color CloseButtonColor = Styles.Hotbar.HELP_TEXT_CLOSE_BUTTON_COLOR;
     private final Color TooltipBackgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
@@ -291,7 +291,7 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     private enum HotbarHelpText
     {
-        UNSELECTED("key: move to slot - shift + key: select slot"),
+        UNSELECTED("key: move to slot, shift + key: select slot"),
         SELECTED("key: move selected to slot");
 
         private final String text;
