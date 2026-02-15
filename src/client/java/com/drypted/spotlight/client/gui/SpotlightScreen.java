@@ -2,9 +2,11 @@ package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.actions.Actions;
+import com.drypted.spotlight.client.core.command.Command;
+import com.drypted.spotlight.client.core.command.CommandsHandler;
 import com.drypted.spotlight.client.core.search.SearchHandler;
 import com.drypted.spotlight.client.gui.components.*;
-import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -43,15 +45,10 @@ public class SpotlightScreen extends Screen
         final int searchBarX = (this.width - searchBarWidth) / 2;
         final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FROM_CENTER;
 
-        this.inputWidget = InputWidget.builder(
-                searchBarX,
-                searchBarY,
-                searchBarWidth,
-                SEARCH_BAR_HEIGHT
-        ).build();
+        this.inputWidget = InputWidget.builder(searchBarX, searchBarY, searchBarWidth, SEARCH_BAR_HEIGHT).build();
         this.inputWidget.setPlaceholder("Search items for blocks ...");
         // set validator for no symbols
-        this.inputWidget.setValidator(text -> text.matches("[a-zA-Z0-9 _-]*"));
+        this.inputWidget.setValidator(text -> text.matches("[/a-zA-Z0-9 _-]*"));
 
         this.searchResultsWidget = ScrollBoxWidget.builder(
                 searchBarX,
@@ -96,8 +93,8 @@ public class SpotlightScreen extends Screen
         inputWidget.setSearchStatus(InputWidget.SearchStatus.SEARCHING);
 
         // Delegate logic to appropriate handler
-        if (!text.contains("/"))
-            SearchHandler.searchAsync(text, this::displayResults);
+        if (text.contains("/")) CommandsHandler.getCommands(text, this::displayCommands);
+        else SearchHandler.searchAsync(text, this::displayItems);
     }
 
     @Override
@@ -116,8 +113,7 @@ public class SpotlightScreen extends Screen
             return true;
         }
 
-        if (this.minecraft == null)
-            return super.keyPressed(keyCode, scanCode, modifiers);
+        if (this.minecraft == null) return super.keyPressed(keyCode, scanCode, modifiers);
 
         // only allow key when hotbar is focused
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null && hotbarCollectionWidget.isFocused())
@@ -125,8 +121,7 @@ public class SpotlightScreen extends Screen
             for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
                 HotbarSlotWidget hotbarWidget = this.hotbarCollectionWidget.getWidgets().get(i);
-                if (hotbarWidget != null && keyCode == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
-                                                                                               .getValue())
+                if (hotbarWidget != null && keyCode == this.minecraft.options.keyHotbarSlots[i].getDefaultKey().getValue())
                 {
                     this.hotbarCollectionWidget.onHotbarKeyPressed(hotbarWidget, modifiers);
                     return true;
@@ -160,7 +155,7 @@ public class SpotlightScreen extends Screen
 
     /* Results */
 
-    private void displayResults(List<SearchResultData> results)
+    private void displayItems(List<ItemsResultData> results)
     {
         clearResults();
 
@@ -173,7 +168,7 @@ public class SpotlightScreen extends Screen
         }
 
         int matchCount = 0;
-        for (SearchResultData result : results)
+        for (ItemsResultData result : results)
         {
             // fill hotbar for first 9
             if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null && matchCount < HOTBAR_SLOTS)
@@ -183,16 +178,18 @@ public class SpotlightScreen extends Screen
                 {
                     widget.setSearchResultData(result);
                     widget.onClick(mouseButtonClick -> {
-                        onResultClicked(result);
+                        onItemsResultClicked(result);
                         widget.setFocused(true);
                     });
                 }
             }
 
             this.searchResultsWidget.addChildRow( //
-                    SearchResultDataWidget.builder(0, 0, result)
-                                          .width(searchResultsWidget.getMaxWidth())
-                                          .onClick((mBC, dC) -> onResultClicked(result)).build() //
+                    ItemsResultDataWidget.builder(
+                            0,
+                            0,
+                            result
+                    ).width(searchResultsWidget.getMaxWidth()).onClick((mBC, dC) -> onItemsResultClicked(result)).build() //
             );
 
             matchCount++;
@@ -202,27 +199,68 @@ public class SpotlightScreen extends Screen
         inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
     }
 
-    private void onResultClicked(SearchResultData data)
+    private void onItemsResultClicked(ItemsResultData data)
     {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null)
-            Actions.giveItem(player, data);
+        if (player != null) Actions.giveItem(player, data);
+    }
+
+    /* Commands */
+
+    private void displayCommands(List<Command> results)
+    {
+        clearResults();
+
+        // If results came back empty (or query was canceled/cleared mid-flight), stop here.
+        if (results.isEmpty())
+        {
+            inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
+            setResultsVisible(false);
+            return;
+        }
+
+        int matchCount = 0;
+        for (Command result : results)
+        {
+            this.searchResultsWidget.addChildRow( //
+                    CommandResultDataWidget.builder(
+                            0,
+                            0,
+                            result
+                    ).width(searchResultsWidget.getMaxWidth()).onClick((mBC, dC) -> onCommandsResultClicked(result)).build() //
+            );
+
+            matchCount++;
+        }
+
+        setResultsVisible(true, false);
+        inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
+    }
+
+    private void onCommandsResultClicked(Command data)
+    {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null) data.execute(new String[]{}, player);
     }
 
     /* Overrides for settings */
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) { } // don't render any background
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f)
+    {
+    } // don't render any background
 
     @Override
-    public boolean isPauseScreen() { return false; }
+    public boolean isPauseScreen()
+    {
+        return false;
+    }
 
     /* Helpers */
 
     public void setVisible(AbstractWidget widget, boolean visible)
     {
-        if (widget == null)
-            return;
+        if (widget == null) return;
 
         widget.visible = visible;
         widget.active = visible;
@@ -230,10 +268,15 @@ public class SpotlightScreen extends Screen
 
     private void setResultsVisible(boolean visible)
     {
+        setResultsVisible(visible, true);
+    }
+
+    private void setResultsVisible(boolean visible, boolean showHotbar)
+    {
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
         {
             this.hotbarCollectionWidget.getWidgets().forEach(widget -> setVisible(widget, visible));
-            setVisible(this.hotbarCollectionWidget, visible);
+            setVisible(this.hotbarCollectionWidget, showHotbar);
         }
 
         setVisible(this.searchResultsWidget, visible);
@@ -244,8 +287,7 @@ public class SpotlightScreen extends Screen
         this.inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
         this.searchResultsWidget.removeAllChildren();
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
-            this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(
-                    null));
+            this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
     }
 
     private boolean isHotbarEnabledInConfig()

@@ -115,25 +115,13 @@ public class InputWidget extends AbstractWidget
         int textAreaHeight = this.getHeight();
 
         // Enable scissor for clipping
-        guiGraphics.enableScissor(
-                textX,
-                this.getY(),
-                textX + textAreaWidth,
-                this.getY() + textAreaHeight
-        );
+        guiGraphics.enableScissor(textX, this.getY(), textX + textAreaWidth, this.getY() + textAreaHeight);
 
         // Render text or placeholder
         if (this.text.isEmpty() && !this.placeholder.isEmpty())
         {
             // Render placeholder
-            guiGraphics.drawString(
-                    FONT,
-                    this.placeholder,
-                    textX,
-                    textY,
-                    placeholderColor.asInt(),
-                    false
-            );
+            guiGraphics.drawString(FONT, this.placeholder, textX, textY, placeholderColor.asInt(), false);
         }
         else
         {
@@ -155,8 +143,7 @@ public class InputWidget extends AbstractWidget
                 beforeSelection = this.text.substring(0, start);
                 selection = this.text.substring(start, end);
                 afterSelection = this.text.substring(end);
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 beforeSelection = this.text;
                 selection = "";
@@ -165,17 +152,8 @@ public class InputWidget extends AbstractWidget
 
             // Render text
             // Priority: disabled > error > normal
-            Color textColor = isDisabled
-                              ? disabledTextColor
-                              : hasError ? errorColor : normalTextColor;
-            guiGraphics.drawString(
-                    FONT,
-                    beforeSelection,
-                    textX - scrollOffset,
-                    textY,
-                    textColor.asInt(),
-                    false
-            );
+            Color textColor = isDisabled ? disabledTextColor : hasError ? errorColor : normalTextColor;
+            guiGraphics.drawString(FONT, beforeSelection, textX - scrollOffset, textY, textColor.asInt(), false);
 
             guiGraphics.drawString(
                     FONT,
@@ -228,13 +206,7 @@ public class InputWidget extends AbstractWidget
         int textAreaWidth = getTextAreaWidth();
         if (caretX >= textX && caretX < textX + textAreaWidth)
         {
-            guiGraphics.fill(
-                    caretX,
-                    textY,
-                    caretX + 1,
-                    textY + FONT.lineHeight,
-                    caretColor.asInt()
-            );
+            guiGraphics.fill(caretX, textY, caretX + 1, textY + FONT.lineHeight, caretColor.asInt());
         }
     }
 
@@ -297,9 +269,7 @@ public class InputWidget extends AbstractWidget
 
     private int getTextAreaWidth()
     {
-        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING)
-                             ? (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT)
-                             : 0;
+        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ? (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT) : 0;
         return this.getWidth() - (TEXT_PADDING_X * 2) - indicatorSpace;
     }
 
@@ -314,8 +284,7 @@ public class InputWidget extends AbstractWidget
     @Override
     public boolean charTyped(char codePoint, int modifiers)
     {
-        if (!this.isFocused() || isDisabled || isReadOnly)
-            return false;
+        if (!this.isFocused() || isDisabled || isReadOnly) return false;
 
         if (StringUtil.isAllowedChatCharacter(codePoint))
         {
@@ -329,8 +298,7 @@ public class InputWidget extends AbstractWidget
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        if (!this.isFocused() || isDisabled)
-            return false;
+        if (!this.isFocused() || isDisabled) return false;
 
         boolean ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0 || (modifiers & GLFW.GLFW_MOD_SUPER) != 0;
         boolean shift = (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
@@ -361,8 +329,7 @@ public class InputWidget extends AbstractWidget
             }
         }
 
-        if (isReadOnly && (keyCode == GLFW.GLFW_KEY_BACKSPACE || keyCode == GLFW.GLFW_KEY_DELETE))
-            return false;
+        if (isReadOnly && (keyCode == GLFW.GLFW_KEY_BACKSPACE || keyCode == GLFW.GLFW_KEY_DELETE)) return false;
 
         // Movement and editing
         return switch (keyCode)
@@ -494,8 +461,7 @@ public class InputWidget extends AbstractWidget
 
     private int findPreviousWordBoundary(int from)
     {
-        if (from <= 0)
-            return 0;
+        if (from <= 0) return 0;
 
         int pos = from - 1;
 
@@ -516,8 +482,7 @@ public class InputWidget extends AbstractWidget
 
     private int findNextWordBoundary(int from)
     {
-        if (from >= text.length())
-            return text.length();
+        if (from >= text.length()) return text.length();
 
         int pos = from;
 
@@ -559,8 +524,7 @@ public class InputWidget extends AbstractWidget
 
     private String getSelectedText()
     {
-        if (!hasSelection())
-            return "";
+        if (!hasSelection()) return "";
 
         int start = Math.min(selectionStart, selectionEnd);
         int end = Math.max(selectionStart, selectionEnd);
@@ -569,8 +533,7 @@ public class InputWidget extends AbstractWidget
 
     private void deleteSelection()
     {
-        if (!hasSelection())
-            return;
+        if (!hasSelection()) return;
 
         int start = Math.min(selectionStart, selectionEnd);
         int end = Math.max(selectionStart, selectionEnd);
@@ -594,8 +557,7 @@ public class InputWidget extends AbstractWidget
         if (text.length() + str.length() > maxLength)
         {
             str = str.substring(0, maxLength - text.length());
-            if (str.isEmpty())
-                return;
+            if (str.isEmpty()) return;
         }
 
         text = text.substring(0, cursorPos) + str + text.substring(cursorPos);
@@ -616,8 +578,7 @@ public class InputWidget extends AbstractWidget
             return;
         }
 
-        if (cursorPos == 0)
-            return;
+        if (cursorPos == 0) return;
 
         if (byWord)
         {
@@ -646,8 +607,7 @@ public class InputWidget extends AbstractWidget
             return;
         }
 
-        if (cursorPos >= text.length())
-            return;
+        if (cursorPos >= text.length()) return;
 
         if (byWord)
         {
@@ -668,8 +628,7 @@ public class InputWidget extends AbstractWidget
 
     private void copyToClipboard()
     {
-        if (!hasSelection())
-            return;
+        if (!hasSelection()) return;
 
         String selected = getSelectedText();
         Minecraft.getInstance().keyboardHandler.setClipboard(selected);
@@ -677,8 +636,7 @@ public class InputWidget extends AbstractWidget
 
     private void cutToClipboard()
     {
-        if (!hasSelection())
-            return;
+        if (!hasSelection()) return;
 
         copyToClipboard();
         deleteSelection();
@@ -689,8 +647,7 @@ public class InputWidget extends AbstractWidget
     private void pasteFromClipboard()
     {
         String clipboard = Minecraft.getInstance().keyboardHandler.getClipboard();
-        if (clipboard.isEmpty())
-            return;
+        if (clipboard.isEmpty()) return;
 
         // Filter allowed characters
         StringBuilder filtered = new StringBuilder();
@@ -753,8 +710,7 @@ public class InputWidget extends AbstractWidget
             return false;
         }
 
-        if (isDisabled)
-            return false;
+        if (isDisabled) return false;
 
         // Left click
         if (button == 0)
@@ -777,8 +733,7 @@ public class InputWidget extends AbstractWidget
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
     {
-        if (!isDragging || isDisabled)
-            return false;
+        if (!isDragging || isDisabled) return false;
 
         double clampedX = Math.max(getTextX(), mouseX);
         int currentPos = getCharacterIndexAt(clampedX);
@@ -806,8 +761,7 @@ public class InputWidget extends AbstractWidget
         int textX = getTextX();
         int relativeX = (int) mouseX - textX + scrollOffset;
 
-        if (relativeX <= 0)
-            return 0;
+        if (relativeX <= 0) return 0;
 
         int width = 0;
         for (int i = 0; i < text.length(); i++)
@@ -825,8 +779,7 @@ public class InputWidget extends AbstractWidget
 
     private void selectWordAt(int pos)
     {
-        if (text.isEmpty())
-            return;
+        if (text.isEmpty()) return;
 
         pos = Math.max(0, Math.min(text.length() - 1, pos));
 
@@ -915,10 +868,7 @@ public class InputWidget extends AbstractWidget
         }
         else if (isReadOnly)
         {
-            output.add(
-                    NarratedElementType.TITLE,
-                    Component.literal("Search input (read-only): " + text)
-            );
+            output.add(NarratedElementType.TITLE, Component.literal("Search input (read-only): " + text));
         }
         else
         {
@@ -1245,7 +1195,6 @@ public class InputWidget extends AbstractWidget
 
     public enum SearchStatus
     {
-        IDLE,
-        SEARCHING
+        IDLE, SEARCHING
     }
 }

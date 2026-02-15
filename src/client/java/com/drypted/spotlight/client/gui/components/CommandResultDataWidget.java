@@ -1,12 +1,12 @@
 package com.drypted.spotlight.client.gui.components;
 
+import com.drypted.spotlight.client.core.command.Command;
 import com.drypted.spotlight.client.gui.models.MouseButtonClick;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
-import com.drypted.spotlight.client.models.SearchResultData;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -17,12 +17,11 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.BiConsumer;
 
-/// Renders a `SearchResultData` entry as a widget, implements `ScrollBoxWidgetEntry`
-public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxWidgetEntry
+public class CommandResultDataWidget extends AbstractWidget implements ScrollBoxWidgetEntry
 {
     private static final Font FONT = Minecraft.getInstance().font;
 
-    SearchResultData data;
+    private final Command command;
 
     private final int padding;
     private final boolean isRounded;
@@ -37,8 +36,6 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
     private boolean selected;
     private boolean showOutline;
 
-    private static final int ICON_SIZE = 16;
-    private static final int ICON_PADDING = 6;
     private static final int SUBTITLE_SPACING = 1;
     private static final float SUBTITLE_SCALE = 0.75f;
 
@@ -46,10 +43,10 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public SearchResultDataWidget(int x, int y, int width, SearchResultData data, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
+    public CommandResultDataWidget(int x, int y, int width, Command command, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
     {
         super(x, y, width, 0, Component.empty());
-        this.data = data;
+        this.command = command;
         this.padding = padding;
         this.isRounded = isRounded;
         this.outlineThickness = outlineThickness;
@@ -60,10 +57,7 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         this.selectedColor = selectedColor;
         this.outlineColor = outlineColor;
 
-        this.setHeight((2 * padding) + Math.max(
-                ICON_PADDING,
-                FONT.lineHeight + SUBTITLE_SPACING + (int) (FONT.lineHeight * SUBTITLE_SCALE)
-        ));
+        this.setHeight((2 * padding) + FONT.lineHeight + SUBTITLE_SPACING + (int) (FONT.lineHeight * SUBTITLE_SCALE));
     }
 
     @Override
@@ -78,14 +72,10 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         final int endPosY = startPosY + height;
 
         Color outlineColor;
-        if (showOutline)
-            outlineColor = this.getOutlineColor();
-        else if (this.pressed)
-            outlineColor = clickColor;
-        else if (this.isHovered)
-            outlineColor = hoverColor;
-        else
-            outlineColor = backgroundColor;
+        if (showOutline) outlineColor = this.getOutlineColor();
+        else if (this.pressed) outlineColor = clickColor;
+        else if (this.isHovered) outlineColor = hoverColor;
+        else outlineColor = backgroundColor;
 
         boolean renderOutline = this.isHovered() || this.isPressed() || this.isFocused();
 
@@ -102,17 +92,11 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
                 (this.selected && !this.isPressed()) ? selectedColor : outlineColor
         );
 
-        // icon
-        int iconX = startPosX + padding;
-        int iconY = startPosY + padding;
-
-        RenderUtils.drawScaledItemSize(g, this.data.getIcon(), iconX, iconY, ICON_SIZE);
-
         // title
-        int titleX = iconX + ICON_SIZE + ICON_PADDING;
+        int titleX = startPosX + padding;
         int titleY = startPosY + padding;
 
-        g.drawString(FONT, this.data.getName(), titleX, titleY, textColor.asInt(), false);
+        g.drawString(FONT, this.command.getName(), titleX, titleY, textColor.asInt(), false);
 
         // subtitle
         int subtitleY = titleY + FONT.lineHeight + SUBTITLE_SPACING;
@@ -122,7 +106,7 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         g.pose().scale(subtitleScale, subtitleScale, subtitleScale);
         g.drawString(
                 FONT,
-                this.data.getIdentifier().toString(),
+                this.command.getDescription(),
                 (int) (titleX / subtitleScale),
                 (int) (subtitleY / subtitleScale),
                 textColor.asInt(),
@@ -185,10 +169,16 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
 
     /* State Methods */
 
-    public boolean isPressed() { return pressed; }
+    public boolean isPressed()
+    {
+        return pressed;
+    }
 
     @Override
-    public void select(boolean selected) { this.selected = selected; }
+    public void select(boolean selected)
+    {
+        this.selected = selected;
+    }
 
     @Override
     public void press()
@@ -287,7 +277,7 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
 
     /* Builder */
 
-    public static Builder builder(int x, int y, SearchResultData data)
+    public static Builder builder(int x, int y, Command data)
     {
         return new Builder(x, y, data);
     }
@@ -297,7 +287,7 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         private final int x;
         private final int y;
         private int width = 0;
-        private final SearchResultData data;
+        private final Command command;
 
         private int padding = 5;
         private boolean isRounded = false;
@@ -315,11 +305,11 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
         private BiConsumer<MouseButtonClick, Boolean> onClick = (e, pressed) -> {
         };
 
-        private Builder(int x, int y, SearchResultData data)
+        private Builder(int x, int y, Command command)
         {
             this.x = x;
             this.y = y;
-            this.data = data;
+            this.command = command;
         }
 
         public Builder width(int width)
@@ -400,13 +390,13 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
             return this;
         }
 
-        public SearchResultDataWidget build()
+        public CommandResultDataWidget build()
         {
-            SearchResultDataWidget button = new SearchResultDataWidget(
+            CommandResultDataWidget button = new CommandResultDataWidget(
                     this.x,
                     this.y,
                     this.width,
-                    this.data,
+                    this.command,
                     this.padding,
                     this.isRounded,
                     this.outlineThickness,
@@ -423,8 +413,7 @@ public class SearchResultDataWidget extends AbstractWidget implements ScrollBoxW
 
             button.pressed = this.pressed;
 
-            if (this.width > 0)
-                button.setWidth(this.width);
+            if (this.width > 0) button.setWidth(this.width);
 
             return button;
         }

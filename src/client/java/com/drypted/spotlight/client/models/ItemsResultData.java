@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-public final class SearchResultData
+public final class ItemsResultData
 {
     private final ItemStack icon;
     private final String name;
@@ -20,7 +20,7 @@ public final class SearchResultData
     private final int maxStackSize;
     private final ItemInput definition;
 
-    public SearchResultData(ItemStack icon, String name, ResourceLocation identifier)
+    public ItemsResultData(ItemStack icon, String name, ResourceLocation identifier)
     {
         this.icon = icon;
         this.name = name;
@@ -29,38 +29,34 @@ public final class SearchResultData
         this.definition = buildItemInput(icon);
     }
 
-    public static SearchResultData fromItem(Item item)
+    public static ItemsResultData fromItem(Item item)
     {
-        if (item == null || item == ItemStack.EMPTY.getItem() || item == Items.AIR)
-            return SearchResultData.EMPTY;
+        if (item == null || item == ItemStack.EMPTY.getItem() || item == Items.AIR) return ItemsResultData.EMPTY;
 
         final ItemStack stack = item.getDefaultInstance();
 
         final String name = item.getName(stack).getString();
         final ResourceLocation identifier = BuiltInRegistries.ITEM.getKey(item);
 
-        return new SearchResultData(stack, name, identifier);
+        return new ItemsResultData(stack, name, identifier);
     }
 
-    public static SearchResultData fromItemStack(ItemStack stack)
+    public static ItemsResultData fromItemStack(ItemStack stack)
     {
-        if (stack == null || stack.isEmpty() || stack.getItem() == Items.AIR)
-            return SearchResultData.EMPTY;
+        if (stack == null || stack.isEmpty() || stack.getItem() == Items.AIR) return ItemsResultData.EMPTY;
 
         final Item item = stack.getItem();
         final String name = item.getName(stack).getString();
         final ResourceLocation identifier = BuiltInRegistries.ITEM.getKey(item);
 
-        return new SearchResultData(stack, name, identifier);
+        return new ItemsResultData(stack, name, identifier);
     }
 
     private static ItemInput buildItemInput(ItemStack stack)
     {
-        if (stack == null || stack == ItemStack.EMPTY || stack.getItem() == Items.AIR)
-            return null;
+        if (stack == null || stack == ItemStack.EMPTY || stack.getItem() == Items.AIR) return null;
 
-        ResourceKey<Item> itemKey = BuiltInRegistries.ITEM.getResourceKey(stack.getItem())
-                                                          .orElseThrow();
+        ResourceKey<Item> itemKey = BuiltInRegistries.ITEM.getResourceKey(stack.getItem()).orElseThrow();
         Holder<Item> holder = BuiltInRegistries.ITEM.getHolderOrThrow(itemKey);
 
         DataComponentPatch patch = stack.getComponentsPatch();
@@ -136,7 +132,7 @@ public final class SearchResultData
 
     /* PRE DEFINED */
 
-    public static final SearchResultData EMPTY = new SearchResultData(
+    public static final ItemsResultData EMPTY = new ItemsResultData(
             ItemStack.EMPTY,
             "",
             ResourceLocation.fromNamespaceAndPath("spotlight", "search_result_data_empty")

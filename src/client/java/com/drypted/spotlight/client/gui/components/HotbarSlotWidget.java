@@ -4,7 +4,7 @@ import com.drypted.spotlight.client.gui.models.MouseButtonClick;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
-import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.models.ItemsResultData;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -31,7 +31,7 @@ public class HotbarSlotWidget extends AbstractWidget
 
     private Consumer<MouseButtonClick> onClickCallback;
 
-    private SearchResultData searchResultData = SearchResultData.EMPTY;
+    private ItemsResultData itemsResultData = ItemsResultData.EMPTY;
     private boolean showBind = false;
     private boolean highlighted = false;
 
@@ -79,12 +79,12 @@ public class HotbarSlotWidget extends AbstractWidget
         );
 
         // show icon if search result data is available
-        if (searchResultData != null && !searchResultData.isEmpty())
+        if (itemsResultData != null && !itemsResultData.isEmpty())
         {
             int iconSize = this.getHeight() - 2 * iconPadding;
             RenderUtils.drawScaledItemSize(
                     guiGraphics,
-                    searchResultData.getIcon(),
+                    itemsResultData.getIcon(),
                     this.getX() + iconPadding,
                     this.getY() + iconPadding,
                     iconSize
@@ -130,14 +130,14 @@ public class HotbarSlotWidget extends AbstractWidget
 
     /* Getters and Setters */
 
-    public SearchResultData getSearchResultData()
+    public ItemsResultData getSearchResultData()
     {
-        return searchResultData;
+        return itemsResultData;
     }
 
-    public void setSearchResultData(SearchResultData searchResultData)
+    public void setSearchResultData(ItemsResultData itemsResultData)
     {
-        this.searchResultData = searchResultData;
+        this.itemsResultData = itemsResultData;
     }
 
     public void onClick(Consumer<MouseButtonClick> onClickCallback)

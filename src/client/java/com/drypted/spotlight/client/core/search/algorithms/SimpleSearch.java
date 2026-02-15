@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.core.search.algorithms;
 
-import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.models.ItemsResultData;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +19,7 @@ public final class SimpleSearch
      *
      * @return matched results (up to maxResults)
      */
-    public static List<SearchResultData> search(List<SearchResultData> items, String query, int maxResults)
+    public static List<ItemsResultData> search(List<ItemsResultData> items, String query, int maxResults)
     {
         if (query == null || query.isBlank() || items == null || items.isEmpty())
         {

@@ -5,7 +5,7 @@ import com.drypted.spotlight.client.core.actions.Actions;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
-import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.models.ItemsResultData;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -67,7 +67,7 @@ public class HotbarCollectionWidget extends AbstractWidget
                     (int) Math.ceil(iconSize)
             ).build();
             hotbarWidget.onClick(mouseButtonClick -> {
-                SearchResultData item = hotbarWidget.getSearchResultData();
+                ItemsResultData item = hotbarWidget.getSearchResultData();
                 if (item == null || item.isEmpty())
                     return;
 
@@ -221,7 +221,7 @@ public class HotbarCollectionWidget extends AbstractWidget
         if (player != null)
         {
             // if there is item in the selected hotbar slot
-            SearchResultData item = widget.getSearchResultData();
+            ItemsResultData item = widget.getSearchResultData();
 
             // if a slot is already selected, use that slot
             if (selectedHotbarWidget != null)

@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.core.search.algorithms;
 
-import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.models.ItemsResultData;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -50,7 +50,7 @@ public class SmartSearch
      * The complete list of searchable items managed by this search instance.
      * This list is immutable after being set via constructor or rebuildIndices().
      */
-    private List<SearchResultData> searchableItems = Collections.emptyList();
+    private List<ItemsResultData> searchableItems = Collections.emptyList();
 
     /**
      * Inverted index mapping individual words to the indices of items containing those words.
@@ -98,7 +98,7 @@ public class SmartSearch
      *
      * @param items The list of searchable items to index. If null, an empty list is used.
      */
-    public SmartSearch(List<SearchResultData> items)
+    public SmartSearch(List<ItemsResultData> items)
     {
         if (items != null)
         {
@@ -118,7 +118,7 @@ public class SmartSearch
      *
      * @param items The new list of items to search. If null, the search will be empty.
      */
-    public void rebuildIndices(List<SearchResultData> items)
+    public void rebuildIndices(List<ItemsResultData> items)
     {
         if (items == null)
         {
@@ -146,7 +146,7 @@ public class SmartSearch
      *
      * @return A stream of matching items, sorted by relevance (best matches first)
      */
-    public Stream<SearchResultData> search(String searchQuery, int maximumResults)
+    public Stream<ItemsResultData> search(String searchQuery, int maximumResults)
     {
         if (searchQuery == null)
         {
@@ -163,7 +163,7 @@ public class SmartSearch
         {
             for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
             {
-                SearchResultData item = searchableItems.get(itemIndex);
+                ItemsResultData item = searchableItems.get(itemIndex);
 
                 double nameSimilarity = calculateTrigramSimilarity(
                         normalizedQuery,
@@ -188,7 +188,7 @@ public class SmartSearch
 
         // Step 2: Score candidates and filter out poor matches
         return candidateItemIndices.stream().map(itemIndex -> {
-                                       SearchResultData item = searchableItems.get(itemIndex);
+                                       ItemsResultData item = searchableItems.get(itemIndex);
                                        ItemScoreResult scoreResult = calculateItemScore(item, normalizedQuery);
 
                                        // Filter out items with no match (score >= 1000)
@@ -237,7 +237,7 @@ public class SmartSearch
 
         for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
         {
-            SearchResultData item = searchableItems.get(itemIndex);
+            ItemsResultData item = searchableItems.get(itemIndex);
 
             // Index the identifier path (e.g., "minecraft:diamond_sword")
             // Split on common separators: underscore, hyphen, space, slash, colon, backslash
@@ -323,7 +323,7 @@ public class SmartSearch
 
         for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
         {
-            SearchResultData item = searchableItems.get(itemIndex);
+            ItemsResultData item = searchableItems.get(itemIndex);
 
             // Generate trigrams from the item's path identifier
             String itemPath = item.getIdentifier().getPath().toLowerCase();
@@ -664,7 +664,7 @@ public class SmartSearch
      *
      * @return Scoring result containing the total score and match type
      */
-    private ItemScoreResult calculateItemScore(SearchResultData item, String normalizedQuery)
+    private ItemScoreResult calculateItemScore(ItemsResultData item, String normalizedQuery)
     {
         String displayName = item.getName().toLowerCase();
         String identifierPath = item.getIdentifier().getPath().toLowerCase();
@@ -943,7 +943,7 @@ public class SmartSearch
      * The originalIndex preserves the item's position in the source list, which is used
      * as a tiebreaker when scores are equal (to maintain stable sorting).
      */
-    private record SearchResultWithScore(SearchResultData item, int score, int originalIndex)
+    private record SearchResultWithScore(ItemsResultData item, int score, int originalIndex)
     { }
 
     /**

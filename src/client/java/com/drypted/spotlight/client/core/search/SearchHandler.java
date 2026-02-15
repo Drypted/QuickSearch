@@ -2,7 +2,7 @@ package com.drypted.spotlight.client.core.search;
 
 import com.drypted.spotlight.client.core.search.algorithms.SimpleSearch;
 import com.drypted.spotlight.client.core.search.algorithms.SmartSearch;
-import com.drypted.spotlight.client.models.SearchResultData;
+import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -20,7 +20,7 @@ public class SearchHandler
 {
     private static final int MAX_RESULTS = 60;
 
-    private static List<SearchResultData> GameItems = Collections.emptyList();
+    private static List<ItemsResultData> GameItems = Collections.emptyList();
 
     private static SmartSearch smartSearch;
     private static SearchMode searchMode = SearchMode.SMART;
@@ -39,12 +39,12 @@ public class SearchHandler
             return;
         }
 
-        LinkedHashMap<String, SearchResultData> combined = new LinkedHashMap<>();
+        LinkedHashMap<String, ItemsResultData> combined = new LinkedHashMap<>();
 
         // 1. Creative-mode items (sorted, visible)
         CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems().stream()).forEach(
                 stack -> {
-                    SearchResultData data = SearchResultData.fromItemStack(stack);
+                    ItemsResultData data = ItemsResultData.fromItemStack(stack);
                     combined.putIfAbsent(data.getSerializedDefinition(), data);
                 });
 
@@ -52,7 +52,7 @@ public class SearchHandler
         BuiltInRegistries.ITEM.stream().forEach(item -> {
             try
             {
-                SearchResultData data = SearchResultData.fromItem(item);
+                ItemsResultData data = ItemsResultData.fromItem(item);
                 combined.putIfAbsent(data.getSerializedDefinition(), data);
             }
             catch (Exception ignored)
@@ -90,7 +90,7 @@ public class SearchHandler
      * @param query      The text to search for.
      * @param onComplete Callback to run on the main thread with the results.
      */
-    public static void searchAsync(String query, Consumer<List<SearchResultData>> onComplete)
+    public static void searchAsync(String query, Consumer<List<ItemsResultData>> onComplete)
     {
         searchAsync(query, onComplete, searchMode);
     }
@@ -104,7 +104,7 @@ public class SearchHandler
      * @param onComplete Callback to run on the main thread with the results.
      * @param mode       The search mode to use (simple or smart).
      */
-    public static void searchAsync(String query, Consumer<List<SearchResultData>> onComplete, SearchMode mode)
+    public static void searchAsync(String query, Consumer<List<ItemsResultData>> onComplete, SearchMode mode)
     {
         // 1. Cancel existing search if it's still running
         if (ActiveSearchTask != null && !ActiveSearchTask.isDone())
@@ -145,7 +145,7 @@ public class SearchHandler
 
     /* GETTERS & SETTERS */
 
-    public static List<SearchResultData> getGameItems()
+    public static List<ItemsResultData> getGameItems()
     {
         return GameItems;
     }
