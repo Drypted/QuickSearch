@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 
@@ -53,5 +54,10 @@ public class ReplaceHotbarItemAction extends Action
                 Component.literal("Set slot " + (slotIndex + 1) + " to " + name),
                 true
         );
+
+        final float volume = 0.5f;
+        final float pitch = ((player.getRandom().nextFloat() - player.getRandom()
+                                                                     .nextFloat()) * 0.7f + 1.0f) * 2.0f;
+        player.playSound(SoundEvents.ITEM_PICKUP, volume, pitch);
     }
 }
