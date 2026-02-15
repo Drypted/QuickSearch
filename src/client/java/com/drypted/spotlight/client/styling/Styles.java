@@ -39,19 +39,14 @@ public final class Styles
         // text
         public static final Color CARET_COLOR = Styles.THEME_WHITE;
         public static final Color TEXT_COLOR = Styles.THEME_WHITE;
-        public static final Color DISABLED_TEXT = Colors.WHITE.withHalfOpacity();
-        public static final Color PLACEHOLDER_TEXT = Colors.WHITE.withHalfOpacity();
+        public static final Color DISABLED_TEXT = Colors.GRAY;
+        public static final Color PLACEHOLDER_TEXT = Colors.GRAY;
         // selection
-        public static final Color SELECTION_BACKGROUND = Color.fromRGBA(147, 197, 253, 255);
-        public static final Color SELECTION_TEXT = Color.fromRGBA(11, 11, 11, 255);
+        public static final Color SELECTION_BACKGROUND = Color.fromInt(0xFF93C5FD);
+        public static final Color SELECTION_TEXT = Color.fromInt(0xFF1E1E1E);
         // misc
         public static final Color ERROR_COLOR = Styles.ERROR_COLOR;
-        public static final Color LOADER_COLOR = Color.fromRGBA(
-                59,
-                130,
-                246,
-                255
-        );     // Modern blue
+        public static final Color LOADER_COLOR = Color.fromInt(0xFF3B82F6); // Modern blue
     }
 
     public static final class ResultData

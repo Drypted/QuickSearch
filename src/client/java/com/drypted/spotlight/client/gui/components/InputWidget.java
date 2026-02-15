@@ -36,7 +36,7 @@ public class InputWidget extends AbstractWidget
     private final Color normalTextColor;
     private final Color disabledTextColor;
     private final Color selectionBackgroundColor;
-    private final Color selectionTextColor; // TODO: Add selection text color support
+    private final Color selectionTextColor;
     private final Color placeholderColor;
     private final Color errorColor;
 
@@ -143,6 +143,26 @@ public class InputWidget extends AbstractWidget
                 drawSelection(guiGraphics, textX, textY);
             }
 
+            // separate text into three parts: before selection, selection, after selection
+            String beforeSelection;
+            String selection;
+            String afterSelection;
+            try
+            {
+                final int start = Math.min(selectionStart, selectionEnd);
+                final int end = Math.max(selectionStart, selectionEnd);
+
+                beforeSelection = this.text.substring(0, start);
+                selection = this.text.substring(start, end);
+                afterSelection = this.text.substring(end);
+            }
+            catch (Exception e)
+            {
+                beforeSelection = this.text;
+                selection = "";
+                afterSelection = "";
+            }
+
             // Render text
             // Priority: disabled > error > normal
             Color textColor = isDisabled
@@ -150,8 +170,26 @@ public class InputWidget extends AbstractWidget
                               : hasError ? errorColor : normalTextColor;
             guiGraphics.drawString(
                     FONT,
-                    this.text,
+                    beforeSelection,
                     textX - scrollOffset,
+                    textY,
+                    textColor.asInt(),
+                    false
+            );
+
+            guiGraphics.drawString(
+                    FONT,
+                    selection,
+                    (textX + FONT.width(beforeSelection)) - scrollOffset,
+                    textY,
+                    selectionTextColor.asInt(),
+                    false
+            );
+
+            guiGraphics.drawString(
+                    FONT,
+                    afterSelection,
+                    (textX + FONT.width(beforeSelection) + FONT.width(selection)) - scrollOffset,
                     textY,
                     textColor.asInt(),
                     false

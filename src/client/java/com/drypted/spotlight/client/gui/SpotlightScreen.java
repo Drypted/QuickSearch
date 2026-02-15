@@ -94,7 +94,6 @@ public class SpotlightScreen extends Screen
 
         // Set visual state to searching
         inputWidget.setSearchStatus(InputWidget.SearchStatus.SEARCHING);
-        setResultsVisible(true);
 
         // Delegate logic to appropriate handler
         if (!text.contains("/"))
@@ -199,6 +198,7 @@ public class SpotlightScreen extends Screen
             matchCount++;
         }
 
+        setResultsVisible(true);
         inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
     }
 
