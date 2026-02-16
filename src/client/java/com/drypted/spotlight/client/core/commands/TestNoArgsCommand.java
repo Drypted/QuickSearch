@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.core.command;
+package com.drypted.spotlight.client.core.commands;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -20,12 +20,12 @@ public class TestNoArgsCommand implements Command
     @Override
     public String getDescription()
     {
-        return "Test No Args command.";
+        return "Test No Args commands.";
     }
 
     @Override
     public void execute(String[] args, LocalPlayer player)
     {
-        player.displayClientMessage(Component.literal("Test No Args command executed."), true);
+        player.displayClientMessage(Component.literal("Test No Args commands executed."), true);
     }
 }

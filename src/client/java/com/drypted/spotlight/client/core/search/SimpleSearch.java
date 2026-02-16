@@ -1,33 +1,34 @@
-package com.drypted.spotlight.client.core.search.algorithms;
-
-import com.drypted.spotlight.client.models.ItemsResultData;
+package com.drypted.spotlight.client.core.search;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class SimpleSearch
+public final class SimpleSearch<T extends Searchable>
 {
-    private SimpleSearch()
+    private List<T> items;
+
+    public SimpleSearch(List<T> items)
     {
+        this.items = items;
     }
 
     /**
      * Simple, fast substring-based search (keeps previous behavior).
      *
-     * @param items      list to search
      * @param query      query text
      * @param maxResults maximum results to return
      * @return matched results (up to maxResults)
      */
-    public static List<ItemsResultData> search(List<ItemsResultData> items, String query, int maxResults)
+    public List<T> search(String query, int maxResults)
     {
         if (query == null || query.isBlank() || items == null || items.isEmpty())
         {
             return Collections.emptyList();
         }
 
-        return items.stream().filter(item -> item.containsText(query)).limit(maxResults).collect(
-                Collectors.toList());
+        return items.stream().filter(item -> {
+            return item.getPrimaryQuery().contains(query) || item.getSecondaryQuery().contains(query);
+        }).limit(maxResults).collect(Collectors.toList());
     }
 }

@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.gui.components;
 
-import com.drypted.spotlight.client.core.command.Command;
+import com.drypted.spotlight.client.core.commands.Command;
 import com.drypted.spotlight.client.gui.models.MouseButtonClick;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
@@ -60,7 +60,7 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
         this.selectedColor = selectedColor;
         this.outlineColor = outlineColor;
 
-        // clickable only if command is no args
+        // clickable only if commands is no args
         this.isPressable = command.isNotArgs();
 
         this.setHeight((2 * paddingY) + FONT.lineHeight + SUBTITLE_SPACING + (int) (FONT.lineHeight * SUBTITLE_SCALE));

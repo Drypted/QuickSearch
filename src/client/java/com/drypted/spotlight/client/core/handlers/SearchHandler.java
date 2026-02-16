@@ -1,7 +1,7 @@
-package com.drypted.spotlight.client.core.search;
+package com.drypted.spotlight.client.core.handlers;
 
-import com.drypted.spotlight.client.core.search.algorithms.SimpleSearch;
-import com.drypted.spotlight.client.core.search.algorithms.SmartSearch;
+import com.drypted.spotlight.client.core.search.SimpleSearch;
+import com.drypted.spotlight.client.core.search.SmartSearch;
 import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -22,8 +22,10 @@ public class SearchHandler
 
     private static List<ItemsResultData> GameItems = Collections.emptyList();
 
-    private static SmartSearch smartSearch;
-    private static SearchMode searchMode = SearchMode.SMART;
+    private static SimpleSearch<ItemsResultData> simpleSearch = new SimpleSearch<>(GameItems);
+
+    private static SmartSearch<ItemsResultData> smartSearch;
+    private static SearchMode searchMode = SearchMode.SIMPLE;
 
     // Keep track of the active search to allow cancellation
     private static CompletableFuture<Void> ActiveSearchTask;
@@ -35,18 +37,17 @@ public class SearchHandler
         if (minecraft.level == null)
         {
             GameItems = Collections.emptyList();
-            smartSearch = new SmartSearch(GameItems);
+            smartSearch = new SmartSearch<ItemsResultData>(GameItems);
             return;
         }
 
         LinkedHashMap<String, ItemsResultData> combined = new LinkedHashMap<>();
 
         // 1. Creative-mode items (sorted, visible)
-        CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems().stream()).forEach(
-                stack -> {
-                    ItemsResultData data = ItemsResultData.fromItemStack(stack);
-                    combined.putIfAbsent(data.getSerializedDefinition(), data);
-                });
+        CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems().stream()).forEach(stack -> {
+            ItemsResultData data = ItemsResultData.fromItemStack(stack);
+            combined.putIfAbsent(data.getSerializedDefinition(), data);
+        });
 
         // 2. Registry fallback (includes hidden mod items)
         BuiltInRegistries.ITEM.stream().forEach(item -> {
@@ -63,7 +64,8 @@ public class SearchHandler
         GameItems = List.copyOf(combined.values());
 
         // Rebuild/replace smart search instance with the new items
-        smartSearch = new SmartSearch(GameItems);
+        simpleSearch = new SimpleSearch<ItemsResultData>(GameItems);
+        smartSearch = new SmartSearch<ItemsResultData>(GameItems);
     }
 
     public static void requestCreativeTabRebuild()
@@ -126,13 +128,21 @@ public class SearchHandler
                 // Ensure smartSearch exists
                 if (smartSearch == null)
                 {
-                    smartSearch = new SmartSearch(GameItems);
+                    smartSearch = new SmartSearch<ItemsResultData>(GameItems);
                 }
 
                 // SmartSearch.search returns a Stream; collect up to MAX_RESULTS
                 yield smartSearch.search(query, MAX_RESULTS).collect(Collectors.toList());
             }
-            case null, default -> SimpleSearch.search(GameItems, query, MAX_RESULTS);
+            case null, default ->
+            {
+                if (simpleSearch == null)
+                {
+                    simpleSearch = new SimpleSearch<>(GameItems);
+                }
+
+                yield simpleSearch.search(query, MAX_RESULTS);
+            }
         }).thenAcceptAsync(results -> {
             // 4. Return results to the Main Thread safely
             Minecraft.getInstance().execute(() -> onComplete.accept(results));
@@ -149,7 +159,7 @@ public class SearchHandler
         return GameItems;
     }
 
-    public static SmartSearch getSmartSearchInstance()
+    public static SmartSearch<ItemsResultData> getSmartSearchInstance()
     {
         return smartSearch;
     }
@@ -168,7 +178,6 @@ public class SearchHandler
 
     public enum SearchMode
     {
-        SIMPLE,
-        SMART
+        SIMPLE, SMART
     }
 }

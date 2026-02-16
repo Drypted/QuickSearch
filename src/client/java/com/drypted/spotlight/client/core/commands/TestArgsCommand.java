@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.core.command;
+package com.drypted.spotlight.client.core.commands;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -20,14 +20,14 @@ public class TestArgsCommand implements Command
     @Override
     public String getDescription()
     {
-        return "Test With Args command.";
+        return "Test With Args commands.";
     }
 
     @Override
     public void execute(String[] args, LocalPlayer player)
     {
         player.displayClientMessage(
-                Component.literal("Test With Args command executed with args \"" //
+                Component.literal("Test With Args commands executed with args \"" //
                         + String.join(", ", args) + "\""), true
         );
     }

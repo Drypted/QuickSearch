@@ -1,6 +1,4 @@
-package com.drypted.spotlight.client.core.search.algorithms;
-
-import com.drypted.spotlight.client.models.ItemsResultData;
+package com.drypted.spotlight.client.core.search;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -17,8 +15,10 @@ import java.util.stream.Stream;
  * <p>
  * The search uses inverted indices and trigram indices for efficient candidate selection,
  * then scores each candidate to rank results by relevance.
+ *
+ * @param <T> The type of searchable items (must implement {@link Searchable})
  */
-public class SmartSearch
+public class SmartSearch<T extends Searchable>
 {
     /* CONSTANTS */
 
@@ -50,7 +50,7 @@ public class SmartSearch
      * The complete list of searchable items managed by this search instance.
      * This list is immutable after being set via constructor or rebuildIndices().
      */
-    private List<ItemsResultData> searchableItems = Collections.emptyList();
+    private List<T> searchableItems = Collections.emptyList();
 
     /**
      * Inverted index mapping individual words to the indices of items containing those words.
@@ -98,7 +98,7 @@ public class SmartSearch
      *
      * @param items The list of searchable items to index. If null, an empty list is used.
      */
-    public SmartSearch(List<ItemsResultData> items)
+    public SmartSearch(List<T> items)
     {
         if (items != null)
         {
@@ -118,7 +118,7 @@ public class SmartSearch
      *
      * @param items The new list of items to search. If null, the search will be empty.
      */
-    public void rebuildIndices(List<ItemsResultData> items)
+    public void rebuildIndices(List<T> items)
     {
         if (items == null)
         {
@@ -145,7 +145,7 @@ public class SmartSearch
      * @param maximumResults Maximum number of results to return. Use 0 or negative for unlimited.
      * @return A stream of matching items, sorted by relevance (best matches first)
      */
-    public Stream<ItemsResultData> search(String searchQuery, int maximumResults)
+    public Stream<T> search(String searchQuery, int maximumResults)
     {
         if (searchQuery == null)
         {
@@ -162,17 +162,16 @@ public class SmartSearch
         {
             for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
             {
-                ItemsResultData item = searchableItems.get(itemIndex);
+                T item = searchableItems.get(itemIndex);
 
                 double nameSimilarity = calculateTrigramSimilarity(
                         normalizedQuery,
-                        item.getName().toLowerCase()
+                        item.getPrimaryQuery().toLowerCase()
                 );
 
                 double pathSimilarity = calculateTrigramSimilarity(
                         normalizedQuery,
-                        item.getIdentifier().getPath()
-                                .toLowerCase()
+                        item.getSecondaryQuery().toLowerCase()
                 );
 
                 double bestSimilarity = Math.max(nameSimilarity, pathSimilarity);
@@ -187,7 +186,7 @@ public class SmartSearch
 
         // Step 2: Score candidates and filter out poor matches
         return candidateItemIndices.stream().map(itemIndex -> {
-                    ItemsResultData item = searchableItems.get(itemIndex);
+                    T item = searchableItems.get(itemIndex);
                     ItemScoreResult scoreResult = calculateItemScore(item, normalizedQuery);
 
                     // Filter out items with no match (score >= 1000)
@@ -196,13 +195,11 @@ public class SmartSearch
                         return null;
                     }
 
-                    return new SearchResultWithScore(item, scoreResult.totalScore(), itemIndex);
+                    return new SearchResultWithScore<>(item, scoreResult.totalScore(), itemIndex);
                 }).filter(Objects::nonNull)
                 // Step 3: Sort by score (lower is better), then by original position for stability
-                .sorted(Comparator.comparingInt(SearchResultWithScore::score)
-                        .thenComparingInt(SearchResultWithScore::originalIndex))
-                .limit(maximumResults > 0 ? maximumResults : Integer.MAX_VALUE)
-                .map(SearchResultWithScore::item);
+                .sorted(Comparator.comparingInt(SearchResultWithScore<T>::score).thenComparingInt(SearchResultWithScore::originalIndex)).limit(
+                        maximumResults > 0 ? maximumResults : Integer.MAX_VALUE).map(SearchResultWithScore::item);
     }
 
     /* INDEX BUILDING */
@@ -236,11 +233,11 @@ public class SmartSearch
 
         for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
         {
-            ItemsResultData item = searchableItems.get(itemIndex);
+            T item = searchableItems.get(itemIndex);
 
             // Index the identifier path (e.g., "minecraft:diamond_sword")
             // Split on common separators: underscore, hyphen, space, slash, colon, backslash
-            String itemPath = item.getIdentifier().getPath().toLowerCase();
+            String itemPath = item.getSecondaryQuery().toLowerCase();
             String[] pathWords = itemPath.split("[_\\-\\s/:\\\\]+");
 
             for (String word : pathWords)
@@ -253,7 +250,7 @@ public class SmartSearch
             }
 
             // Index the display name (e.g., "Diamond Sword")
-            String displayName = item.getName().toLowerCase();
+            String displayName = item.getPrimaryQuery().toLowerCase();
             String[] nameWords = displayName.split("[_\\-\\s]+");
 
             for (String word : nameWords)
@@ -322,10 +319,10 @@ public class SmartSearch
 
         for (int itemIndex = 0; itemIndex < searchableItems.size(); itemIndex++)
         {
-            ItemsResultData item = searchableItems.get(itemIndex);
+            T item = searchableItems.get(itemIndex);
 
             // Generate trigrams from the item's path identifier
-            String itemPath = item.getIdentifier().getPath().toLowerCase();
+            String itemPath = item.getSecondaryQuery().toLowerCase();
             Set<String> pathTrigrams = generateTrigramsFromText(itemPath);
 
             for (String trigram : pathTrigrams)
@@ -334,7 +331,7 @@ public class SmartSearch
             }
 
             // Generate trigrams from the item's display name
-            String displayName = item.getName().toLowerCase();
+            String displayName = item.getPrimaryQuery().toLowerCase();
             Set<String> nameTrigrams = generateTrigramsFromText(displayName);
 
             for (String trigram : nameTrigrams)
@@ -428,9 +425,7 @@ public class SmartSearch
         allUniqueTrigrams.addAll(secondTrigrams);
 
         // Jaccard similarity = |intersection| / |union|
-        return allUniqueTrigrams.isEmpty()
-                ? 0.0
-                : (double) sharedTrigrams.size() / allUniqueTrigrams.size();
+        return allUniqueTrigrams.isEmpty() ? 0.0 : (double) sharedTrigrams.size() / allUniqueTrigrams.size();
     }
 
     /* FUZZY MATCHING - LEVENSHTEIN DISTANCE */
@@ -488,9 +483,7 @@ public class SmartSearch
             for (int j = 1; j <= secondString.length(); j++)
             {
                 // Cost is 0 if characters match, 1 if substitution needed
-                int substitutionCost = firstString.charAt(i - 1) == secondString.charAt(j - 1)
-                        ? 0
-                        : 1;
+                int substitutionCost = firstString.charAt(i - 1) == secondString.charAt(j - 1) ? 0 : 1;
 
                 // Take minimum of three operations:
                 currentRow[j] = Math.min(
@@ -563,10 +556,7 @@ public class SmartSearch
                 int prefixLength = Math.min(queryWord.length(), MAXIMUM_PREFIX_LENGTH);
                 String prefix = queryWord.substring(0, prefixLength);
 
-                Set<String> matchingWords = prefixToWordsMap.getOrDefault(
-                        prefix,
-                        Collections.emptySet()
-                );
+                Set<String> matchingWords = prefixToWordsMap.getOrDefault(prefix, Collections.emptySet());
 
                 for (String word : matchingWords)
                 {
@@ -593,10 +583,7 @@ public class SmartSearch
 
             for (String trigram : queryTrigrams)
             {
-                Set<Integer> matchingItems = trigramToItemIndicesMap.getOrDefault(
-                        trigram,
-                        Collections.emptySet()
-                );
+                Set<Integer> matchingItems = trigramToItemIndicesMap.getOrDefault(trigram, Collections.emptySet());
 
                 for (Integer itemIndex : matchingItems)
                 {
@@ -658,11 +645,11 @@ public class SmartSearch
      * @param normalizedQuery The search query in lowercase
      * @return Scoring result containing the total score and match type
      */
-    private ItemScoreResult calculateItemScore(ItemsResultData item, String normalizedQuery)
+    private ItemScoreResult calculateItemScore(T item, String normalizedQuery)
     {
-        String displayName = item.getName().toLowerCase();
-        String identifierPath = item.getIdentifier().getPath().toLowerCase();
-        String fullIdentifier = item.getIdentifier().toString().toLowerCase();
+        String displayName = item.getPrimaryQuery().toLowerCase();
+        String identifierPath = item.getSecondaryQuery().toLowerCase();
+        String fullIdentifier = identifierPath;
 
         // Remove namespace prefix from identifier if present (e.g., "minecraft:diamond" → "diamond")
         int namespaceColonIndex = fullIdentifier.indexOf(':');
@@ -792,11 +779,7 @@ public class SmartSearch
             {
                 if (word.length() >= 3)
                 {
-                    int editDistance = calculateLevenshteinDistance(
-                            normalizedQuery,
-                            word,
-                            MAXIMUM_FUZZY_EDIT_DISTANCE
-                    );
+                    int editDistance = calculateLevenshteinDistance(normalizedQuery, word, MAXIMUM_FUZZY_EDIT_DISTANCE);
 
                     if (editDistance <= MAXIMUM_FUZZY_EDIT_DISTANCE)
                     {
@@ -817,11 +800,7 @@ public class SmartSearch
             {
                 if (word.length() >= 3)
                 {
-                    int editDistance = calculateLevenshteinDistance(
-                            normalizedQuery,
-                            word,
-                            MAXIMUM_FUZZY_EDIT_DISTANCE
-                    );
+                    int editDistance = calculateLevenshteinDistance(normalizedQuery, word, MAXIMUM_FUZZY_EDIT_DISTANCE);
 
                     if (editDistance <= MAXIMUM_FUZZY_EDIT_DISTANCE)
                     {
@@ -854,10 +833,7 @@ public class SmartSearch
                 }
             }
 
-            double identifierSimilarity = calculateTrigramSimilarity(
-                    normalizedQuery,
-                    fullIdentifier
-            );
+            double identifierSimilarity = calculateTrigramSimilarity(normalizedQuery, fullIdentifier);
             if (identifierSimilarity >= MINIMUM_TRIGRAM_SIMILARITY_THRESHOLD)
             {
                 // Score: 70 + (dissimilarity × 20)
@@ -936,7 +912,7 @@ public class SmartSearch
      * The originalIndex preserves the item's position in the source list, which is used
      * as a tiebreaker when scores are equal (to maintain stable sorting).
      */
-    private record SearchResultWithScore(ItemsResultData item, int score, int originalIndex)
+    private record SearchResultWithScore<T>(T item, int score, int originalIndex)
     {
     }
 

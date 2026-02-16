@@ -2,9 +2,9 @@ package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.actions.Actions;
-import com.drypted.spotlight.client.core.command.Command;
-import com.drypted.spotlight.client.core.command.CommandsHandler;
-import com.drypted.spotlight.client.core.search.SearchHandler;
+import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.handlers.CommandsHandler;
+import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.gui.components.*;
 import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.client.Minecraft;
@@ -119,7 +119,7 @@ public class SpotlightScreen extends Screen
 
         if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
         {
-            SpotlightEntryClient.LOGGER.info("Enter pressed, executing command if valid");
+            SpotlightEntryClient.LOGGER.info("Enter pressed, executing commands if valid");
             onEnterPressed();
             return true;
         }
@@ -237,7 +237,7 @@ public class SpotlightScreen extends Screen
             return;
         }
 
-        selectedCommand = results.getFirst(); // auto-select first command for hotbar keybinds
+        selectedCommand = results.getFirst(); // auto-select first commands for hotbar keybinds
 
         for (Command result : results)
         {
@@ -266,7 +266,7 @@ public class SpotlightScreen extends Screen
         String text = inputWidget.getText();
         if (text == null || !isUserInputCommand()) return;
 
-        SpotlightEntryClient.LOGGER.info("Executing command from user input: {}", text);
+        SpotlightEntryClient.LOGGER.info("Executing commands from user input: {}", text);
 
 
         String[] parts = text.split(" ");
@@ -278,7 +278,7 @@ public class SpotlightScreen extends Screen
             System.arraycopy(parts, 1, args, 0, parts.length - 1);
         }
 
-        SpotlightEntryClient.LOGGER.info("Detected command: {}, with args: {}", commandName, String.join(", ", args));
+        SpotlightEntryClient.LOGGER.info("Detected commands: {}, with args: {}", commandName, String.join(", ", args));
 
 
         LocalPlayer player = Minecraft.getInstance().player;
