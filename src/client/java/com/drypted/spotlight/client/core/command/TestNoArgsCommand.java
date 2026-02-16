@@ -3,26 +3,29 @@ package com.drypted.spotlight.client.core.command;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
-public class TestCommand implements Command
+public class TestNoArgsCommand implements Command
 {
+    @Override
+    public boolean isNotArgs()
+    {
+        return true;
+    }
+
     @Override
     public String getName()
     {
-        return "test";
+        return "no_args";
     }
 
     @Override
     public String getDescription()
     {
-        return "A sample text command.";
+        return "Test No Args command.";
     }
 
     @Override
     public void execute(String[] args, LocalPlayer player)
     {
-        player.displayClientMessage(
-                Component.literal("Test command executed with args \"" //
-                        + String.join(", ", args) + "\""), true
-        );
+        player.displayClientMessage(Component.literal("Test No Args command executed."), true);
     }
 }

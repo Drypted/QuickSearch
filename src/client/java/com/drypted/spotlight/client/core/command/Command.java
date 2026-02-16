@@ -4,6 +4,8 @@ import net.minecraft.client.player.LocalPlayer;
 
 public interface Command
 {
+    boolean isNotArgs();
+
     String getName();
 
     String getDescription();

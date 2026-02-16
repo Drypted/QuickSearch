@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class SpotlightScreen extends Screen
     private InputWidget inputWidget;
     private ScrollBoxWidget searchResultsWidget;
     private @Nullable HotbarCollectionWidget hotbarCollectionWidget;
+
+    @Nullable
+    private Command selectedCommand = null;
 
     public SpotlightScreen()
     {
@@ -73,7 +77,7 @@ public class SpotlightScreen extends Screen
         this.addRenderableWidget(inputWidget);
 
         // show search on open
-        setResultsVisible(false);
+        setItemResultsVisible(false);
 
         this.setFocused(inputWidget);
     }
@@ -84,7 +88,7 @@ public class SpotlightScreen extends Screen
     {
         if (text == null || text.isEmpty())
         {
-            setResultsVisible(false);
+            setItemResultsVisible(false);
             clearResults();
             return;
         }
@@ -106,10 +110,23 @@ public class SpotlightScreen extends Screen
             {
                 inputWidget.clearText();
                 clearResults();
-                setResultsVisible(false);
+                setItemResultsVisible(false);
                 return true;
             }
             this.onClose();
+            return true;
+        }
+
+        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
+        {
+            SpotlightEntryClient.LOGGER.info("Enter pressed, executing command if valid");
+            onEnterPressed();
+            return true;
+        }
+        else if (keyCode == GLFW.GLFW_KEY_TAB)
+        {
+            SpotlightEntryClient.LOGGER.info("Tab pressed, executing tab action if valid");
+            onTabPressed();
             return true;
         }
 
@@ -163,7 +180,7 @@ public class SpotlightScreen extends Screen
         if (results.isEmpty())
         {
             inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-            setResultsVisible(false);
+            setItemResultsVisible(false);
             return;
         }
 
@@ -195,7 +212,7 @@ public class SpotlightScreen extends Screen
             matchCount++;
         }
 
-        setResultsVisible(true);
+        setItemResultsVisible(true);
         inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
     }
 
@@ -215,32 +232,71 @@ public class SpotlightScreen extends Screen
         if (results.isEmpty())
         {
             inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-            setResultsVisible(false);
+            setItemResultsVisible(false);
+            selectedCommand = null;
             return;
         }
 
-        int matchCount = 0;
+        selectedCommand = results.getFirst(); // auto-select first command for hotbar keybinds
+
         for (Command result : results)
         {
-            this.searchResultsWidget.addChildRow( //
-                    CommandResultDataWidget.builder(
+            this.searchResultsWidget.addChildRow(CommandResultDataWidget.builder(
                             0,
                             0,
                             result
-                    ).width(searchResultsWidget.getMaxWidth()).onClick((mBC, dC) -> onCommandsResultClicked(result)).build() //
+                    ).width(searchResultsWidget.getMaxWidth()).onClick((mBC, dC) -> onCommandsResultMouseClick(result)).build() //
             );
-
-            matchCount++;
         }
 
-        setResultsVisible(true, false);
+        setItemResultsVisible(true);
+        setHotbarWidgetVisible(false);
         inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
     }
 
-    private void onCommandsResultClicked(Command data)
+    private void onCommandsResultMouseClick(Command data)
     {
+        if (!data.isNotArgs()) return;
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) data.execute(new String[]{}, player);
+    }
+
+    private void onEnterPressed()
+    {
+        String text = inputWidget.getText();
+        if (text == null || !isUserInputCommand()) return;
+
+        SpotlightEntryClient.LOGGER.info("Executing command from user input: {}", text);
+
+
+        String[] parts = text.split(" ");
+        String commandName = parts[0].substring(1); // Remove leading "/"
+        String[] args = new String[0];
+        if (parts.length > 1)
+        {
+            args = new String[parts.length - 1];
+            System.arraycopy(parts, 1, args, 0, parts.length - 1);
+        }
+
+        SpotlightEntryClient.LOGGER.info("Detected command: {}, with args: {}", commandName, String.join(", ", args));
+
+
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) return;
+
+        if (selectedCommand != null && selectedCommand.getName().equalsIgnoreCase(commandName))
+        {
+            selectedCommand.execute(args, player);
+        }
+    }
+
+    private void onTabPressed()
+    {
+        if (isUserInputCommand() && selectedCommand != null)
+        {
+            String commandName = selectedCommand.getName();
+            inputWidget.setText("/" + commandName + " ");
+        }
     }
 
     /* Overrides for settings */
@@ -266,20 +322,18 @@ public class SpotlightScreen extends Screen
         widget.active = visible;
     }
 
-    private void setResultsVisible(boolean visible)
+    private void setItemResultsVisible(boolean visible)
     {
-        setResultsVisible(visible, true);
+        setHotbarWidgetVisible(visible);
+        setVisible(this.searchResultsWidget, visible);
     }
 
-    private void setResultsVisible(boolean visible, boolean showHotbar)
+    private void setHotbarWidgetVisible(boolean visible)
     {
-        if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
-        {
-            this.hotbarCollectionWidget.getWidgets().forEach(widget -> setVisible(widget, visible));
-            setVisible(this.hotbarCollectionWidget, showHotbar);
-        }
+        if (!isHotbarEnabledInConfig() || this.hotbarCollectionWidget == null) return;
 
-        setVisible(this.searchResultsWidget, visible);
+        this.hotbarCollectionWidget.getWidgets().forEach(widget -> setVisible(widget, visible));
+        setVisible(this.hotbarCollectionWidget, visible);
     }
 
     private void clearResults()
@@ -293,5 +347,11 @@ public class SpotlightScreen extends Screen
     private boolean isHotbarEnabledInConfig()
     {
         return SpotlightEntryClient.getConfig().showHotbarSlots;
+    }
+
+    private boolean isUserInputCommand()
+    {
+        String text = inputWidget.getText();
+        return text != null && text.contains("/");
     }
 }

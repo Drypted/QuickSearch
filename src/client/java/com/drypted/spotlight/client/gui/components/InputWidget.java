@@ -916,7 +916,7 @@ public class InputWidget extends AbstractWidget
     public void setText(String text)
     {
         this.text = text == null ? "" : text.substring(0, Math.min(text.length(), maxLength));
-        this.cursorPos = Math.min(cursorPos, this.text.length());
+        this.cursorPos = Math.max(cursorPos, this.text.length());
         clearSelection();
         updateScrollOffset();
         notifyTextChanged();

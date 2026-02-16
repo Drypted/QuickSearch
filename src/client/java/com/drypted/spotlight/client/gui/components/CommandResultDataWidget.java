@@ -22,8 +22,10 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
     private static final Font FONT = Minecraft.getInstance().font;
 
     private final Command command;
+    private final boolean isPressable;
 
-    private final int padding;
+    private final int paddingX;
+    private final int paddingY;
     private final boolean isRounded;
     private final int outlineThickness;
     private Color backgroundColor;
@@ -43,11 +45,12 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    public CommandResultDataWidget(int x, int y, int width, Command command, int padding, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
+    public CommandResultDataWidget(int x, int y, int width, Command command, int paddingX, int paddingY, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
     {
         super(x, y, width, 0, Component.empty());
         this.command = command;
-        this.padding = padding;
+        this.paddingX = paddingX;
+        this.paddingY = paddingY;
         this.isRounded = isRounded;
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
@@ -57,7 +60,10 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
         this.selectedColor = selectedColor;
         this.outlineColor = outlineColor;
 
-        this.setHeight((2 * padding) + FONT.lineHeight + SUBTITLE_SPACING + (int) (FONT.lineHeight * SUBTITLE_SCALE));
+        // clickable only if command is no args
+        this.isPressable = command.isNotArgs();
+
+        this.setHeight((2 * paddingY) + FONT.lineHeight + SUBTITLE_SPACING + (int) (FONT.lineHeight * SUBTITLE_SCALE));
     }
 
     @Override
@@ -93,10 +99,11 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
         );
 
         // title
-        int titleX = startPosX + padding;
-        int titleY = startPosY + padding;
+        int titleX = startPosX + paddingX;
+        int titleY = startPosY + paddingY;
+        int _textColor = this.isPressable ? textColor.asInt() : textColor.withLightness(textColor.getLightness() / 2).asInt();
 
-        g.drawString(FONT, this.command.getName(), titleX, titleY, textColor.asInt(), false);
+        g.drawString(FONT, this.command.getName(), titleX, titleY, _textColor, false);
 
         // subtitle
         int subtitleY = titleY + FONT.lineHeight + SUBTITLE_SPACING;
@@ -109,7 +116,7 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
                 this.command.getDescription(),
                 (int) (titleX / subtitleScale),
                 (int) (subtitleY / subtitleScale),
-                textColor.asInt(),
+                _textColor,
                 false
         );
         g.pose().popPose();
@@ -138,12 +145,15 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
     @Override
     public void onClick(double x, double y)
     {
+        if (!this.isPressable) return;
         this.pressed = true;
     }
 
     @Override
     public void onRelease(double x, double y)
     {
+        if (!this.isPressable) return;
+
         this.pressed = false;
         MouseButtonClick clickPoint = new MouseButtonClick(x, y);
         if (isMouseInButton(clickPoint))
@@ -183,6 +193,7 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
     @Override
     public void press()
     {
+        if (!this.isPressable) return;
         this.pressed = true;
         onClickCallback.accept(MouseButtonClick.from(getX(), getY()), true);
     }
@@ -190,6 +201,7 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
     @Override
     public void unpress()
     {
+        if (!this.isPressable) return;
         this.pressed = false;
     }
 
@@ -289,7 +301,8 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
         private int width = 0;
         private final Command command;
 
-        private int padding = 5;
+        private int paddingX = 10;
+        private int paddingY = 5;
         private boolean isRounded = false;
         private Color backgroundColor = Styles.ResultData.BACKGROUND_COLOR;
         private Color textColor = Styles.ResultData.TEXT_COLOR;
@@ -318,9 +331,15 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
             return this;
         }
 
-        public Builder padding(int padding)
+        public Builder paddingX(int paddingX)
         {
-            this.padding = padding;
+            this.paddingX = paddingX;
+            return this;
+        }
+
+        public Builder paddingY(int paddingY)
+        {
+            this.paddingY = paddingY;
             return this;
         }
 
@@ -397,7 +416,8 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
                     this.y,
                     this.width,
                     this.command,
-                    this.padding,
+                    this.paddingX,
+                    this.paddingY,
                     this.isRounded,
                     this.outlineThickness,
                     this.backgroundColor,

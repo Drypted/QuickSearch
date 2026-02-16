@@ -10,16 +10,23 @@ public class CommandsHandler
 
     static
     {
-        commands.add(new TestCommand());
+        commands.add(new TestNoArgsCommand());
+        commands.add(new TestArgsCommand());
     }
 
-    public static void getCommands(String query, Consumer<List<Command>> onComplete)
+    public static void getCommands(String userInput, Consumer<List<Command>> onComplete)
     {
+        userInput = userInput.substring(1); // Remove the leading "/"
         List<Command> results = new ArrayList<>();
+
+        // Get the command name part of the userInput
+        String normalizedQuery = userInput.split(" ")[0].toLowerCase();
 
         for (Command command : commands)
         {
-            if (query.contains(command.getName()))
+            String normalizedName = command.getName().toLowerCase();
+
+            if (normalizedName.contains(normalizedQuery))
             {
                 results.add(command);
             }
