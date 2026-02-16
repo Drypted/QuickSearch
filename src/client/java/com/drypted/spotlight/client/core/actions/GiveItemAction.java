@@ -34,8 +34,7 @@ public class GiveItemAction extends Action
         {
             stack = item.createItemStack(maxStackSize, false);
             // signature: createItemStack(int maxStackSize, boolean checkSize)
-        }
-        catch (CommandSyntaxException ignored)
+        } catch (CommandSyntaxException ignored)
         {
             handleError(player, ERROR.INVALID_ITEM);
             return;
@@ -70,7 +69,7 @@ public class GiveItemAction extends Action
 
         final float volume = 0.5f;
         final float pitch = ((player.getRandom().nextFloat() - player.getRandom()
-                                                                     .nextFloat()) * 0.7f + 1.0f) * 2.0f;
+                .nextFloat()) * 0.7f + 1.0f) * 2.0f;
         player.playSound(SoundEvents.ITEM_PICKUP, volume, pitch);
     }
 }

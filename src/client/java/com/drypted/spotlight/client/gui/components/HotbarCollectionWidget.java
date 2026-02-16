@@ -192,7 +192,7 @@ public class HotbarCollectionWidget extends AbstractWidget
         hotbarSlotWidgets.forEach(widget -> widget.setHighlighted(false));
         // get slot index and set show bind to true for that widget
         hotbarSlotWidgets.stream().filter(widget -> widget.getHotbarIndex() == slotIndex)
-                         .findFirst().ifPresent(widget -> widget.setHighlighted(true));
+                .findFirst().ifPresent(widget -> widget.setHighlighted(true));
     }
 
     private void unhighlightAllSlots()
@@ -310,5 +310,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     /* OVERRIDES */
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) { }
+    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput)
+    {
+    }
 }

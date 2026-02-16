@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 public final class SimpleSearch
 {
-    private SimpleSearch() { }
+    private SimpleSearch()
+    {
+    }
 
     /**
      * Simple, fast substring-based search (keeps previous behavior).
@@ -16,7 +18,6 @@ public final class SimpleSearch
      * @param items      list to search
      * @param query      query text
      * @param maxResults maximum results to return
-     *
      * @return matched results (up to maxResults)
      */
     public static List<ItemsResultData> search(List<ItemsResultData> items, String query, int maxResults)

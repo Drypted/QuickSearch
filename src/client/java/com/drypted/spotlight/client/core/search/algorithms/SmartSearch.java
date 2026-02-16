@@ -143,7 +143,6 @@ public class SmartSearch
      *
      * @param searchQuery    The text to search for (case-insensitive)
      * @param maximumResults Maximum number of results to return. Use 0 or negative for unlimited.
-     *
      * @return A stream of matching items, sorted by relevance (best matches first)
      */
     public Stream<ItemsResultData> search(String searchQuery, int maximumResults)
@@ -173,7 +172,7 @@ public class SmartSearch
                 double pathSimilarity = calculateTrigramSimilarity(
                         normalizedQuery,
                         item.getIdentifier().getPath()
-                            .toLowerCase()
+                                .toLowerCase()
                 );
 
                 double bestSimilarity = Math.max(nameSimilarity, pathSimilarity);
@@ -188,22 +187,22 @@ public class SmartSearch
 
         // Step 2: Score candidates and filter out poor matches
         return candidateItemIndices.stream().map(itemIndex -> {
-                                       ItemsResultData item = searchableItems.get(itemIndex);
-                                       ItemScoreResult scoreResult = calculateItemScore(item, normalizedQuery);
+                    ItemsResultData item = searchableItems.get(itemIndex);
+                    ItemScoreResult scoreResult = calculateItemScore(item, normalizedQuery);
 
-                                       // Filter out items with no match (score >= 1000)
-                                       if (scoreResult.totalScore() >= 1000)
-                                       {
-                                           return null;
-                                       }
+                    // Filter out items with no match (score >= 1000)
+                    if (scoreResult.totalScore() >= 1000)
+                    {
+                        return null;
+                    }
 
-                                       return new SearchResultWithScore(item, scoreResult.totalScore(), itemIndex);
-                                   }).filter(Objects::nonNull)
-                                   // Step 3: Sort by score (lower is better), then by original position for stability
-                                   .sorted(Comparator.comparingInt(SearchResultWithScore::score)
-                                                     .thenComparingInt(SearchResultWithScore::originalIndex))
-                                   .limit(maximumResults > 0 ? maximumResults : Integer.MAX_VALUE)
-                                   .map(SearchResultWithScore::item);
+                    return new SearchResultWithScore(item, scoreResult.totalScore(), itemIndex);
+                }).filter(Objects::nonNull)
+                // Step 3: Sort by score (lower is better), then by original position for stability
+                .sorted(Comparator.comparingInt(SearchResultWithScore::score)
+                        .thenComparingInt(SearchResultWithScore::originalIndex))
+                .limit(maximumResults > 0 ? maximumResults : Integer.MAX_VALUE)
+                .map(SearchResultWithScore::item);
     }
 
     /* INDEX BUILDING */
@@ -364,7 +363,6 @@ public class SmartSearch
      * in similarity calculations.
      *
      * @param text The text to generate trigrams from
-     *
      * @return A set of all trigrams found in the text
      */
     private Set<String> generateTrigramsFromText(String text)
@@ -408,7 +406,6 @@ public class SmartSearch
      *
      * @param firstText  The first string to compare
      * @param secondText The second string to compare
-     *
      * @return A similarity score between 0.0 and 1.0, where 1.0 means identical
      */
     private double calculateTrigramSimilarity(String firstText, String secondText)
@@ -432,8 +429,8 @@ public class SmartSearch
 
         // Jaccard similarity = |intersection| / |union|
         return allUniqueTrigrams.isEmpty()
-               ? 0.0
-               : (double) sharedTrigrams.size() / allUniqueTrigrams.size();
+                ? 0.0
+                : (double) sharedTrigrams.size() / allUniqueTrigrams.size();
     }
 
     /* FUZZY MATCHING - LEVENSHTEIN DISTANCE */
@@ -462,7 +459,6 @@ public class SmartSearch
      * @param firstString     The first string
      * @param secondString    The second string
      * @param maximumDistance The maximum distance to calculate. If exceeded, returns Integer.MAX_VALUE.
-     *
      * @return The minimum number of edits needed, or Integer.MAX_VALUE if it exceeds maximumDistance
      */
     private int calculateLevenshteinDistance(String firstString, String secondString, int maximumDistance)
@@ -493,8 +489,8 @@ public class SmartSearch
             {
                 // Cost is 0 if characters match, 1 if substitution needed
                 int substitutionCost = firstString.charAt(i - 1) == secondString.charAt(j - 1)
-                                       ? 0
-                                       : 1;
+                        ? 0
+                        : 1;
 
                 // Take minimum of three operations:
                 currentRow[j] = Math.min(
@@ -543,7 +539,6 @@ public class SmartSearch
      * of items that need detailed scoring.
      *
      * @param normalizedQuery The search query in lowercase
-     *
      * @return A set of item indices that are potential matches
      */
     private Set<Integer> findCandidateItemIndices(String normalizedQuery)
@@ -661,7 +656,6 @@ public class SmartSearch
      *
      * @param item            The item to score
      * @param normalizedQuery The search query in lowercase
-     *
      * @return Scoring result containing the total score and match type
      */
     private ItemScoreResult calculateItemScore(ItemsResultData item, String normalizedQuery)
@@ -915,7 +909,6 @@ public class SmartSearch
      *
      * @param needle   The sequence to search for
      * @param haystack The string to search within
-     *
      * @return true if needle is a subsequence of haystack, false otherwise
      */
     private boolean isSubsequenceOf(String needle, String haystack)
@@ -944,7 +937,8 @@ public class SmartSearch
      * as a tiebreaker when scores are equal (to maintain stable sorting).
      */
     private record SearchResultWithScore(ItemsResultData item, int score, int originalIndex)
-    { }
+    {
+    }
 
     /**
      * Represents the score assigned to an item along with the type of match that produced it.
@@ -953,7 +947,8 @@ public class SmartSearch
      * useful for debugging, telemetry, and understanding search behavior.
      */
     private record ItemScoreResult(int totalScore, ResultMatchType matchType)
-    { }
+    {
+    }
 
     /**
      * Enumeration of all possible match types that can produce a score.

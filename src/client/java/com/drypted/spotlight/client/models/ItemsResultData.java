@@ -1,5 +1,6 @@
 package com.drypted.spotlight.client.models;
 
+import com.drypted.spotlight.client.core.search.algorithms.Searchable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.Holder;
@@ -12,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-public final class ItemsResultData
+public final class ItemsResultData implements Searchable
 {
     private final ItemStack icon;
     private final String name;
@@ -137,4 +138,17 @@ public final class ItemsResultData
             "",
             ResourceLocation.fromNamespaceAndPath("spotlight", "search_result_data_empty")
     );
+
+    /* SEARCHABLE IMPLEMENTATION */
+    @Override
+    public String getPrimaryQuery()
+    {
+        return this.getName();
+    }
+
+    @Override
+    public String getSecondaryQuery()
+    {
+        return this.getIdentifier().getPath().toLowerCase();
+    }
 }

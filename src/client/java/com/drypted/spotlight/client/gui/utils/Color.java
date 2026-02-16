@@ -80,7 +80,6 @@ public class Color
      * @param g green component (0-255)
      * @param b blue component (0-255)
      * @param a alpha component (0-255)
-     *
      * @return a new Color instance
      */
     public static Color fromRGBA(int r, int g, int b, int a)
@@ -92,7 +91,6 @@ public class Color
      * Creates a color from a 32-bit integer representation.
      *
      * @param aarrggbb the color value in 0xAARRGGBB format
-     *
      * @return a new Color instance
      */
     public static Color fromInt(int aarrggbb)
@@ -108,9 +106,7 @@ public class Color
      * @param s     saturation (0.0-1.0, where 0 is gray and 1 is full color)
      * @param l     lightness (0.0-1.0, where 0 is black and 1 is white)
      * @param alpha alpha component (0.0-1.0, where 0 is transparent and 1 is opaque)
-     *
      * @return a new Color instance
-     *
      * @see #toHSL()
      */
     public static Color fromHSL(float h, float s, float l, float alpha)
@@ -154,7 +150,6 @@ public class Color
      * Converts this color to a hexadecimal string.
      *
      * @param includeAlpha whether to include the alpha channel
-     *
      * @return hexadecimal string (e.g., "#RRGGBB" or "#AARRGGBB")
      */
     public String toHex(boolean includeAlpha)
@@ -193,7 +188,6 @@ public class Color
      * Original color remains unchanged.
      *
      * @param alpha new alpha value (0-255)
-     *
      * @return a new Color instance
      */
     public Color withOpacity(int alpha)
@@ -217,7 +211,6 @@ public class Color
      * Original color remains unchanged.
      *
      * @param red new red value (0-255)
-     *
      * @return a new Color instance
      */
     public Color withRed(int red)
@@ -230,7 +223,6 @@ public class Color
      * Original color remains unchanged.
      *
      * @param green new green value (0-255)
-     *
      * @return a new Color instance
      */
     public Color withGreen(int green)
@@ -243,7 +235,6 @@ public class Color
      * Original color remains unchanged.
      *
      * @param blue new blue value (0-255)
-     *
      * @return a new Color instance
      */
     public Color withBlue(int blue)
@@ -257,7 +248,6 @@ public class Color
      * Original color remains unchanged.
      *
      * @param hue new hue value (0.0-1.0, represents 0-360 degrees)
-     *
      * @return a new Color instance
      */
     public Color withHue(float hue)
@@ -273,7 +263,6 @@ public class Color
      * Original color remains unchanged.
      *
      * @param saturation new saturation value (0.0-1.0)
-     *
      * @return a new Color instance
      */
     public Color withSaturation(float saturation)
@@ -289,7 +278,6 @@ public class Color
      * Original color remains unchanged.
      *
      * @param lightness new lightness value (0.0-1.0)
-     *
      * @return a new Color instance
      */
     public Color withLightness(float lightness)
@@ -307,7 +295,6 @@ public class Color
      * Increases lightness by the specified amount (clamped to 0.0-1.0).
      *
      * @param amount amount to brighten (0.0-1.0)
-     *
      * @return a new Color instance
      */
     public Color brighten(float amount)
@@ -322,7 +309,6 @@ public class Color
      * Decreases lightness by the specified amount (clamped to 0.0-1.0).
      *
      * @param amount amount to darken (0.0-1.0)
-     *
      * @return a new Color instance
      */
     public Color darken(float amount)
@@ -337,7 +323,6 @@ public class Color
      * Increases saturation by the specified amount (clamped to 0.0-1.0).
      *
      * @param amount amount to increase saturation (0.0-1.0)
-     *
      * @return a new Color instance
      */
     public Color saturate(float amount)
@@ -352,7 +337,6 @@ public class Color
      * Decreases saturation by the specified amount (clamped to 0.0-1.0).
      *
      * @param amount amount to decrease saturation (0.0-1.0)
-     *
      * @return a new Color instance
      */
     public Color desaturate(float amount)
@@ -409,7 +393,6 @@ public class Color
      *
      * @param other the target color
      * @param t     interpolation factor (0.0 = this color, 1.0 = other color)
-     *
      * @return a new Color instance
      */
     public Color lerp(Color other, float t)
@@ -429,7 +412,6 @@ public class Color
      * Equivalent to lerp(other, 0.5).
      *
      * @param other the color to mix with
-     *
      * @return a new Color instance
      */
     public Color mix(Color other)
@@ -444,7 +426,6 @@ public class Color
      * <p>Formula: C_out = C_src * α_src + C_dst * (1 - α_src)</p>
      *
      * @param background the background color
-     *
      * @return a new Color instance representing the composited result
      */
     public Color blendOver(Color background)
@@ -657,7 +638,6 @@ public class Color
      * @param p the base color component value
      * @param q the peak color component value
      * @param t the normalized hue offset
-     *
      * @return the RGB component value (0.0-1.0)
      */
     private static float hueToRGB(float p, float q, float t)

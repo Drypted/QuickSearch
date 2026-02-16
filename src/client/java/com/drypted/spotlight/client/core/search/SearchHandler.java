@@ -54,8 +54,7 @@ public class SearchHandler
             {
                 ItemsResultData data = ItemsResultData.fromItem(item);
                 combined.putIfAbsent(data.getSerializedDefinition(), data);
-            }
-            catch (Exception ignored)
+            } catch (Exception ignored)
             {
                 // Some items are not safe to instantiate
             }

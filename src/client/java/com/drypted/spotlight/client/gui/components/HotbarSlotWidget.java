@@ -54,8 +54,8 @@ public class HotbarSlotWidget extends AbstractWidget
         this.onClickCallback = onClickCallback;
 
         this.hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
-                                                                                    .getString()
-                                                                                    .toUpperCase();
+                .getString()
+                .toUpperCase();
     }
 
     @Override
@@ -72,10 +72,10 @@ public class HotbarSlotWidget extends AbstractWidget
                 true,
                 this.backgroundColor,
                 this.pressed
-                ? this.clickedColor
-                : this.highlighted
-                  ? this.highlightedColor
-                  : this.shouldShowBind() ? this.focusedColor : this.outlineColor
+                        ? this.clickedColor
+                        : this.highlighted
+                        ? this.highlightedColor
+                        : this.shouldShowBind() ? this.focusedColor : this.outlineColor
         );
 
         // show icon if search result data is available
@@ -106,8 +106,8 @@ public class HotbarSlotWidget extends AbstractWidget
                     this.getY(),
                     RoundedCorners.fromVerticalSides(true, false),
                     this.pressed
-                    ? this.clickedColor
-                    : this.highlighted ? highlightedColor : focusedColor,
+                            ? this.clickedColor
+                            : this.highlighted ? highlightedColor : focusedColor,
                     textColor
             );
         }
@@ -206,7 +206,8 @@ public class HotbarSlotWidget extends AbstractWidget
         private Color highlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
         private Color clickedColor = Styles.Hotbar.SLOT_PRESSED_COLOR;
 
-        private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> { };
+        private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> {
+        };
 
         public Builder(int hotbarIndex, int x, int y, int width, int height)
         {
