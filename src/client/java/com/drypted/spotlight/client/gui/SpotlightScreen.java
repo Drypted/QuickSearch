@@ -35,9 +35,12 @@ public class SpotlightScreen extends Screen
     @Nullable
     private Command selectedCommand = null;
 
-    public SpotlightScreen()
+    private final boolean showCommandOnStartup;
+
+    public SpotlightScreen(boolean showCommandOnStartup)
     {
         super(Component.literal("Spotlight Menu"));
+        this.showCommandOnStartup = showCommandOnStartup;
     }
 
     @Override
@@ -80,6 +83,12 @@ public class SpotlightScreen extends Screen
         setItemResultsVisible(false);
 
         this.setFocused(inputWidget);
+
+        // check if to show command
+        if (showCommandOnStartup)
+        {
+            inputWidget.setText("/");
+        }
     }
 
     /* Input */

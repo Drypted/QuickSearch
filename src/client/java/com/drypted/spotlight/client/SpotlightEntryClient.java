@@ -24,6 +24,8 @@ public class SpotlightEntryClient implements ClientModInitializer
     public static KeyMapping openSpotlightKeyMapping;
     public static KeyMapping closeSpotlightKeyMapping;
 
+    public static KeyMapping openSpotlightCommandKeyMapping;
+
     @Override
     public void onInitializeClient()
     {
@@ -33,7 +35,7 @@ public class SpotlightEntryClient implements ClientModInitializer
 
         // register keybind
         openSpotlightKeyMapping = new KeyMapping(
-                "key.spotlight.toggle",
+                "key.spotlight.open",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_Y,
                 KEY_CATEGORY_SPOTLIGHT
@@ -44,15 +46,27 @@ public class SpotlightEntryClient implements ClientModInitializer
                 GLFW.GLFW_KEY_ESCAPE,
                 KEY_CATEGORY_SPOTLIGHT
         );
+        openSpotlightCommandKeyMapping = new KeyMapping(
+                "key.spotlight.open_command",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_U,
+                KEY_CATEGORY_SPOTLIGHT
+        );
 
         KeyBindingHelper.registerKeyBinding(openSpotlightKeyMapping);
         KeyBindingHelper.registerKeyBinding(closeSpotlightKeyMapping);
+        KeyBindingHelper.registerKeyBinding(openSpotlightCommandKeyMapping);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openSpotlightKeyMapping.consumeClick())
             {
                 SearchHandler.requestCreativeTabRebuild();
-                client.setScreen(new SpotlightScreen());
+                client.setScreen(new SpotlightScreen(false));
+            }
+            while (openSpotlightCommandKeyMapping.consumeClick())
+            {
+                SearchHandler.requestCreativeTabRebuild();
+                client.setScreen(new SpotlightScreen(true));
             }
         });
     }

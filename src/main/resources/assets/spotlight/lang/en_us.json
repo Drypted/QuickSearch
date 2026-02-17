@@ -9,6 +9,7 @@
   "text.autoconfig.spotlight.option.showHotbarSlots": "Show hotbar slots",
   "text.autoconfig.spotlight.option.showHotbarSlots.@Tooltip": "Shows the hotbar slots while spotlight is open",
   "key.categories.spotlight": "Spotlight",
-  "key.spotlight.toggle": "Toggle Spotlight",
-  "key.spotlight.close": "Close Spotlight"
+  "key.spotlight.open": "Open Spotlight",
+  "key.spotlight.close": "Close Spotlight",
+  "key.spotlight.open_command": "Open Spotlight (Command)"
 }
