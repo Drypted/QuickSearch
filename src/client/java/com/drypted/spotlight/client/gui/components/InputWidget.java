@@ -28,6 +28,8 @@ public class InputWidget extends AbstractWidget
     private static final int TEXT_PADDING_Y = 1;
     private static final int INDICATOR_PADDING_RIGHT = 4;
     private static final int CARET_BLINK_TIME = 500;
+    private static final int ERROR_TOOLTIP_HEIGHT = 11;
+    private static final int ERROR_TOOLTIP_SPACING = 2;
 
     // Visual configuration
     private final boolean isRounded;
@@ -203,17 +205,14 @@ public class InputWidget extends AbstractWidget
         if (shouldShowError())
         {
             assert this.error != null;
-            // TODO: cleanup
-            final int height = 11;
-            final int spacing = 2;
             RenderUtils.drawLabelWithScale(
                     guiGraphics,
                     error.getMessage(),
                     0.65f,
                     this.getX(),
-                    this.getY() - height - spacing,
+                    this.getY() - ERROR_TOOLTIP_HEIGHT - ERROR_TOOLTIP_SPACING,
                     this.getX() + this.getWidth(),
-                    this.getY() - spacing,
+                    this.getY() - ERROR_TOOLTIP_SPACING,
                     RoundedCorners.all(),
                     this.error.getColor(),
                     normalTextColor
