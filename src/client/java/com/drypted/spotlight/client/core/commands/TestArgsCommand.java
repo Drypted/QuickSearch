@@ -41,7 +41,7 @@ public class TestArgsCommand implements Command
     {
         CommandError error = validateArgs(args);
 
-        if (!error.isIgnorable())
+        if (error.isCritical())
         {
             return error;
         }
@@ -51,6 +51,6 @@ public class TestArgsCommand implements Command
                         + String.join(", ", args) + "\""), true
         );
 
-        return CommandError.withWarning("asdfasdfas");
+        return CommandError.NONE;
     }
 }

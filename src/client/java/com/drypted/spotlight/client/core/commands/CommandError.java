@@ -10,9 +10,9 @@ public record CommandError(String error, InputErrorSeverity severity) implements
         return this.severity == InputErrorSeverity.NONE || this.equals(NONE);
     }
 
-    public boolean isIgnorable()
+    public boolean isCritical()
     {
-        return severity.isIgnorable();
+        return severity.isCritical();
     }
 
     /* VALIDATION ERROR IMPLEMENTATION */

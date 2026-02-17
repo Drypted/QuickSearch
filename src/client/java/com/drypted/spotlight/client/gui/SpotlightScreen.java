@@ -291,7 +291,7 @@ public class SpotlightScreen extends Screen
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
         CommandError error = CommandsHandler.execute(commandName, args, player);
-        if (!error.isIgnorable())
+        if (error.isCritical())
         {
             this.inputWidget.showError(error);
             return;

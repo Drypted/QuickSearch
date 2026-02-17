@@ -6,20 +6,21 @@ import com.drypted.spotlight.client.styling.Styles;
 
 public enum InputErrorSeverity
 {
-    NONE(true),
-    WARNING(true),
-    ERROR(false);
+    NONE(false),
+    WARNING(false),
+    ERROR(true);
 
-    private final boolean ignorable;
+    private final boolean critical;
 
-    InputErrorSeverity(boolean ignorable)
+    InputErrorSeverity(boolean critical)
     {
-        this.ignorable = ignorable;
+        this.critical = critical;
     }
 
-    public boolean isIgnorable()
+    /// Critical Errors should halt execution
+    public boolean isCritical()
     {
-        return ignorable;
+        return critical;
     }
 
     public Color getColor()
