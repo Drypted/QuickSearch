@@ -288,6 +288,9 @@ public class SpotlightScreen extends Screen
         {
             selectedCommand.execute(args, player);
         }
+
+        // execute and exit
+        this.onClose();
     }
 
     private void onTabPressed()

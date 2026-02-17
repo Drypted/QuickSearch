@@ -34,7 +34,7 @@ public class CommandsHandler
     {
         if (userInput == null || userInput.length() <= 1)
         {
-            onComplete.accept(new ArrayList<>());
+            onComplete.accept(commands); // Show all commands if input is empty or just "/"
             return;
         }
 
