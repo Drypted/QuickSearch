@@ -68,8 +68,56 @@ public class GiveItemAction extends Action
         player.displayClientMessage(Component.literal("Gave " + name), true);
 
         final float volume = 0.5f;
-        final float pitch = ((player.getRandom().nextFloat() - player.getRandom()
-                .nextFloat()) * 0.7f + 1.0f) * 2.0f;
+        final float pitch = ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f;
+        player.playSound(SoundEvents.ITEM_PICKUP, volume, pitch);
+    }
+
+    public static void run(LocalPlayer player, ItemStack stack, String name)
+    {
+        Minecraft mc = Minecraft.getInstance();
+
+        if (mc.gameMode == null)
+        {
+            handleError(player, ERROR.UNINITIALIZED);
+            return;
+        }
+
+        if (stack.isEmpty())
+        {
+            handleError(player, ERROR.INVALID_ITEM);
+            return;
+        }
+
+        // Must be in creative mode
+        if (notInCreative(player))
+        {
+            handleError(player, ERROR.NOT_IN_CREATIVE);
+            return;
+        }
+
+        MultiPlayerGameMode gameMode = mc.gameMode;
+
+        int invSlot = player.getInventory().getFreeSlot();
+        // returns -1 for none, 0-8 for hotbar, 9-35 for main inventory
+
+        int containerSlot;
+
+        if (invSlot == -1) // no slot, drop
+            containerSlot = -1;
+        else if (invSlot < 9) // in hotbar
+            containerSlot = InventoryMenu.USE_ROW_SLOT_START + invSlot;
+        else // in main inventory
+            containerSlot = InventoryMenu.INV_SLOT_START + (invSlot - 9);
+
+        // if no empty slot was found, then handleCreativeModeItemAdd will drop the item
+        gameMode.handleCreativeModeItemAdd(stack, containerSlot);
+
+        // Feedback
+        // TODO: add config
+        player.displayClientMessage(Component.literal("Gave " + name), true);
+
+        final float volume = 0.5f;
+        final float pitch = ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f;
         player.playSound(SoundEvents.ITEM_PICKUP, volume, pitch);
     }
 }

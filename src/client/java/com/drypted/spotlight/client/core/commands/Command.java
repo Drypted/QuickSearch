@@ -5,7 +5,7 @@ import net.minecraft.client.player.LocalPlayer;
 
 public interface Command extends Searchable
 {
-    boolean isNotArgs();
+    boolean requiresArgs();
 
     String getName();
 

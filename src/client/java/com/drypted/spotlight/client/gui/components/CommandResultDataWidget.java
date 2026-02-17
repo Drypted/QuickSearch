@@ -61,7 +61,7 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
         this.outlineColor = outlineColor;
 
         // clickable only if commands is no args
-        this.isPressable = command.isNotArgs();
+        this.isPressable = !command.requiresArgs();
 
         this.setHeight((2 * paddingY) + FONT.lineHeight + SUBTITLE_SPACING + (int) (FONT.lineHeight * SUBTITLE_SCALE));
     }

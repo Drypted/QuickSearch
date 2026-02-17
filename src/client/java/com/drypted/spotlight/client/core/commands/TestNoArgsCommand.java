@@ -6,9 +6,9 @@ import net.minecraft.network.chat.Component;
 public class TestNoArgsCommand implements Command
 {
     @Override
-    public boolean isNotArgs()
+    public boolean requiresArgs()
     {
-        return true;
+        return false;
     }
 
     @Override

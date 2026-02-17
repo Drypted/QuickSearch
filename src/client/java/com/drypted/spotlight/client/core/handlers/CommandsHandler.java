@@ -1,9 +1,6 @@
 package com.drypted.spotlight.client.core.handlers;
 
-import com.drypted.spotlight.client.core.commands.Command;
-import com.drypted.spotlight.client.core.commands.CommandError;
-import com.drypted.spotlight.client.core.commands.TestArgsCommand;
-import com.drypted.spotlight.client.core.commands.TestNoArgsCommand;
+import com.drypted.spotlight.client.core.commands.*;
 import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -32,8 +29,8 @@ public class CommandsHandler
     static
     {
         // Registering instances once
-        register(new TestArgsCommand());
         register(new TestNoArgsCommand());
+        register(new GetPlayerHeadCommand());
 
         rebuildCommandIndex();
     }
