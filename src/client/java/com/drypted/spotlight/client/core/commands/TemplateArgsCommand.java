@@ -3,7 +3,7 @@ package com.drypted.spotlight.client.core.commands;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
-public class TestArgsCommand implements Command
+public class TemplateArgsCommand implements Command
 {
     @Override
     public boolean requiresArgs()

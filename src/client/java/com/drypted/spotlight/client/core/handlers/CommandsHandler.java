@@ -28,8 +28,7 @@ public class CommandsHandler
 
     static
     {
-        // Registering instances once
-        register(new TestNoArgsCommand());
+        // Registering instances
         register(new GetPlayerHeadCommand());
 
         rebuildCommandIndex();
