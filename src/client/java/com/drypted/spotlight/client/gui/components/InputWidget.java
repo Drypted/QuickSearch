@@ -2,6 +2,7 @@ package com.drypted.spotlight.client.gui.components;
 
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
+import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
@@ -59,6 +60,7 @@ public class InputWidget extends AbstractWidget
     private boolean isDisabled = false;
     private boolean isReadOnly = false;
     private boolean hasError = false;
+    private String errorMessage = "";
 
     // Mouse selection
     private boolean isDragging = false;
@@ -92,7 +94,7 @@ public class InputWidget extends AbstractWidget
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         // Determine outline color based on state
-        Color currentOutlineColor = this.outlineColor;
+        Color currentOutlineColor = this.hasError ? this.errorColor : this.outlineColor;
 
         // Background
         RenderUtils.drawRectangle(
@@ -192,6 +194,26 @@ public class InputWidget extends AbstractWidget
             case IDLE:
             default:
                 break;
+        }
+
+        // Render error message
+        if (hasError && !errorMessage.isEmpty())
+        {
+            // TODO: cleanup
+            final int height = 11;
+            final int spacing = 2;
+            RenderUtils.drawLabelWithScale(
+                    guiGraphics,
+                    errorMessage,
+                    0.65f,
+                    this.getX(),
+                    this.getY() - height - spacing,
+                    this.getX() + this.getWidth(),
+                    this.getY() - spacing,
+                    RoundedCorners.all(),
+                    errorColor,
+                    normalTextColor
+            );
         }
     }
 
@@ -966,6 +988,12 @@ public class InputWidget extends AbstractWidget
         this.hasError = hasError;
     }
 
+    public void setErrorMessage(boolean hasError, String message)
+    {
+        this.hasError = hasError;
+        this.errorMessage = (message != null) ? message : "";
+    }
+
     public String getPlaceholder()
     {
         return placeholder;
@@ -1195,6 +1223,7 @@ public class InputWidget extends AbstractWidget
 
     public enum SearchStatus
     {
-        IDLE, SEARCHING
+        IDLE,
+        SEARCHING
     }
 }

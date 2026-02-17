@@ -3,6 +3,7 @@ package com.drypted.spotlight.client.gui;
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.actions.Actions;
 import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.CommandError;
 import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.gui.components.*;
@@ -10,13 +11,18 @@ import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SpotlightScreen extends Screen
 {
@@ -31,9 +37,6 @@ public class SpotlightScreen extends Screen
     private InputWidget inputWidget;
     private ScrollBoxWidget searchResultsWidget;
     private @Nullable HotbarCollectionWidget hotbarCollectionWidget;
-
-    @Nullable
-    private Command selectedCommand = null;
 
     private final boolean showCommandOnStartup;
 
@@ -55,7 +58,7 @@ public class SpotlightScreen extends Screen
         this.inputWidget = InputWidget.builder(searchBarX, searchBarY, searchBarWidth, SEARCH_BAR_HEIGHT).build();
         this.inputWidget.setPlaceholder("Search items for blocks ...");
         // set validator for no symbols
-        this.inputWidget.setValidator(text -> text.matches("[/a-zA-Z0-9 _-]*"));
+        this.inputWidget.setValidator(text -> text.matches("[/a-zA-Z0-9 -_\"]*"));
 
         this.searchResultsWidget = ScrollBoxWidget.builder(
                 searchBarX,
@@ -242,11 +245,8 @@ public class SpotlightScreen extends Screen
         {
             inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
             setItemResultsVisible(false);
-            selectedCommand = null;
             return;
         }
-
-        selectedCommand = results.getFirst(); // auto-select first commands for hotbar keybinds
 
         for (Command result : results)
         {
@@ -261,6 +261,11 @@ public class SpotlightScreen extends Screen
         setItemResultsVisible(true);
         setHotbarWidgetVisible(false);
         inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
+
+        // validate command
+        CommandError error = results.getFirst().validateArgs(getArgs());
+        boolean showError = !error.isIgnorable();
+        inputWidget.setErrorMessage(showError, showError ? error.getMessage() : "");
     }
 
     private void onCommandsResultMouseClick(Command data)
@@ -277,38 +282,65 @@ public class SpotlightScreen extends Screen
 
         SpotlightEntryClient.LOGGER.info("Executing commands from user input: {}", text);
 
+        String commandName = text.split(" ")[0].substring(1); // Remove leading "/"
 
-        String[] parts = text.split(" ");
-        String commandName = parts[0].substring(1); // Remove leading "/"
-        String[] args = new String[0];
-        if (parts.length > 1)
-        {
-            args = new String[parts.length - 1];
-            System.arraycopy(parts, 1, args, 0, parts.length - 1);
-        }
+        String[] args = getArgs();
 
         SpotlightEntryClient.LOGGER.info("Detected commands: {}, with args: {}", commandName, String.join(", ", args));
-
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
 
-        if (selectedCommand != null && selectedCommand.getName().equalsIgnoreCase(commandName))
+        if (CommandsHandler.executeAndWasSuccess(commandName, args, player))
         {
-            selectedCommand.execute(args, player);
+            // execute and exit
+            this.onClose();
+        }
+    }
+
+    private String @NotNull [] getArgs()
+    {
+        String text = this.inputWidget.getText().trim();
+        int spaceIndex = text.indexOf(' ');
+
+        // no space -> no arguments
+        if (spaceIndex == -1) return new String[0];
+
+        // separate command name from args
+        String args = text.substring(spaceIndex + 1).trim();
+        if (args.isEmpty()) return new String[0];
+
+        List<String> matches = new ArrayList<>();
+
+        // text inside double quotes: "([^"]*)"
+        // words separated by spaces: ([^\s"]+)
+        Pattern regex = Pattern.compile("\"([^\"]*)\"|([^\\s\"]+)");
+        Matcher matcher = regex.matcher(args);
+
+        while (matcher.find())
+        {
+            if (matcher.group(1) != null)
+            {
+                // Found a quoted string, add it without the quotes
+                matches.add(matcher.group(1));
+            }
+            else if (matcher.group(2) != null)
+            {
+                // Found a normal word
+                matches.add(matcher.group(2));
+            }
         }
 
-        // execute and exit
-        this.onClose();
+        return matches.toArray(new String[0]);
     }
 
     private void onTabPressed()
     {
-        if (isUserInputCommand() && selectedCommand != null)
-        {
-            String commandName = selectedCommand.getName();
-            inputWidget.setText("/" + commandName + " ");
-        }
+        // if (isUserInputCommand() && selectedCommand != null)
+        // {
+        //     String commandName = selectedCommand.getName();
+        //     inputWidget.setText("/" + commandName + " ");
+        // }
     }
 
     /* Overrides for settings */
@@ -351,6 +383,7 @@ public class SpotlightScreen extends Screen
     private void clearResults()
     {
         this.inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
+        this.inputWidget.setErrorMessage(false, "");
         this.searchResultsWidget.removeAllChildren();
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
             this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));

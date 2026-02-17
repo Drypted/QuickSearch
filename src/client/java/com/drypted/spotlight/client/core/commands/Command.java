@@ -11,8 +11,9 @@ public interface Command extends Searchable
 
     String getDescription();
 
-    void execute(String[] args, LocalPlayer player);
+    CommandError validateArgs(String[] args);
 
+    CommandError execute(String[] args, LocalPlayer player);
 
     /* SEARCHABLE DEFAULT IMPLEMENTATION */
 

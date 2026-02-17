@@ -24,8 +24,16 @@ public class TestNoArgsCommand implements Command
     }
 
     @Override
-    public void execute(String[] args, LocalPlayer player)
+    public CommandError validateArgs(String[] args)
+    {
+        return CommandError.NONE;
+    }
+
+    @Override
+    public CommandError execute(String[] args, LocalPlayer player)
     {
         player.displayClientMessage(Component.literal("Test No Args commands executed."), true);
+
+        return CommandError.NONE;
     }
 }

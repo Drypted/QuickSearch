@@ -4,24 +4,37 @@ import com.drypted.spotlight.client.core.commands.Command;
 import com.drypted.spotlight.client.core.commands.TestArgsCommand;
 import com.drypted.spotlight.client.core.commands.TestNoArgsCommand;
 import com.drypted.spotlight.client.core.search.SmartSearch;
+import net.minecraft.client.player.LocalPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class CommandsHandler
 {
-    private static final ArrayList<Command> commands = new ArrayList<>();
+    /* REGISTRY BEGIN */
+    private static final Map<String, Command> REGISTRY = new HashMap<>();
+
+    private static void register(Command cmd)
+    {
+        REGISTRY.put(cmd.getName().toLowerCase(), cmd);
+    }
+
+    /* REGISTRY END */
+
     private static SmartSearch<Command> commandSearch;
 
     static
     {
-        commands.add(new TestNoArgsCommand());
-        commands.add(new TestArgsCommand());
+        // Registering instances once
+        register(new TestArgsCommand());
+        register(new TestNoArgsCommand());
 
-        // Build search index
-        commandSearch = new SmartSearch<>(commands);
+        rebuildCommandIndex();
     }
 
     /**
@@ -34,7 +47,7 @@ public class CommandsHandler
     {
         if (userInput == null || userInput.length() <= 1)
         {
-            onComplete.accept(commands); // Show all commands if input is empty or just "/"
+            onComplete.accept(new ArrayList<>(REGISTRY.values())); // Show all commands if input is empty or just "/"
             return;
         }
 
@@ -51,6 +64,26 @@ public class CommandsHandler
      */
     public static void rebuildCommandIndex()
     {
-        commandSearch = new SmartSearch<>(commands);
+        commandSearch = new SmartSearch<>(new ArrayList<>(REGISTRY.values()));
+    }
+
+
+    /* PUBLIC COMMAND INTERFACE */
+
+    public static @Nullable Command getRawCommand(String name)
+    {
+        return REGISTRY.get(name.toLowerCase());
+    }
+
+    public static boolean executeAndWasSuccess(String name, String[] args, LocalPlayer player)
+    {
+        Command cmd = REGISTRY.get(name.toLowerCase());
+        if (cmd != null)
+        {
+            return cmd.execute(args, player).isNone();
+        }
+
+        return false;
+        // invalid command
     }
 }
