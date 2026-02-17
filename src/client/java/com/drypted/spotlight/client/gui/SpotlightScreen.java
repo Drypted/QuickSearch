@@ -8,6 +8,7 @@ import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.gui.components.*;
 import com.drypted.spotlight.client.models.ItemsResultData;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -118,10 +119,6 @@ public class SpotlightScreen extends Screen
             if (command != null)
             {
                 inputWidget.showError(command.validateArgs(getArgs()));
-            }
-            else
-            {
-                inputWidget.showError(CommandError.withWarning("Please input a command from the list"));
             }
         }
         else
@@ -293,12 +290,19 @@ public class SpotlightScreen extends Screen
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
-
-        if (CommandsHandler.executeAndWasSuccess(commandName, args, player))
+        CommandError error = CommandsHandler.execute(commandName, args, player);
+        if (!error.isIgnorable())
         {
-            // execute and exit
-            this.onClose();
+            this.inputWidget.showError(error);
+            return;
         }
+
+        if (!error.getMessage().isEmpty()) player.displayClientMessage(
+                Component.literal(error.getSeverity().getName() + ": " + error.getMessage()).withStyle(ChatFormatting.GOLD),
+                false
+        );
+
+        this.onClose();
     }
 
     private String @NotNull [] getArgs()

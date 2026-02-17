@@ -31,4 +31,14 @@ public enum InputErrorSeverity
             case ERROR -> Styles.Input.ERROR_COLOR;
         };
     }
+
+    public String getName()
+    {
+        return switch (this)
+        {
+            case NONE -> "None";
+            case WARNING -> "Warning";
+            case ERROR -> "Error";
+        };
+    }
 }

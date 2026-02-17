@@ -25,7 +25,7 @@ public class SearchHandler
     private static SimpleSearch<ItemsResultData> simpleSearch = new SimpleSearch<>(GameItems);
 
     private static SmartSearch<ItemsResultData> smartSearch;
-    private static SearchMode searchMode = SearchMode.SIMPLE;
+    private static SearchMode searchMode = SearchMode.SMART;
 
     // Keep track of the active search to allow cancellation
     private static CompletableFuture<Void> ActiveSearchTask;

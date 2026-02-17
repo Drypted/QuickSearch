@@ -51,6 +51,6 @@ public class TestArgsCommand implements Command
                         + String.join(", ", args) + "\""), true
         );
 
-        return CommandError.NONE;
+        return CommandError.withWarning("asdfasdfas");
     }
 }

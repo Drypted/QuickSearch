@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.core.handlers;
 
 import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.CommandError;
 import com.drypted.spotlight.client.core.commands.TestArgsCommand;
 import com.drypted.spotlight.client.core.commands.TestNoArgsCommand;
 import com.drypted.spotlight.client.core.search.SmartSearch;
@@ -75,15 +76,14 @@ public class CommandsHandler
         return REGISTRY.get(name.toLowerCase());
     }
 
-    public static boolean executeAndWasSuccess(String name, String[] args, LocalPlayer player)
+    public static CommandError execute(String name, String[] args, LocalPlayer player)
     {
         Command cmd = REGISTRY.get(name.toLowerCase());
         if (cmd != null)
         {
-            return cmd.execute(args, player).isNone();
+            return cmd.execute(args, player);
         }
 
-        return false;
-        // invalid command
+        return CommandError.withError("Please enter a valid command name!");
     }
 }
