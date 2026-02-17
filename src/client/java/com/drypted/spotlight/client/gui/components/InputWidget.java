@@ -1,8 +1,8 @@
 package com.drypted.spotlight.client.gui.components;
 
+import com.drypted.spotlight.client.gui.models.InputError;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
@@ -13,6 +13,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -39,7 +40,6 @@ public class InputWidget extends AbstractWidget
     private final Color selectionBackgroundColor;
     private final Color selectionTextColor;
     private final Color placeholderColor;
-    private final Color errorColor;
 
     // Text state
     private String text = "";
@@ -60,7 +60,7 @@ public class InputWidget extends AbstractWidget
     private boolean isDisabled = false;
     private boolean isReadOnly = false;
     private boolean hasError = false;
-    private String errorMessage = "";
+    private @Nullable InputError error;
 
     // Mouse selection
     private boolean isDragging = false;
@@ -74,7 +74,7 @@ public class InputWidget extends AbstractWidget
 
     private final Color LoaderColor = Styles.Input.LOADER_COLOR;
 
-    public InputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor, Color errorColor)
+    public InputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor)
     {
         super(x, y, width, height, Component.empty());
         this.isRounded = isRounded;
@@ -87,14 +87,15 @@ public class InputWidget extends AbstractWidget
         this.selectionBackgroundColor = selectionBackgroundColor;
         this.selectionTextColor = selectionTextColor;
         this.placeholderColor = placeholderColor;
-        this.errorColor = errorColor;
     }
 
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         // Determine outline color based on state
-        Color currentOutlineColor = this.hasError ? this.errorColor : this.outlineColor;
+        Color currentOutlineColor = shouldShowError() ?
+                Objects.requireNonNull(this.error).getColor() :
+                this.outlineColor;
 
         // Background
         RenderUtils.drawRectangle(
@@ -154,7 +155,9 @@ public class InputWidget extends AbstractWidget
 
             // Render text
             // Priority: disabled > error > normal
-            Color textColor = isDisabled ? disabledTextColor : hasError ? errorColor : normalTextColor;
+            Color textColor = isDisabled ?
+                    disabledTextColor :
+                    shouldShowError() ? Objects.requireNonNull(this.error).getColor() : normalTextColor;
             guiGraphics.drawString(FONT, beforeSelection, textX - scrollOffset, textY, textColor.asInt(), false);
 
             guiGraphics.drawString(
@@ -197,21 +200,22 @@ public class InputWidget extends AbstractWidget
         }
 
         // Render error message
-        if (hasError && !errorMessage.isEmpty())
+        if (shouldShowError())
         {
+            assert this.error != null;
             // TODO: cleanup
             final int height = 11;
             final int spacing = 2;
             RenderUtils.drawLabelWithScale(
                     guiGraphics,
-                    errorMessage,
+                    error.getMessage(),
                     0.65f,
                     this.getX(),
                     this.getY() - height - spacing,
                     this.getX() + this.getWidth(),
                     this.getY() - spacing,
                     RoundedCorners.all(),
-                    errorColor,
+                    this.error.getColor(),
                     normalTextColor
             );
         }
@@ -291,7 +295,9 @@ public class InputWidget extends AbstractWidget
 
     private int getTextAreaWidth()
     {
-        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ? (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT) : 0;
+        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ?
+                (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT) :
+                0;
         return this.getWidth() - (TEXT_PADDING_X * 2) - indicatorSpace;
     }
 
@@ -978,22 +984,6 @@ public class InputWidget extends AbstractWidget
         this.isReadOnly = readOnly;
     }
 
-    public boolean hasError()
-    {
-        return hasError;
-    }
-
-    public void setError(boolean hasError)
-    {
-        this.hasError = hasError;
-    }
-
-    public void setErrorMessage(boolean hasError, String message)
-    {
-        this.hasError = hasError;
-        this.errorMessage = (message != null) ? message : "";
-    }
-
     public String getPlaceholder()
     {
         return placeholder;
@@ -1018,11 +1008,6 @@ public class InputWidget extends AbstractWidget
         }
     }
 
-    public Predicate<String> getValidator()
-    {
-        return validator;
-    }
-
     public void setValidator(Predicate<String> validator)
     {
         this.validator = validator;
@@ -1032,6 +1017,40 @@ public class InputWidget extends AbstractWidget
     public int getOutlineThickness()
     {
         return outlineThickness;
+    }
+
+    /* ERROR */
+
+    public Predicate<String> getValidator()
+    {
+        return validator;
+    }
+
+    public boolean hasError()
+    {
+        return hasError;
+    }
+
+    public void showError(InputError error)
+    {
+        this.error = error;
+        this.hasError = true;
+    }
+
+    public void clearError()
+    {
+        this.error = null;
+        this.hasError = false;
+    }
+
+    public @Nullable InputError getError()
+    {
+        return error;
+    }
+
+    private boolean shouldShowError()
+    {
+        return this.hasError && this.error != null && this.error.getMessage() != null && !this.error.getMessage().isEmpty();
     }
 
     /* Public Methods */
@@ -1090,7 +1109,6 @@ public class InputWidget extends AbstractWidget
         private Color selectionBackgroundColor = Styles.Input.SELECTION_BACKGROUND;
         private Color selectionTextColor = Styles.Input.SELECTION_TEXT;
         private Color placeholderColor = Styles.Input.PLACEHOLDER_TEXT;
-        private Color errorColor = Styles.Input.ERROR_COLOR;
         private String placeholder = "";
         private int maxLength = 256;
         private Predicate<String> validator = null;
@@ -1169,12 +1187,6 @@ public class InputWidget extends AbstractWidget
             return this;
         }
 
-        public Builder errorColor(Color errorColor)
-        {
-            this.errorColor = errorColor;
-            return this;
-        }
-
         public Builder placeholder(String placeholder)
         {
             this.placeholder = placeholder;
@@ -1209,8 +1221,7 @@ public class InputWidget extends AbstractWidget
                     disabledTextColor,
                     selectionBackgroundColor,
                     selectionTextColor,
-                    placeholderColor,
-                    errorColor
+                    placeholderColor
             );
             widget.setPlaceholder(placeholder);
             widget.setMaxLength(maxLength);

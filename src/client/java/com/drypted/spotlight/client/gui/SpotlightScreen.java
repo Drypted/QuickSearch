@@ -11,7 +11,6 @@ import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -109,8 +108,26 @@ public class SpotlightScreen extends Screen
         inputWidget.setSearchStatus(InputWidget.SearchStatus.SEARCHING);
 
         // Delegate logic to appropriate handler
-        if (text.contains("/")) CommandsHandler.getCommands(text, this::displayCommands);
-        else SearchHandler.searchAsync(text, this::displayItems);
+        if (text.startsWith("/"))
+        {
+            CommandsHandler.getCommands(text, this::displayCommands);
+
+            // validate command
+            String commandName = text.substring(1).split("\\s+")[0];
+            Command command = CommandsHandler.getRawCommand(commandName);
+            if (command != null)
+            {
+                inputWidget.showError(command.validateArgs(getArgs()));
+            }
+            else
+            {
+                inputWidget.showError(CommandError.withWarning("Please input a command from the list"));
+            }
+        }
+        else
+        {
+            SearchHandler.searchAsync(text, this::displayItems);
+        }
     }
 
     @Override
@@ -131,14 +148,7 @@ public class SpotlightScreen extends Screen
 
         if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
         {
-            SpotlightEntryClient.LOGGER.info("Enter pressed, executing commands if valid");
             onEnterPressed();
-            return true;
-        }
-        else if (keyCode == GLFW.GLFW_KEY_TAB)
-        {
-            SpotlightEntryClient.LOGGER.info("Tab pressed, executing tab action if valid");
-            onTabPressed();
             return true;
         }
 
@@ -261,11 +271,6 @@ public class SpotlightScreen extends Screen
         setItemResultsVisible(true);
         setHotbarWidgetVisible(false);
         inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-
-        // validate command
-        CommandError error = results.getFirst().validateArgs(getArgs());
-        boolean showError = !error.isIgnorable();
-        inputWidget.setErrorMessage(showError, showError ? error.getMessage() : "");
     }
 
     private void onCommandsResultMouseClick(Command data)
@@ -279,8 +284,6 @@ public class SpotlightScreen extends Screen
     {
         String text = inputWidget.getText();
         if (text == null || !isUserInputCommand()) return;
-
-        SpotlightEntryClient.LOGGER.info("Executing commands from user input: {}", text);
 
         String commandName = text.split(" ")[0].substring(1); // Remove leading "/"
 
@@ -334,15 +337,6 @@ public class SpotlightScreen extends Screen
         return matches.toArray(new String[0]);
     }
 
-    private void onTabPressed()
-    {
-        // if (isUserInputCommand() && selectedCommand != null)
-        // {
-        //     String commandName = selectedCommand.getName();
-        //     inputWidget.setText("/" + commandName + " ");
-        // }
-    }
-
     /* Overrides for settings */
 
     @Override
@@ -383,7 +377,7 @@ public class SpotlightScreen extends Screen
     private void clearResults()
     {
         this.inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-        this.inputWidget.setErrorMessage(false, "");
+        this.inputWidget.clearError();
         this.searchResultsWidget.removeAllChildren();
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
             this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
@@ -397,6 +391,6 @@ public class SpotlightScreen extends Screen
     private boolean isUserInputCommand()
     {
         String text = inputWidget.getText();
-        return text != null && text.contains("/");
+        return text != null && text.startsWith("/");
     }
 }

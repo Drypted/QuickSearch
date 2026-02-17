@@ -14,6 +14,7 @@ public final class Styles
 
     private static final Color QUATERNARY_COLOR = Color.fromInt(0xFF6CB6FE);
 
+    private static final Color WARNING_COLOR = Color.fromInt(0xFFFFBA00);
     private static final Color ERROR_COLOR = Colors.RED;
 
     public static final class Hotbar
@@ -45,6 +46,7 @@ public final class Styles
         public static final Color SELECTION_BACKGROUND = Color.fromInt(0xFF93C5FD);
         public static final Color SELECTION_TEXT = Color.fromInt(0xFF1E1E1E);
         // misc
+        public static final Color WARNING_COLOR = Styles.WARNING_COLOR;
         public static final Color ERROR_COLOR = Styles.ERROR_COLOR;
         public static final Color LOADER_COLOR = Color.fromInt(0xFF3B82F6); // Modern blue
     }
