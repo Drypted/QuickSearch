@@ -38,11 +38,10 @@ public class CommandsHandler
             return;
         }
 
-        // Remove the leading "/"
-        String query = userInput.substring(1);
+        // Split by one or more whitespace characters
+        String commandName = userInput.substring(1).split("\\s+")[0];
 
-        // Use SmartSearch for intelligent matching
-        List<Command> results = commandSearch.search(query, 10).collect(Collectors.toList());
+        List<Command> results = commandSearch.search(commandName, 10).collect(Collectors.toList());
 
         onComplete.accept(results);
     }
