@@ -1,5 +1,6 @@
 package com.drypted.spotlight.client.core.actions;
 
+import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -64,8 +65,8 @@ public class GiveItemAction extends Action
         gameMode.handleCreativeModeItemAdd(stack, containerSlot);
 
         // Feedback
-        // TODO: add config
-        player.displayClientMessage(Component.literal("Gave " + name), true);
+        if (SpotlightEntryClient.getConfig().showItemMessage)
+            player.displayClientMessage(Component.literal("Gave " + name), true);
 
         final float volume = 0.5f;
         final float pitch = ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f;
@@ -113,8 +114,8 @@ public class GiveItemAction extends Action
         gameMode.handleCreativeModeItemAdd(stack, containerSlot);
 
         // Feedback
-        // TODO: add config
-        player.displayClientMessage(Component.literal("Gave " + name), true);
+        if (SpotlightEntryClient.getConfig().showItemMessage)
+            player.displayClientMessage(Component.literal("Gave " + name), true);
 
         final float volume = 0.5f;
         final float pitch = ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f;

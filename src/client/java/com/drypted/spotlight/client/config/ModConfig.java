@@ -23,4 +23,8 @@ public class ModConfig implements ConfigData
     /// Whether to show hotbar slots when the hotbar of spotlight is focused
     @ConfigEntry.Gui.Tooltip
     public boolean showHotbarSlots = true;
+
+    /// Whether to show a message when item given or replaced
+    @ConfigEntry.Gui.Tooltip
+    public boolean showItemMessage = true;
 }

@@ -8,6 +8,8 @@
   "text.autoconfig.spotlight.option.resultsBoxHeight.@Tooltip": "The height of the results box",
   "text.autoconfig.spotlight.option.showHotbarSlots": "Show hotbar slots",
   "text.autoconfig.spotlight.option.showHotbarSlots.@Tooltip": "Shows the hotbar slots while spotlight is open",
+  "text.autoconfig.spotlight.option.showItemMessage": "Show item message",
+  "text.autoconfig.spotlight.option.showItemMessage.@Tooltip": "Shows a message when item is given or replaced",
   "key.categories.spotlight": "Spotlight",
   "key.spotlight.open": "Open Spotlight",
   "key.spotlight.close": "Close Spotlight",

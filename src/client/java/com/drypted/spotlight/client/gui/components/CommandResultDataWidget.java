@@ -101,7 +101,9 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
         // title
         int titleX = startPosX + paddingX;
         int titleY = startPosY + paddingY;
-        int _textColor = this.isPressable ? textColor.asInt() : textColor.withLightness(textColor.getLightness() / 2).asInt();
+        int _textColor = this.isPressable ?
+                textColor.asInt() :
+                textColor.withLightness(textColor.getLightness() / 2).asInt();
 
         g.drawString(FONT, this.command.getName(), titleX, titleY, _textColor, false);
 

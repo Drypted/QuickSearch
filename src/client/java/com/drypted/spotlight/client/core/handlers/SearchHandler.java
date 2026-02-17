@@ -178,6 +178,7 @@ public class SearchHandler
 
     public enum SearchMode
     {
-        SIMPLE, SMART
+        SIMPLE,
+        SMART
     }
 }

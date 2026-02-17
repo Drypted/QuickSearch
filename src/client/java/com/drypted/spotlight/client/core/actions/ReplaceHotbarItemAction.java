@@ -1,5 +1,6 @@
 package com.drypted.spotlight.client.core.actions;
 
+import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -49,14 +50,11 @@ public class ReplaceHotbarItemAction extends Action
 
         mc.gameMode.handleCreativeModeItemAdd(stack, hotbarSlot);
 
-        player.displayClientMessage(
-                Component.literal("Set slot " + (slotIndex + 1) + " to " + name),
-                true
-        );
+        if (SpotlightEntryClient.getConfig().showItemMessage)
+            player.displayClientMessage(Component.literal("Set slot " + (slotIndex + 1) + " to " + name), true);
 
         final float volume = 0.5f;
-        final float pitch = ((player.getRandom().nextFloat() - player.getRandom()
-                .nextFloat()) * 0.7f + 1.0f) * 2.0f;
+        final float pitch = ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f;
         player.playSound(SoundEvents.ITEM_PICKUP, volume, pitch);
     }
 }

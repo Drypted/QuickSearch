@@ -1,6 +1,8 @@
 package com.drypted.spotlight.client.core.handlers;
 
-import com.drypted.spotlight.client.core.commands.*;
+import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.CommandError;
+import com.drypted.spotlight.client.core.commands.GetPlayerHeadCommand;
 import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;

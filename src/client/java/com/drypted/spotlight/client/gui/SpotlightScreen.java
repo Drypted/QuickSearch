@@ -273,7 +273,7 @@ public class SpotlightScreen extends Screen
     private void onCommandsResultMouseClick(Command data)
     {
         if (data.validateArgs(getArgs()).isCritical()) return;
-        
+
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) data.execute(new String[]{}, player);
     }
