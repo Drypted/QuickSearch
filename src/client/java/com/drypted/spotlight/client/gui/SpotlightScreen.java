@@ -6,6 +6,7 @@ import com.drypted.spotlight.client.core.commands.Command;
 import com.drypted.spotlight.client.core.commands.CommandError;
 import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
+import com.drypted.spotlight.client.core.search.SearchNotFoundError;
 import com.drypted.spotlight.client.gui.components.*;
 import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.ChatFormatting;
@@ -206,8 +207,11 @@ public class SpotlightScreen extends Screen
         {
             inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
             setItemResultsVisible(false);
+            inputWidget.showError(new SearchNotFoundError());
             return;
         }
+
+        inputWidget.clearError();
 
         // Set suggestion to first result if user is still typing the command name
         String currentText = inputWidget.getText().trim();
