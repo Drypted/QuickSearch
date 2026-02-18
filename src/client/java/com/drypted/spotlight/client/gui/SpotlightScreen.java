@@ -132,6 +132,12 @@ public class SpotlightScreen extends Screen
     {
         if (SpotlightEntryClient.closeSpotlightKeyMapping.matches(keyCode, scanCode))
         {
+            if (inputWidget.hasSuggestion())
+            {
+                inputWidget.clearSuggestion();
+                return true;
+            }
+
             if (inputWidget.isFocused() && inputWidget.hasText())
             {
                 inputWidget.clearText();
@@ -205,13 +211,13 @@ public class SpotlightScreen extends Screen
 
         // Set suggestion to first result if user is still typing the command name
         String currentText = inputWidget.getText().trim();
-        if (!currentText.isEmpty() && !currentText.contains(" ") && !results.isEmpty())
+        if (!currentText.isEmpty() && !results.isEmpty())
         {
             ItemsResultData topResult = results.getFirst();
-            String commandWithSlash = topResult.getName();
-            if (commandWithSlash.toLowerCase().startsWith(currentText.toLowerCase()))
+            String itemName = topResult.getName();
+            if (itemName.toLowerCase().startsWith(currentText.toLowerCase()))
             {
-                inputWidget.setSuggestion(commandWithSlash);
+                inputWidget.setSuggestion(itemName);
             }
         }
 

@@ -339,10 +339,10 @@ public class InputWidget extends AbstractWidget
         boolean shift = (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
 
         // Accept suggestion with Tab (only if cursor is at end and no selection)
-        if (keyCode == GLFW.GLFW_KEY_TAB && !suggestion.isEmpty() && cursorPos == text.length() && !hasSelection())
+        if (keyCode == GLFW.GLFW_KEY_TAB && shouldShowSuggestion())
         {
             setText(suggestion);
-            suggestion = ""; // Clear suggestion after accepting
+            clearSuggestion(); // Clear suggestion after accepting
             return true;
         }
 
@@ -888,7 +888,7 @@ public class InputWidget extends AbstractWidget
     private void notifyTextChanged()
     {
         // Clear suggestion when text changes
-        suggestion = "";
+        clearSuggestion();
 
         // Validate
         if (validator != null)
@@ -966,6 +966,11 @@ public class InputWidget extends AbstractWidget
         clearSelection();
         updateScrollOffset();
         notifyTextChanged();
+    }
+
+    public boolean hasSuggestion()
+    {
+        return this.shouldShowSuggestion();
     }
 
     public void setSuggestion(String suggestion)
@@ -1103,8 +1108,8 @@ public class InputWidget extends AbstractWidget
     {
         return !suggestion.isEmpty() // not empty
                 && cursorPos == text.length() // cursor at end
-                && suggestion.length() >= text.length() // suggestion is an extension of current text
-                && !hasSelection();  // not selecting
+                && !hasSelection()  // not selecting
+                && suggestion.length() > text.length(); // suggestion is an extension of current text
     }
 
     /* Callbacks */
