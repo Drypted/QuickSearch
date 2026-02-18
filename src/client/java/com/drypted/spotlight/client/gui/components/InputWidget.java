@@ -1109,7 +1109,8 @@ public class InputWidget extends AbstractWidget
         return !suggestion.isEmpty() // not empty
                 && cursorPos == text.length() // cursor at end
                 && !hasSelection()  // not selecting
-                && suggestion.length() > text.length(); // suggestion is an extension of current text
+                && suggestion.length() > text.length() // suggestion is an extension of current text
+                && suggestion.toLowerCase().startsWith(text.toLowerCase());
     }
 
     /* Callbacks */

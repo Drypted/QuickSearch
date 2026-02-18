@@ -221,7 +221,6 @@ public class SpotlightScreen extends Screen
             }
         }
 
-
         int matchCount = 0;
         for (ItemsResultData result : results)
         {
