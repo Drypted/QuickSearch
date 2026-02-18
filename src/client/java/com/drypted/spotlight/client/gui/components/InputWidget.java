@@ -47,6 +47,7 @@ public class InputWidget extends AbstractWidget
     private String text = "";
     private int maxLength = 256;
     private String placeholder = "";
+    private String suggestion = "";
 
     // Caret and selection
     private int cursorPos = 0;
@@ -153,6 +154,13 @@ public class InputWidget extends AbstractWidget
                 beforeSelection = this.text;
                 selection = "";
                 afterSelection = "";
+            }
+
+            if (shouldShowSuggestion())
+            {
+                String ghostText = suggestion.substring(text.length());
+                int ghostX = textX + FONT.width(this.text) - scrollOffset;
+                guiGraphics.drawString(FONT, ghostText, ghostX, textY, placeholderColor.asInt(), false);
             }
 
             // Render text
@@ -329,6 +337,14 @@ public class InputWidget extends AbstractWidget
 
         boolean ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0 || (modifiers & GLFW.GLFW_MOD_SUPER) != 0;
         boolean shift = (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
+
+        // Accept suggestion with Tab (only if cursor is at end and no selection)
+        if (keyCode == GLFW.GLFW_KEY_TAB && !suggestion.isEmpty() && cursorPos == text.length() && !hasSelection())
+        {
+            setText(suggestion);
+            suggestion = ""; // Clear suggestion after accepting
+            return true;
+        }
 
         // Clipboard operations
         if (ctrl)
@@ -871,6 +887,9 @@ public class InputWidget extends AbstractWidget
 
     private void notifyTextChanged()
     {
+        // Clear suggestion when text changes
+        suggestion = "";
+
         // Validate
         if (validator != null)
         {
@@ -947,6 +966,16 @@ public class InputWidget extends AbstractWidget
         clearSelection();
         updateScrollOffset();
         notifyTextChanged();
+    }
+
+    public void setSuggestion(String suggestion)
+    {
+        this.suggestion = suggestion;
+    }
+
+    public void clearSuggestion()
+    {
+        suggestion = "";
     }
 
     public SearchStatus getSearchStatus()
@@ -1066,6 +1095,16 @@ public class InputWidget extends AbstractWidget
     public boolean hasText()
     {
         return !this.text.isEmpty();
+    }
+
+    /* Utils */
+
+    private boolean shouldShowSuggestion()
+    {
+        return !suggestion.isEmpty() // not empty
+                && cursorPos == text.length() // cursor at end
+                && suggestion.length() >= text.length() // suggestion is an extension of current text
+                && !hasSelection();  // not selecting
     }
 
     /* Callbacks */

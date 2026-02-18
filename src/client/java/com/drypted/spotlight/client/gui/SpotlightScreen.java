@@ -203,6 +203,19 @@ public class SpotlightScreen extends Screen
             return;
         }
 
+        // Set suggestion to first result if user is still typing the command name
+        String currentText = inputWidget.getText().trim();
+        if (!currentText.isEmpty() && !currentText.contains(" ") && !results.isEmpty())
+        {
+            ItemsResultData topResult = results.getFirst();
+            String commandWithSlash = topResult.getName();
+            if (commandWithSlash.toLowerCase().startsWith(currentText.toLowerCase()))
+            {
+                inputWidget.setSuggestion(commandWithSlash);
+            }
+        }
+
+
         int matchCount = 0;
         for (ItemsResultData result : results)
         {
@@ -253,6 +266,18 @@ public class SpotlightScreen extends Screen
             inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
             setItemResultsVisible(false);
             return;
+        }
+
+        // Set suggestion to first result if user is still typing the command name
+        String currentText = inputWidget.getText().trim();
+        if (!currentText.isEmpty() && !currentText.contains(" ") && !results.isEmpty())
+        {
+            Command topResult = results.getFirst();
+            String commandWithSlash = "/" + topResult.getName();
+            if (commandWithSlash.toLowerCase().startsWith(currentText.toLowerCase()))
+            {
+                inputWidget.setSuggestion(commandWithSlash);
+            }
         }
 
         for (Command result : results)
@@ -383,6 +408,7 @@ public class SpotlightScreen extends Screen
     {
         this.inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
         this.inputWidget.clearError();
+        this.inputWidget.clearSuggestion();
         this.searchResultsWidget.removeAllChildren();
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
             this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
