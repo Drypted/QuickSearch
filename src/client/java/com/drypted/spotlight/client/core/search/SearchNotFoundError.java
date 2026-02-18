@@ -8,7 +8,7 @@ public class SearchNotFoundError implements InputError
     @Override
     public String getMessage()
     {
-        return "No Valid Item Found";
+        return "No Item Found";
     }
 
     @Override
