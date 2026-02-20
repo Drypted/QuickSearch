@@ -164,7 +164,7 @@ public class InputWidget extends AbstractWidget
             }
 
             // Render text
-            // Priority: disabled > error > normal
+            // Priority: disabled > message > normal
             Color textColor = isDisabled ?
                     disabledTextColor :
                     shouldShowError() ? Objects.requireNonNull(this.error).getColor() : normalTextColor;
@@ -209,7 +209,7 @@ public class InputWidget extends AbstractWidget
                 break;
         }
 
-        // Render error message
+        // Render message message
         if (shouldShowError())
         {
             assert this.error != null;
