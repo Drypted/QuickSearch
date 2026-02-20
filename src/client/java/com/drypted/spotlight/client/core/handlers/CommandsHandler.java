@@ -1,8 +1,10 @@
 package com.drypted.spotlight.client.core.handlers;
 
 import com.drypted.spotlight.client.core.commands.Command;
-import com.drypted.spotlight.client.core.commands.CommandError;
-import com.drypted.spotlight.client.core.commands.GetPlayerHeadCommand;
+import com.drypted.spotlight.client.core.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.commands.args.GetPlayerHeadCommand;
+import com.drypted.spotlight.client.core.commands.args.LoadHotbarCommand;
+import com.drypted.spotlight.client.core.commands.args.SaveHotbarCommand;
 import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -30,8 +32,11 @@ public class CommandsHandler
 
     static
     {
-        // Registering instances
+        // args
         register(new GetPlayerHeadCommand());
+        register(new SaveHotbarCommand());
+        register(new LoadHotbarCommand());
+        // no args
 
         rebuildCommandIndex();
     }
@@ -74,7 +79,7 @@ public class CommandsHandler
         return REGISTRY.get(name.toLowerCase());
     }
 
-    public static CommandError execute(String name, String[] args, LocalPlayer player)
+    public static CommandFeedback execute(String name, String[] args, LocalPlayer player)
     {
         Command cmd = REGISTRY.get(name.toLowerCase());
         if (cmd != null)
@@ -82,6 +87,6 @@ public class CommandsHandler
             return cmd.execute(args, player);
         }
 
-        return CommandError.withError("Please enter a valid command name!");
+        return CommandFeedback.withError("Please enter a valid command name!");
     }
 }

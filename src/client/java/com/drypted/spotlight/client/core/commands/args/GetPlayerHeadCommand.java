@@ -1,7 +1,9 @@
-package com.drypted.spotlight.client.core.commands;
+package com.drypted.spotlight.client.core.commands.args;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.actions.GiveItemAction;
+import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.CommandFeedback;
 import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.player.LocalPlayer;
@@ -34,24 +36,25 @@ public class GetPlayerHeadCommand implements Command
     }
 
     @Override
-    public CommandError validateArgs(String[] args)
+    public CommandFeedback validateArgs(String[] args)
     {
-        if (args.length != 1) return CommandError.withError("Please enter a username");
+        if (args.length != 1) return CommandFeedback.withError("Please enter a username");
 
         String username = args[0].trim();
-        if (!username.matches("^[a-zA-Z0-9_]{3,16}$")) return CommandError.withError("Please enter a valid username");
+        if (!username.matches("^[a-zA-Z0-9_]{3,16}$"))
+            return CommandFeedback.withError("Please enter a valid username");
 
-        return CommandError.NONE;
+        return CommandFeedback.NO_ERROR;
     }
 
     @Override
-    public CommandError execute(String[] args, LocalPlayer player)
+    public CommandFeedback execute(String[] args, LocalPlayer player)
     {
-        CommandError argsError = validateArgs(args);
+        CommandFeedback argsError = validateArgs(args);
         if (argsError.isCritical()) return argsError;
         else if (!argsError.isNone()) player.displayClientMessage(
-                Component.literal(argsError.getSeverity().getName() + ": " + argsError.getMessage()).withStyle(
-                        ChatFormatting.GOLD), false
+                Component.literal(argsError.getSeverity().getName() + ": " + argsError.getMessage()) //
+                        .withStyle(ChatFormatting.GOLD), false
         );
 
         // fetch player head
@@ -71,6 +74,6 @@ public class GetPlayerHeadCommand implements Command
 
         GiveItemAction.run(player, head, playerName + " Head");
 
-        return CommandError.NONE;
+        return CommandFeedback.NO_ERROR;
     }
 }

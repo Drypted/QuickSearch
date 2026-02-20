@@ -1,5 +1,7 @@
-package com.drypted.spotlight.client.core.commands;
+package com.drypted.spotlight.client.core.commands.args;
 
+import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.CommandFeedback;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
@@ -24,22 +26,22 @@ public class TemplateArgsCommand implements Command
     }
 
     @Override
-    public CommandError validateArgs(String[] args)
+    public CommandFeedback validateArgs(String[] args)
     {
-        if (args.length != 1) return CommandError.withError("Please input only one argument");
+        if (args.length != 1) return CommandFeedback.withError("Please input only one argument");
 
         if (!args[0].matches("^[a-zA-Z]+$"))
         {
-            return CommandError.withError("Please input only alphabets");
+            return CommandFeedback.withError("Please input only alphabets");
         }
 
-        return CommandError.NONE;
+        return CommandFeedback.NO_ERROR;
     }
 
     @Override
-    public CommandError execute(String[] args, LocalPlayer player)
+    public CommandFeedback execute(String[] args, LocalPlayer player)
     {
-        CommandError error = validateArgs(args);
+        CommandFeedback error = validateArgs(args);
 
         if (error.isCritical())
         {
@@ -51,6 +53,6 @@ public class TemplateArgsCommand implements Command
                         + String.join(", ", args) + "\""), true
         );
 
-        return CommandError.NONE;
+        return CommandFeedback.NO_ERROR;
     }
 }

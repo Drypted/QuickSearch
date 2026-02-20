@@ -24,7 +24,7 @@ public class GiveItemAction extends Action
         }
 
         // Must be in creative mode
-        if (notInCreative(player))
+        if (notInCreative())
         {
             handleError(player, ERROR.NOT_IN_CREATIVE);
             return;
@@ -90,7 +90,7 @@ public class GiveItemAction extends Action
         }
 
         // Must be in creative mode
-        if (notInCreative(player))
+        if (notInCreative())
         {
             handleError(player, ERROR.NOT_IN_CREATIVE);
             return;

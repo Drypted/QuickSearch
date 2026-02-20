@@ -1,6 +1,8 @@
 package com.drypted.spotlight.client.core.actions;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -8,9 +10,10 @@ import net.minecraft.world.item.ItemStack;
 /// Common utilities for actions
 public class Action
 {
-    protected static boolean notInCreative(LocalPlayer player)
+    protected static boolean notInCreative()
     {
-        return !player.getAbilities().instabuild; // corresponds to creative mode
+        MultiPlayerGameMode gameMode = Minecraft.getInstance().gameMode;
+        return gameMode != null && !gameMode.getPlayerMode().isCreative(); // corresponds to creative mode
     }
 
     protected static void showErrorMessage(LocalPlayer player, String text)
@@ -20,10 +23,9 @@ public class Action
 
     protected static boolean validate(LocalPlayer player, ItemStack stack)
     {
-        if (player == null)
-            return false;
+        if (player == null) return false;
 
-        if (notInCreative(player))
+        if (notInCreative())
         {
             handleError(player, ERROR.NOT_IN_CREATIVE);
             return false;

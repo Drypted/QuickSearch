@@ -3,13 +3,12 @@ package com.drypted.spotlight.client.gui;
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.actions.Actions;
 import com.drypted.spotlight.client.core.commands.Command;
-import com.drypted.spotlight.client.core.commands.CommandError;
+import com.drypted.spotlight.client.core.commands.CommandFeedback;
 import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.core.search.SearchNotFoundError;
 import com.drypted.spotlight.client.gui.components.*;
 import com.drypted.spotlight.client.models.ItemsResultData;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -325,17 +324,18 @@ public class SpotlightScreen extends Screen
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
-        CommandError error = CommandsHandler.execute(commandName, args, player);
+        CommandFeedback error = CommandsHandler.execute(commandName, args, player);
         if (error.isCritical())
         {
             this.inputWidget.showError(error);
             return;
         }
 
-        if (!error.getMessage().isEmpty()) player.displayClientMessage(
-                Component.literal(error.getSeverity().getName() + ": " + error.getMessage()).withStyle(ChatFormatting.GOLD),
-                false
-        );
+        if (!error.getMessage().isEmpty()) //
+            player.displayClientMessage(
+                    Component.literal(error.getSeverity().getName() + ":\n" + error.getMessage()) //
+                            .withStyle(error.getSeverity().getChatColor()), false
+            );
 
         this.onClose();
     }

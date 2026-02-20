@@ -1,5 +1,7 @@
-package com.drypted.spotlight.client.core.commands;
+package com.drypted.spotlight.client.core.commands.no_args;
 
+import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.CommandFeedback;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
@@ -24,16 +26,16 @@ public class TemplateNoArgsCommand implements Command
     }
 
     @Override
-    public CommandError validateArgs(String[] args)
+    public CommandFeedback validateArgs(String[] args)
     {
-        return CommandError.NONE;
+        return CommandFeedback.NO_ERROR;
     }
 
     @Override
-    public CommandError execute(String[] args, LocalPlayer player)
+    public CommandFeedback execute(String[] args, LocalPlayer player)
     {
         player.displayClientMessage(Component.literal("Test No Args commands executed."), true);
 
-        return CommandError.NONE;
+        return CommandFeedback.NO_ERROR;
     }
 }
