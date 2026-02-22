@@ -97,7 +97,7 @@ public class InputWidget extends AbstractWidget
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    protected void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         // Determine outline color based on state
         Color currentOutlineColor = shouldShowError() ?
@@ -337,7 +337,7 @@ public class InputWidget extends AbstractWidget
     }
 
     @Override
-    public boolean keyPressed(KeyEvent keyEvent)
+    public boolean keyPressed(@NonNull KeyEvent keyEvent)
     {
         if (!this.isFocused() || isDisabled) return false;
 
@@ -912,7 +912,7 @@ public class InputWidget extends AbstractWidget
     /* Accessibility */
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput output)
+    protected void updateWidgetNarration(@NonNull NarrationElementOutput output)
     {
         if (isDisabled)
         {

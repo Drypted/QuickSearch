@@ -5,10 +5,12 @@ import com.drypted.spotlight.client.core.actions.GiveItemAction;
 import com.drypted.spotlight.client.core.commands.Command;
 import com.drypted.spotlight.client.core.commands.CommandFeedback;
 import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.datafixers.util.Either;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
@@ -63,10 +65,10 @@ public class GetPlayerHeadCommand implements Command
         ItemStack head = new ItemStack(Items.PLAYER_HEAD);
 
 
-        head.set(
-                DataComponents.PROFILE,
-                new ResolvableProfile(Optional.ofNullable(playerName), Optional.empty(), new PropertyMap())
-        );
+//        head.set(
+//                DataComponents.PROFILE,
+//                new ResolvableProfile.Dynamic(Either.left(playerName), PlayerSkin.Patch.EMPTY)
+//        );
         head.setCount(1);
 
         GiveItemAction.run(player, head, playerName + " Head");

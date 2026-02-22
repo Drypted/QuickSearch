@@ -3,26 +3,17 @@ package com.drypted.spotlight.client;
 import com.drypted.spotlight.client.config.ModConfig;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.gui.SpotlightScreen;
-import com.drypted.spotlight.client.gui.utils.renderer.MosaicShader;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
-import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class SpotlightEntryClient implements ClientModInitializer
 {
@@ -86,36 +77,6 @@ public class SpotlightEntryClient implements ClientModInitializer
                 client.setScreen(new SpotlightScreen(true));
             }
         });
-
-        // Resource reload listener for shaders
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener()
-        {
-            private final Identifier id = Identifier.fromNamespaceAndPath(MOD_ID, "shaders");
-
-            @Override
-            public Identifier getFabricId()
-            {
-                return id;
-            }
-
-            @Override
-            public void onResourceManagerReload(@NonNull ResourceManager manager)
-            {
-                try
-                {
-                    // Safely reload mosaic shader from mod namespace
-                    MosaicShader.free();
-                    MosaicShader.load();
-                    LOGGER.info("Mosaic shader reloaded successfully");
-                }
-                catch (IOException e)
-                {
-                    LOGGER.error("Failed to reload mosaic shader", e);
-                }
-            }
-        });
-
-        ClientLifecycleEvents.CLIENT_STOPPING.register((minecraft) -> MosaicShader.free());
     }
 
     public static ModConfig getConfig()

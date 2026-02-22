@@ -4,8 +4,7 @@
   "package": "com.drypted.spotlight.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "CreativeModeTabsMixin",
-    "ShaderInstanceMixin"
+    "CreativeModeTabsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -34,24 +34,16 @@ public final class RenderUtils
         // Main body
         if (!renderOutline || insetThickness == 0)
         {
-            if (MosaicShader.isAvailable()) MosaicShader.draw(
-                    BACKGROUND_PIXEL_SIZE,
-                    startPosX,
-                    startPosY,
-                    endPosX,
-                    endPosY,
-                    backgroundColor
-            );
+            g.fill(startPosX, startPosY, endPosX, endPosY, backgroundColor.asInt());
             return;
         }
 
-        if (MosaicShader.isAvailable()) MosaicShader.draw(
-                BACKGROUND_PIXEL_SIZE,
+        g.fill(
                 startPosX + insetThickness,
                 startPosY + insetThickness,
                 endPosX - insetThickness,
                 endPosY - insetThickness,
-                backgroundColor
+                backgroundColor.asInt()
         );
 
         // LEFT

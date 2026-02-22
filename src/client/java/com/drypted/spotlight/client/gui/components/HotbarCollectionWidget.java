@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -149,8 +150,8 @@ public class HotbarCollectionWidget extends AbstractWidget
         final int posX = (int) (mouseX - (textWidth - CLOSE_BUTTON_TOOLTIP_PADDING_X) / 2.0f);
         final int posY = this.getY() - (int) textHeight - CLOSE_BUTTON_TOOLTIP_PADDING_Y - CLOSE_BUTTON_TOOLTIP_OFFSET_Y;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0.0F, 0.0F, zOrder);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(0.0F, 0.0F, guiGraphics.pose());
 
         RenderUtils.drawLabel(
                 guiGraphics,
@@ -166,7 +167,7 @@ public class HotbarCollectionWidget extends AbstractWidget
                 TooltipTextColor
         );
 
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
     }
 
     private boolean isOverCloseButton(double mouseX, double mouseY)
@@ -276,15 +277,15 @@ public class HotbarCollectionWidget extends AbstractWidget
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseReleased(MouseButtonEvent mEv)
     {
-        if (this.isOverCloseButton(mouseX, mouseY))
+        if (this.isOverCloseButton(mEv.x(), mEv.y()))
         {
             SpotlightEntryClient.getConfig().showHotbarHelpText = false;
             SpotlightEntryClient.saveConfig();
         }
 
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(mEv);
     }
 
     /* PRIVATE HELPERS */
