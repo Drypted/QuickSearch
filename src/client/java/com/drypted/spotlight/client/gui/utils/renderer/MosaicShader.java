@@ -1,5 +1,6 @@
 package com.drypted.spotlight.client.gui.utils.renderer;
 
+import com.drypted.spotlight.client.gui.utils.Color;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -7,12 +8,12 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public final class MosaicShader
 {
@@ -30,7 +31,11 @@ public final class MosaicShader
 
     public static void load() throws IOException
     {
-        if (shader != null) { shader.close(); shader = null; }
+        if (shader != null)
+        {
+            shader.close();
+            shader = null;
+        }
         loadFailed = false;
         try
         {
@@ -72,15 +77,23 @@ public final class MosaicShader
         // (Re)allocate snapshot texture if resolution changed
         if (snapshotTextureId == -1 || snapshotWidth != fbW || snapshotHeight != fbH)
         {
-            if (snapshotTextureId != -1)
-                GlStateManager._deleteTexture(snapshotTextureId);
+            if (snapshotTextureId != -1) GlStateManager._deleteTexture(snapshotTextureId);
 
             snapshotTextureId = GlStateManager._genTexture();
 
             // Bind directly via GL — bypasses MC's state tracker entirely
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, snapshotTextureId);
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8,
-                    fbW, fbH, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (java.nio.ByteBuffer) null);
+            GL11.glTexImage2D(
+                    GL11.GL_TEXTURE_2D,
+                    0,
+                    GL11.GL_RGBA8,
+                    fbW,
+                    fbH,
+                    0,
+                    GL11.GL_RGBA,
+                    GL11.GL_UNSIGNED_BYTE,
+                    (java.nio.ByteBuffer) null
+            );
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_WRAP_R, GL12.GL_CLAMP_TO_EDGE);
@@ -107,12 +120,13 @@ public final class MosaicShader
      * Does nothing if captureFramebuffer() hasn't been called this frame,
      * or if we're already inside a draw() call (re-entrancy guard).
      */
-    public static void draw(int x, int y, int w, int h,
-                            float pixelSize,
-                            float tr, float tg, float tb, float ta)
+    public static void draw(float pixelSize, int startX, int startY, int endX, int endY, Color color)
     {
         if (!isAvailable() || !hasCapturedThisFrame || isDrawing) return;
         if (snapshotTextureId == -1) return;
+
+        int width = endX - startX;
+        int height = endY - startY;
 
         isDrawing = true;
         try
@@ -122,10 +136,10 @@ public final class MosaicShader
             float sw = snapshotWidth;
             float sh = snapshotHeight;
 
-            float sx = (float) (x * scale);
-            float sy = (float) (y * scale);
-            float sW = (float) (w * scale);
-            float sH = (float) (h * scale);
+            float sx = (float) (startX * scale);
+            float sy = (float) (startY * scale);
+            float sW = (float) (width * scale);
+            float sH = (float) (height * scale);
             float sp = pixelSize * (float) scale;
 
             // Manually activate texture unit 0 and bind our snapshot,
@@ -138,22 +152,24 @@ public final class MosaicShader
             shader.safeGetUniform("ScreenSize").set(sw, sh);
             shader.safeGetUniform("Region").set(sx, sy, sW, sH);
             shader.safeGetUniform("PixelSize").set(sp);
-            shader.safeGetUniform("TintColor").set(tr, tg, tb, ta);
+            shader.safeGetUniform("TintColor").set(
+                    (float) color.getRed() / 255f,
+                    (float) color.getGreen() / 255f,
+                    (float) color.getBlue() / 255f,
+                    (float) color.getAlpha() / 255f
+            );
             shader.safeGetUniform("ModelViewMat").set(RenderSystem.getModelViewMatrix());
             shader.safeGetUniform("ProjMat").set(RenderSystem.getProjectionMatrix());
 
             shader.apply();
 
-            BufferBuilder buf = Tesselator.getInstance().begin(
-                    VertexFormat.Mode.QUADS,
-                    DefaultVertexFormat.POSITION
-            );
-            buf.addVertex(x,     y,     0);
-            buf.addVertex(x,     y + h, 0);
-            buf.addVertex(x + w, y + h, 0);
-            buf.addVertex(x + w, y,     0);
+            BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+            buf.addVertex(startX, startY, 0);
+            buf.addVertex(startX, startY + height, 0);
+            buf.addVertex(startX + width, startY + height, 0);
+            buf.addVertex(startX + width, startY, 0);
 
-            BufferUploader.drawWithShader(buf.build());
+            BufferUploader.drawWithShader(Objects.requireNonNull(buf.build()));
             shader.clear();
 
             // Restore MC's texture state so subsequent vanilla draws aren't broken
@@ -165,10 +181,16 @@ public final class MosaicShader
         }
     }
 
-    /** Call when the screen closes or the game shuts down. */
+    /**
+     * Call when the screen closes or the game shuts down.
+     */
     public static void free()
     {
-        if (shader != null) { shader.close(); shader = null; }
+        if (shader != null)
+        {
+            shader.close();
+            shader = null;
+        }
         if (snapshotTextureId != -1)
         {
             GlStateManager._deleteTexture(snapshotTextureId);
