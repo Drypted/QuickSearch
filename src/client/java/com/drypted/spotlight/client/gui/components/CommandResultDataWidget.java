@@ -13,7 +13,9 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.util.function.BiConsumer;
 
@@ -113,8 +115,8 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
         int subtitleY = titleY + FONT.lineHeight + SUBTITLE_SPACING;
         float subtitleScale = 0.75f;
 
-        g.pose().pushPose();
-        g.pose().scale(subtitleScale, subtitleScale, subtitleScale);
+        g.pose().pushMatrix();
+        g.pose().scale(subtitleScale, subtitleScale, g.pose());
         g.drawString(
                 FONT,
                 this.command.getDescription(),
@@ -123,7 +125,7 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
                 _textColor,
                 false
         );
-        g.pose().popPose();
+        g.pose().popMatrix();
 
         g.disableScissor();
 
@@ -149,19 +151,19 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
     /* Input */
 
     @Override
-    public void onClick(double x, double y)
+    public void onClick(@NonNull MouseButtonEvent mouseButtonEvent, boolean bl)
     {
         if (!this.isPressable) return;
         this.pressed = true;
     }
 
     @Override
-    public void onRelease(double x, double y)
+    public void onRelease(@NonNull MouseButtonEvent mouseButtonEvent)
     {
         if (!this.isPressable) return;
 
         this.pressed = false;
-        MouseButtonClick clickPoint = new MouseButtonClick(x, y);
+        MouseButtonClick clickPoint = MouseButtonClick.from(mouseButtonEvent);
         if (isMouseInButton(clickPoint))
         {
             onClickCallback.accept(clickPoint, pressed);

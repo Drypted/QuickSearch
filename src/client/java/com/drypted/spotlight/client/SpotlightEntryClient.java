@@ -14,9 +14,10 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +27,21 @@ import java.io.IOException;
 public class SpotlightEntryClient implements ClientModInitializer
 {
     public static final String MOD_ID = "spotlight";
-    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final Logger LOGGER;
     private static ModConfig Config;
 
-    public static final String KEY_CATEGORY_SPOTLIGHT = "key.categories.spotlight";
+    public static final KeyMapping.Category KEY_CATEGORY_SPOTLIGHT;
+
     public static KeyMapping openSpotlightKeyMapping;
     public static KeyMapping closeSpotlightKeyMapping;
 
     public static KeyMapping openSpotlightCommandKeyMapping;
+
+    static
+    {
+        LOGGER = LoggerFactory.getLogger(MOD_ID);
+        KEY_CATEGORY_SPOTLIGHT = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "keymappings"));
+    }
 
     @Override
     public void onInitializeClient()
@@ -82,16 +90,16 @@ public class SpotlightEntryClient implements ClientModInitializer
         // Resource reload listener for shaders
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener()
         {
-            private final ResourceLocation id = ResourceLocation.fromNamespaceAndPath(MOD_ID, "shaders");
+            private final Identifier id = Identifier.fromNamespaceAndPath(MOD_ID, "shaders");
 
             @Override
-            public ResourceLocation getFabricId()
+            public Identifier getFabricId()
             {
                 return id;
             }
 
             @Override
-            public void onResourceManagerReload(ResourceManager manager)
+            public void onResourceManagerReload(@NonNull ResourceManager manager)
             {
                 try
                 {

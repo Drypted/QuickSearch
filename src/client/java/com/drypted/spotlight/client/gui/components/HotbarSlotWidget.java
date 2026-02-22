@@ -10,7 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.util.function.Consumer;
 
@@ -114,14 +116,13 @@ public class HotbarSlotWidget extends AbstractWidget
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick)
     {
-        if (isMouseOver(mouseX, mouseY))
+        if (isMouseOver(event.x(), event.y()))
         {
             if (onClickCallback != null)
             {
-                MouseButtonClick click = new MouseButtonClick(mouseX, mouseY, button);
-                onClickCallback.accept(click);
+                onClickCallback.accept(MouseButtonClick.from(event));
             }
             return true;
         }

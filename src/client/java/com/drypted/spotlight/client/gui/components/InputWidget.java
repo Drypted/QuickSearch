@@ -11,9 +11,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -149,7 +153,8 @@ public class InputWidget extends AbstractWidget
                 beforeSelection = this.text.substring(0, start);
                 selection = this.text.substring(start, end);
                 afterSelection = this.text.substring(end);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 beforeSelection = this.text;
                 selection = "";
@@ -316,14 +321,15 @@ public class InputWidget extends AbstractWidget
 
     /* Text Editing */
 
+
     @Override
-    public boolean charTyped(char codePoint, int modifiers)
+    public boolean charTyped(@NonNull CharacterEvent chEv)
     {
         if (!this.isFocused() || isDisabled || isReadOnly) return false;
 
-        if (StringUtil.isAllowedChatCharacter(codePoint))
+        if (StringUtil.isAllowedChatCharacter(chEv.codepoint()))
         {
-            insertText(String.valueOf(codePoint));
+            insertText(chEv.codepointAsString());
             return true;
         }
 
@@ -331,15 +337,15 @@ public class InputWidget extends AbstractWidget
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(KeyEvent keyEvent)
     {
         if (!this.isFocused() || isDisabled) return false;
 
-        boolean ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0 || (modifiers & GLFW.GLFW_MOD_SUPER) != 0;
-        boolean shift = (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
+        boolean ctrl = (keyEvent.modifiers() & GLFW.GLFW_MOD_CONTROL) != 0 || (keyEvent.modifiers() & GLFW.GLFW_MOD_SUPER) != 0;
+        boolean shift = (keyEvent.modifiers() & GLFW.GLFW_MOD_SHIFT) != 0;
 
         // Accept suggestion with Tab (only if cursor is at end and no selection)
-        if (keyCode == GLFW.GLFW_KEY_TAB && shouldShowSuggestion())
+        if (keyEvent.key() == GLFW.GLFW_KEY_TAB && shouldShowSuggestion())
         {
             setText(suggestion);
             clearSuggestion(); // Clear suggestion after accepting
@@ -349,7 +355,7 @@ public class InputWidget extends AbstractWidget
         // Clipboard operations
         if (ctrl)
         {
-            switch (keyCode)
+            switch (keyEvent.key())
             {
                 case GLFW.GLFW_KEY_C:
                     copyToClipboard();
@@ -372,10 +378,10 @@ public class InputWidget extends AbstractWidget
             }
         }
 
-        if (isReadOnly && (keyCode == GLFW.GLFW_KEY_BACKSPACE || keyCode == GLFW.GLFW_KEY_DELETE)) return false;
+        if (isReadOnly && (keyEvent.key() == GLFW.GLFW_KEY_BACKSPACE || keyEvent.key() == GLFW.GLFW_KEY_DELETE)) return false;
 
         // Movement and editing
-        return switch (keyCode)
+        return switch (keyEvent.key())
         {
             case GLFW.GLFW_KEY_LEFT ->
             {
@@ -741,9 +747,9 @@ public class InputWidget extends AbstractWidget
     /* Mouse Interaction */
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(MouseButtonEvent mEv, boolean doubleClick)
     {
-        if (!this.isMouseOver(mouseX, mouseY))
+        if (!this.isMouseOver(mEv.x(), mEv.y()))
         {
             if (this.isFocused())
             {
@@ -756,12 +762,12 @@ public class InputWidget extends AbstractWidget
         if (isDisabled) return false;
 
         // Left click
-        if (button == 0)
+        if (mEv.button() == 0)
         {
             setFocused(true);
 
             // Single click - place caret
-            int clickPos = getCharacterIndexAt(mouseX);
+            int clickPos = getCharacterIndexAt(mEv.x());
             setCursorPosition(clickPos, false);
             updateScrollOffset();
             isDragging = true;
@@ -774,11 +780,11 @@ public class InputWidget extends AbstractWidget
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY)
+    public boolean mouseDragged(@NonNull MouseButtonEvent mEv, double dragX, double dragY)
     {
         if (!isDragging || isDisabled) return false;
 
-        double clampedX = Math.max(getTextX(), mouseX);
+        double clampedX = Math.max(getTextX(), mEv.x());
         int currentPos = getCharacterIndexAt(clampedX);
         selectionStart = dragStartPos;
         selectionEnd = currentPos;
@@ -789,9 +795,9 @@ public class InputWidget extends AbstractWidget
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseReleased(@NonNull MouseButtonEvent mEv)
     {
-        if (button == 0 && isDragging)
+        if (mEv.button() == 0 && isDragging)
         {
             isDragging = false;
             return true;

@@ -15,10 +15,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +51,7 @@ public class SpotlightScreen extends Screen
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         // Snapshot the world/background before any UI is drawn this frame
         MosaicShader.captureFramebuffer(guiGraphics);
@@ -147,9 +150,9 @@ public class SpotlightScreen extends Screen
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(@NonNull KeyEvent kEv)
     {
-        if (SpotlightEntryClient.closeSpotlightKeyMapping.matches(keyCode, scanCode))
+        if (SpotlightEntryClient.closeSpotlightKeyMapping.matches(kEv))
         {
             if (inputWidget.hasSuggestion())
             {
@@ -168,44 +171,42 @@ public class SpotlightScreen extends Screen
             return true;
         }
 
-        if (this.minecraft == null) return super.keyPressed(keyCode, scanCode, modifiers);
-
         // only allow key when hotbar is focused
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null && hotbarCollectionWidget.isFocused())
         {
             for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
                 HotbarSlotWidget hotbarWidget = this.hotbarCollectionWidget.getWidgets().get(i);
-                if (hotbarWidget != null && keyCode == this.minecraft.options.keyHotbarSlots[i].getDefaultKey().getValue())
+                if (hotbarWidget != null && kEv.key() == this.minecraft.options.keyHotbarSlots[i].getDefaultKey().getValue())
                 {
-                    this.hotbarCollectionWidget.onHotbarKeyPressed(hotbarWidget, modifiers);
+                    this.hotbarCollectionWidget.onHotbarKeyPressed(hotbarWidget, kEv.modifiers());
                     return true;
                 }
             }
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(kEv);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
+    public boolean keyReleased(@NonNull KeyEvent kEv)
     {
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
             this.hotbarCollectionWidget.onAnyKeyReleased();
 
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(kEv);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(@NonNull MouseButtonEvent mEv, boolean doubleClick)
     {
-        if (!super.mouseClicked(mouseX, mouseY, button))
+        if (!super.mouseClicked(mEv, doubleClick))
         {
             // click outside, close spotlight
             this.onClose();
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mEv, doubleClick);
     }
 
     /* Results */
@@ -414,7 +415,7 @@ public class SpotlightScreen extends Screen
     /* Overrides for settings */
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f)
+    public void renderBackground(@NonNull GuiGraphics guiGraphics, int i, int j, float f)
     {
     } // don't render any background
 

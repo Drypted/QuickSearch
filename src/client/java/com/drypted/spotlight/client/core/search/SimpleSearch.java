@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public final class SimpleSearch<T extends Searchable>
 {
-    private List<T> items;
+    private final List<T> items;
 
     public SimpleSearch(List<T> items)
     {

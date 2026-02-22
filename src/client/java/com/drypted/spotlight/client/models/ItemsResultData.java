@@ -7,7 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -17,11 +17,11 @@ public final class ItemsResultData implements Searchable
 {
     private final ItemStack icon;
     private final String name;
-    private final ResourceLocation identifier;
+    private final Identifier identifier;
     private final int maxStackSize;
     private final ItemInput definition;
 
-    public ItemsResultData(ItemStack icon, String name, ResourceLocation identifier)
+    public ItemsResultData(ItemStack icon, String name, Identifier identifier)
     {
         this.icon = icon;
         this.name = name;
@@ -37,7 +37,7 @@ public final class ItemsResultData implements Searchable
         final ItemStack stack = item.getDefaultInstance();
 
         final String name = item.getName(stack).getString();
-        final ResourceLocation identifier = BuiltInRegistries.ITEM.getKey(item);
+        final Identifier identifier = BuiltInRegistries.ITEM.getKey(item);
 
         return new ItemsResultData(stack, name, identifier);
     }
@@ -48,7 +48,7 @@ public final class ItemsResultData implements Searchable
 
         final Item item = stack.getItem();
         final String name = item.getName(stack).getString();
-        final ResourceLocation identifier = BuiltInRegistries.ITEM.getKey(item);
+        final Identifier identifier = BuiltInRegistries.ITEM.getKey(item);
 
         return new ItemsResultData(stack, name, identifier);
     }
@@ -58,7 +58,7 @@ public final class ItemsResultData implements Searchable
         if (stack == null || stack == ItemStack.EMPTY || stack.getItem() == Items.AIR) return null;
 
         ResourceKey<Item> itemKey = BuiltInRegistries.ITEM.getResourceKey(stack.getItem()).orElseThrow();
-        Holder<Item> holder = BuiltInRegistries.ITEM.getHolderOrThrow(itemKey);
+        Holder<Item> holder = BuiltInRegistries.ITEM.getOrThrow(itemKey);
 
         DataComponentPatch patch = stack.getComponentsPatch();
         return new ItemInput(holder, patch);
@@ -105,7 +105,7 @@ public final class ItemsResultData implements Searchable
         return name;
     }
 
-    public ResourceLocation getIdentifier()
+    public Identifier getIdentifier()
     {
         return identifier;
     }
@@ -136,7 +136,7 @@ public final class ItemsResultData implements Searchable
     public static final ItemsResultData EMPTY = new ItemsResultData(
             ItemStack.EMPTY,
             "",
-            ResourceLocation.fromNamespaceAndPath("spotlight", "search_result_data_empty")
+            Identifier.fromNamespaceAndPath("spotlight", "search_result_data_empty")
     );
 
     /* SEARCHABLE IMPLEMENTATION */

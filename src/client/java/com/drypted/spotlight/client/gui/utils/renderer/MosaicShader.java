@@ -1,131 +1,124 @@
 package com.drypted.spotlight.client.gui.utils.renderer;
 
+import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.gui.utils.Color;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.shaders.UniformType;
+import com.mojang.blaze3d.systems.CommandEncoder;
+import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuSampler;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.textures.TextureFormat;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.ShaderInstance;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL13;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 
-import java.io.IOException;
-import java.util.Objects;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 public final class MosaicShader
 {
-    private static ShaderInstance shader = null;
-    private static boolean loadFailed = false;
+    // Uniform buffer layout (std140, all float):
+    // offset  0: ScreenSize  (vec2)  = 8 bytes
+    // offset  8: Region      (vec4)  = 16 bytes
+    // offset 24: PixelSize   (float) = 4 bytes
+    // offset 28: pad         (float) = 4 bytes  <- std140 alignment
+    // offset 32: TintColor   (vec4)  = 16 bytes
+    // total = 48 bytes
+    private static final int UBO_SIZE = 48;
 
-    private static int snapshotTextureId = -1;
+    public static final RenderPipeline MOSAIC_PIPELINE = RenderPipelines.register(
+            RenderPipeline.builder(new RenderPipeline.Snippet[0])
+                    .withLocation("pipeline/spotlight_mosaic")
+                    .withVertexShader(Identifier.fromNamespaceAndPath(SpotlightEntryClient.MOD_ID, "mosaic_background"))
+                    .withFragmentShader(Identifier.fromNamespaceAndPath(SpotlightEntryClient.MOD_ID, "mosaic_background"))
+                    .withSampler("ScreenTexture")
+                    .withUniform("MosaicData", UniformType.UNIFORM_BUFFER)
+                    .withoutBlend()
+                    .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                    .withDepthWrite(false)
+                    .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+                    .build()
+    );
+
+    private static GpuTexture snapshotTexture = null;
+    private static GpuTextureView snapshotTextureView = null;
+    private static GpuSampler snapshotSampler = null;
     private static int snapshotWidth = -1;
     private static int snapshotHeight = -1;
 
-    // Re-entrancy guard: prevent nested mosaic draws
-    private static boolean isDrawing = false;
-    // Whether captureFramebuffer() succeeded this frame
+    private static GpuBuffer uniformBuffer = null;
+
     private static boolean hasCapturedThisFrame = false;
+    private static boolean isDrawing = false;
 
-    public static void load() throws IOException
-    {
-        if (shader != null)
-        {
-            shader.close();
-            shader = null;
-        }
-        loadFailed = false;
-        try
-        {
-            shader = new ShaderInstance(
-                    Minecraft.getInstance().getResourceManager(),
-                    "mosaic_background",
-                    DefaultVertexFormat.POSITION
-            );
-        }
-        catch (IOException e)
-        {
-            loadFailed = true;
-            throw e;
-        }
-    }
-
-    public static boolean isAvailable()
-    {
-        return shader != null && !loadFailed;
-    }
-
-    /**
-     * Call ONCE at the very start of SpotlightScreen.render(), before super.render().
-     * Flushes pending draws then copies the framebuffer to the snapshot texture.
-     */
     public static void captureFramebuffer(GuiGraphics g)
     {
         hasCapturedThisFrame = false;
-        if (!isAvailable()) return;
 
-        // Flush any pending vanilla batched draws so they appear in the FB
-        g.flush();
+        // In 1.21.11, GuiGraphics uses a deferred render state - no flush() needed.
+        // The world/background is already rendered to the main framebuffer before the screen renders.
 
         Minecraft mc = Minecraft.getInstance();
         RenderTarget fb = mc.getMainRenderTarget();
         int fbW = fb.width;
         int fbH = fb.height;
 
+        GpuDevice gpu = RenderSystem.getDevice();
+
         // (Re)allocate snapshot texture if resolution changed
-        if (snapshotTextureId == -1 || snapshotWidth != fbW || snapshotHeight != fbH)
+        if (snapshotTexture == null || snapshotWidth != fbW || snapshotHeight != fbH)
         {
-            if (snapshotTextureId != -1) GlStateManager._deleteTexture(snapshotTextureId);
+            freeTextures();
 
-            snapshotTextureId = GlStateManager._genTexture();
-
-            // Bind directly via GL — bypasses MC's state tracker entirely
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, snapshotTextureId);
-            GL11.glTexImage2D(
-                    GL11.GL_TEXTURE_2D,
-                    0,
-                    GL11.GL_RGBA8,
-                    fbW,
-                    fbH,
-                    0,
-                    GL11.GL_RGBA,
-                    GL11.GL_UNSIGNED_BYTE,
-                    (java.nio.ByteBuffer) null
+            snapshotTexture = gpu.createTexture(
+                    "mosaic_snapshot",
+                    GpuTexture.Usage.TEXTURE_BINDING | GpuTexture.Usage.COPY_DST,
+                    TextureFormat.RGBA8,
+                    fbW, fbH,
+                    1,  // layers
+                    1   // mip levels
             );
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL12.GL_TEXTURE_WRAP_R, GL12.GL_CLAMP_TO_EDGE);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-
+            snapshotTextureView = gpu.createTextureView(snapshotTexture);
+            snapshotSampler = gpu.createSampler(
+                    AddressMode.CLAMP_TO_EDGE,
+                    AddressMode.CLAMP_TO_EDGE,
+                    FilterMode.NEAREST,
+                    FilterMode.NEAREST,
+                    1,
+                    OptionalDouble.empty()
+            );
             snapshotWidth = fbW;
             snapshotHeight = fbH;
         }
 
-        // Copy FB colour → snapshot (pure GPU blit, no CPU readback)
-        fb.bindRead();
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, snapshotTextureId);
-        GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, fbW, fbH);
-
-        // Restore write target
-        fb.bindWrite(false);
+        // GPU-side copy via CommandEncoder
+        CommandEncoder encoder = gpu.createCommandEncoder();
+        encoder.copyTextureToTexture(fb.getColorTexture(), snapshotTexture);
+        encoder.close();
 
         hasCapturedThisFrame = true;
     }
 
-    /**
-     * Draw mosaic background for one widget. Safe to call multiple times per frame.
-     * Does nothing if captureFramebuffer() hasn't been called this frame,
-     * or if we're already inside a draw() call (re-entrancy guard).
-     */
     public static void draw(float pixelSize, int startX, int startY, int endX, int endY, Color color)
     {
-        if (!isAvailable() || !hasCapturedThisFrame || isDrawing) return;
-        if (snapshotTextureId == -1) return;
+        if (!hasCapturedThisFrame || isDrawing || snapshotTexture == null) return;
 
-        int width = endX - startX;
+        int width  = endX - startX;
         int height = endY - startY;
 
         isDrawing = true;
@@ -133,47 +126,82 @@ public final class MosaicShader
         {
             Minecraft mc = Minecraft.getInstance();
             double scale = mc.getWindow().getGuiScale();
+
             float sw = snapshotWidth;
             float sh = snapshotHeight;
-
             float sx = (float) (startX * scale);
             float sy = (float) (startY * scale);
-            float sW = (float) (width * scale);
-            float sH = (float) (height * scale);
+            float sW = (float) (width   * scale);
+            float sH = (float) (height  * scale);
             float sp = pixelSize * (float) scale;
 
-            // Manually activate texture unit 0 and bind our snapshot,
-            // bypassing RenderSystem's state cache (which causes the "unloadable" warning)
-            GL13.glActiveTexture(GL13.GL_TEXTURE0);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, snapshotTextureId);
+            // Upload uniforms into a GpuBuffer
+            GpuDevice gpu = RenderSystem.getDevice();
+            ByteBuffer data = ByteBuffer.allocate(UBO_SIZE).order(ByteOrder.nativeOrder());
+            data.putFloat(0,  sw);
+            data.putFloat(4,  sh);
+            data.putFloat(8,  sx);
+            data.putFloat(12, sy);
+            data.putFloat(16, sW);
+            data.putFloat(20, sH);
+            data.putFloat(24, sp);
+            data.putFloat(28, 0f); // padding
+            data.putFloat(32, (float) color.getRed()   / 255f);
+            data.putFloat(36, (float) color.getGreen() / 255f);
+            data.putFloat(40, (float) color.getBlue()  / 255f);
+            data.putFloat(44, (float) color.getAlpha() / 255f);
+            data.rewind();
 
-            RenderSystem.setShader(() -> shader);
+            if (uniformBuffer == null)
+            {
+                uniformBuffer = gpu.createBuffer(
+                        () -> "mosaic_ubo",
+                        GpuBuffer.Usage.UNIFORM | GpuBuffer.Usage.DYNAMIC,
+                        UBO_SIZE
+                );
+            }
 
-            shader.safeGetUniform("ScreenSize").set(sw, sh);
-            shader.safeGetUniform("Region").set(sx, sy, sW, sH);
-            shader.safeGetUniform("PixelSize").set(sp);
-            shader.safeGetUniform("TintColor").set(
-                    (float) color.getRed() / 255f,
-                    (float) color.getGreen() / 255f,
-                    (float) color.getBlue() / 255f,
-                    (float) color.getAlpha() / 255f
-            );
-            shader.safeGetUniform("ModelViewMat").set(RenderSystem.getModelViewMatrix());
-            shader.safeGetUniform("ProjMat").set(RenderSystem.getProjectionMatrix());
+            CommandEncoder encoder = gpu.createCommandEncoder();
+            encoder.writeToBuffer(uniformBuffer.slice(), data);
 
-            shader.apply();
+            RenderTarget mainTarget = mc.getMainRenderTarget();
 
-            BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-            buf.addVertex(startX, startY, 0);
-            buf.addVertex(startX, startY + height, 0);
-            buf.addVertex(startX + width, startY + height, 0);
-            buf.addVertex(startX + width, startY, 0);
+            try (RenderPass pass = encoder.createRenderPass(
+                    mainTarget.getColorTexture(),
+                    OptionalInt.empty(),
+                    null,
+                    OptionalDouble.empty()
+            ))
+            {
+                pass.setPipeline(MOSAIC_PIPELINE);
+                pass.bindTexture("ScreenTexture", snapshotTextureView, snapshotSampler);
+                pass.setUniform("MosaicData", uniformBuffer);
 
-            BufferUploader.drawWithShader(Objects.requireNonNull(buf.build()));
-            shader.clear();
+                // Build immediate vertex data into a temp GpuBuffer
+                float x0 = startX, y0 = startY;
+                float x1 = startX + width, y1 = startY + height;
 
-            // Restore MC's texture state so subsequent vanilla draws aren't broken
-            RenderSystem.bindTextureForSetup(0);
+                // POSITION format: 3 floats per vertex, 4 vertices
+                ByteBuffer verts = ByteBuffer.allocate(4 * 3 * 4).order(ByteOrder.nativeOrder());
+                verts.putFloat(x0); verts.putFloat(y0); verts.putFloat(0);
+                verts.putFloat(x0); verts.putFloat(y1); verts.putFloat(0);
+                verts.putFloat(x1); verts.putFloat(y1); verts.putFloat(0);
+                verts.putFloat(x1); verts.putFloat(y0); verts.putFloat(0);
+                verts.rewind();
+
+                GpuBuffer vertexBuffer = gpu.createBuffer(
+                        () -> "mosaic_verts",
+                        GpuBuffer.Usage.VERTEX,
+                        verts
+                );
+
+                pass.setVertexBuffer(0, vertexBuffer);
+                pass.draw(0, 4);
+
+                vertexBuffer.close();
+            }
+
+            encoder.close();
         }
         finally
         {
@@ -181,22 +209,24 @@ public final class MosaicShader
         }
     }
 
-    /**
-     * Call when the screen closes or the game shuts down.
-     */
     public static void free()
     {
-        if (shader != null)
+        freeTextures();
+        if (uniformBuffer != null)
         {
-            shader.close();
-            shader = null;
-        }
-        if (snapshotTextureId != -1)
-        {
-            GlStateManager._deleteTexture(snapshotTextureId);
-            snapshotTextureId = -1;
+            uniformBuffer.close();
+            uniformBuffer = null;
         }
         hasCapturedThisFrame = false;
         isDrawing = false;
+    }
+
+    private static void freeTextures()
+    {
+        if (snapshotTextureView != null) { snapshotTextureView.close(); snapshotTextureView = null; }
+        if (snapshotTexture != null)     { snapshotTexture.close();     snapshotTexture = null; }
+        if (snapshotSampler != null)     { snapshotSampler.close();     snapshotSampler = null; }
+        snapshotWidth  = -1;
+        snapshotHeight = -1;
     }
 }

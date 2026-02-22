@@ -8,9 +8,12 @@ import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -202,25 +205,25 @@ public class ScrollBoxWidget extends AbstractWidget
     /* Mouse Scroll Input */
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button)
+    public boolean mouseClicked(@NonNull MouseButtonEvent mEv, boolean doubleClick)
     {
         // Check scrollbar first
-        if (scrollbarVisible() && isValidClickButton(button) && isOverScrollbar(mouseX, mouseY))
+        if (scrollbarVisible() && isValidClickButton(mEv.buttonInfo()) && isOverScrollbar(mEv.x(), mEv.y()))
         {
             this.scrolling = true;
 
-            updateScrollPosition(mouseY);
+            updateScrollPosition(mEv.y());
 
             return true;
         }
 
         // Check children (in reverse order for proper z-order)
-        if (isMouseOver(mouseX, mouseY))
+        if (isMouseOver(mEv.x(), mEv.y()))
         {
             for (int i = children.size() - 1; i >= 0; i--)
             {
                 AbstractWidget w = children.get(i).widget;
-                if (w.mouseClicked(mouseX, mouseY, button))
+                if (w.mouseClicked(mEv, doubleClick))
                     return true;
             }
         }
@@ -229,13 +232,13 @@ public class ScrollBoxWidget extends AbstractWidget
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    public boolean mouseReleased(@NonNull MouseButtonEvent mEv)
     {
         this.scrolling = false;
 
         for (WidgetEntry entry : children)
         {
-            entry.widget.mouseReleased(mouseX, mouseY, button);
+            entry.widget.mouseReleased(mEv);
         }
         return false;
     }
@@ -255,15 +258,15 @@ public class ScrollBoxWidget extends AbstractWidget
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY)
+    public boolean mouseDragged(@NonNull MouseButtonEvent mEv, double deltaX, double deltaY)
     {
         if (scrolling)
         {
-            updateScrollPosition(mouseY);
+            updateScrollPosition(mEv.y());
             return true;
         }
 
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(mEv, deltaX, deltaY);
     }
 
     public int getMaxWidth()
@@ -274,7 +277,7 @@ public class ScrollBoxWidget extends AbstractWidget
     /* Render */
 
     @Override
-    protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float delta)
+    protected void renderWidget(@NonNull GuiGraphics g, int mouseX, int mouseY, float delta)
     {
         layoutChildren();
 
@@ -381,12 +384,12 @@ public class ScrollBoxWidget extends AbstractWidget
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyPressed(@NonNull KeyEvent kEv)
     {
         if (children.isEmpty())
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(kEv);
 
-        switch (keyCode)
+        switch (kEv.key())
         {
             case GLFW.GLFW_KEY_UP ->
             {
@@ -410,19 +413,19 @@ public class ScrollBoxWidget extends AbstractWidget
             }
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(kEv);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
+    public boolean keyReleased(@NonNull KeyEvent kEv)
     {
         if (children.isEmpty())
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(kEv);
 
         // unpress all on any key release; if specified, it breaks when moving up and down while holding pressing key
         unpressAllChildren();
 
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(kEv);
     }
 
     private void unpressAllChildren()
@@ -627,7 +630,7 @@ public class ScrollBoxWidget extends AbstractWidget
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narration)
+    protected void updateWidgetNarration(@NonNull NarrationElementOutput narration)
     {
     }
 }

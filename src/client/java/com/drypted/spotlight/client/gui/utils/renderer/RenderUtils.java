@@ -276,13 +276,13 @@ public final class RenderUtils
     {
         if (drawShadow)
         {
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(thickness * shadowOffset, thickness * shadowOffset, 0.0f);
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose().translate(thickness * shadowOffset, thickness * shadowOffset, guiGraphics.pose());
 
             drawThickLine(guiGraphics, startX, startY, endX, endY, thickness, Colors.SHADOW);
             drawThickLine(guiGraphics, startX, endY, endX, startY, thickness, Colors.SHADOW);
 
-            guiGraphics.pose().popPose();
+            guiGraphics.pose().popMatrix();
         }
 
         drawThickLine(guiGraphics, startX, startY, endX, endY, thickness, color);
@@ -363,8 +363,8 @@ public final class RenderUtils
 
     public static void __debugDrawWidgetBounds(GuiGraphics g, AbstractWidget widget, boolean above)
     {
-        g.pose().pushPose();
-        g.pose().translate(0, 0, above ? 100 : -100); // set z order
+        g.pose().pushMatrix();
+        g.pose().translate(0, 0, g.pose()); // set z order
         drawRectangle(
                 g,
                 widget.getX(),
@@ -377,7 +377,7 @@ public final class RenderUtils
                 Colors.DEBUG_RECT_FILL,
                 Colors.DEBUG_RECT_OUTLINE
         );
-        g.pose().popPose();
+        g.pose().popMatrix();
     }
 
     /* MINI-FUNCTIONS */
@@ -419,11 +419,11 @@ public final class RenderUtils
      */
     public static void drawScaledItemFactor(GuiGraphics g, ItemStack stack, int x, int y, float scaleFactor)
     {
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0.0F);
-        g.pose().scale(scaleFactor, scaleFactor, 1.0F);
+        g.pose().pushMatrix();
+        g.pose().translate(x, y, g.pose());
+        g.pose().scale(scaleFactor, scaleFactor, g.pose());
         g.renderItem(stack, 0, 0);
-        g.pose().popPose();
+        g.pose().popMatrix();
     }
 
     /**
@@ -553,11 +553,11 @@ public final class RenderUtils
 
     private static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color)
     {
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0.0F);
-        g.pose().scale(scale, scale, 1.0F);
+        g.pose().pushMatrix();
+        g.pose().translate(x, y, g.pose());
+        g.pose().scale(scale, scale, g.pose());
         g.drawString(Minecraft.getInstance().font, text, 0, 0, color.asInt());
-        g.pose().popPose();
+        g.pose().popMatrix();
     }
 
     /* OVERLOADS */
