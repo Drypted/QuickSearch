@@ -9,6 +9,7 @@ import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.core.search.SearchNotFoundError;
 import com.drypted.spotlight.client.gui.components.*;
+import com.drypted.spotlight.client.gui.utils.renderer.MosaicShader;
 import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -44,6 +45,14 @@ public class SpotlightScreen extends Screen
     {
         super(Component.literal("Spotlight Menu"));
         this.showCommandOnStartup = showCommandOnStartup;
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    {
+        // Snapshot the world/background before any UI is drawn this frame
+        MosaicShader.captureFramebuffer(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override

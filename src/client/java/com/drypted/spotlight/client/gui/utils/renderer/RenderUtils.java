@@ -116,7 +116,24 @@ public final class RenderUtils
      */
     public static void drawRectangle(GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY, RoundedCorners corners, int insetThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
     {
-        RenderUtils.drawMosaicBackground(g, startPosX, startPosY, endPosX, endPosY, backgroundColor, 4);
+        int w = endPosX - startPosX;
+        int h = endPosY - startPosY;
+
+        int argb = Color.fromInt(0x80_FFFFFF).asInt();
+        float ta = ((argb >> 24) & 0xFF) / 255f;
+        float tr = ((argb >> 16) & 0xFF) / 255f;
+        float tg = ((argb >> 8) & 0xFF) / 255f;
+        float tb = (argb & 0xFF) / 255f;
+
+        if (MosaicShader.isAvailable())
+        {
+            MosaicShader.draw(startPosX, startPosY, w, h, 6f, tr, tg, tb, ta);
+        }
+        else
+        {
+            // Fallback: plain fill
+            g.fill(startPosX, startPosY, endPosX, endPosY, Colors.RED.asInt());
+        }
 
         insetThickness = Math.max(0, insetThickness);
 
