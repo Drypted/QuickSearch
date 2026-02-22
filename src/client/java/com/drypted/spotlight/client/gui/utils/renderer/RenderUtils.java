@@ -13,6 +13,94 @@ public final class RenderUtils
     private static final int VANILLA_ITEM_SIZE = 16;
 
     /**
+     * Draws a mosaic (pixelated blur) effect over a region, then tints it.
+     *
+     * @param g         GuiGraphics context
+     * @param startX    Start X of the widget
+     * @param startY    Start Y of the widget
+     * @param endX      End X of the widget
+     * @param endY      End Y of the widget
+     * @param tintColor Color to tint over the mosaic (use with some transparency, e.g. 0x80_1a2035)
+     * @param pixelSize Size of each mosaic tile in pixels (4–8 looks good)
+     */
+    public static void drawMosaicBackground(GuiGraphics g, int startX, int startY, int endX, int endY, Color tintColor, int pixelSize)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        com.mojang.blaze3d.pipeline.RenderTarget fb = mc.getMainRenderTarget();
+
+        // Screen resolution vs. GUI scale
+        double guiScale = mc.getWindow().getGuiScale();
+        int fbWidth = fb.width;
+        int fbHeight = fb.height;
+
+        // We need to read pixels from the framebuffer.
+        // Bind the framebuffer for reading.
+        com.mojang.blaze3d.systems.RenderSystem.bindTexture(fb.getColorTextureId());
+
+        // Allocate a buffer for the region we care about (in framebuffer coords)
+        int fbStartX = (int) (startX * guiScale);
+        int fbStartY = (int) (startY * guiScale);
+        int fbEndX = (int) (endX * guiScale);
+        int fbEndY = (int) (endY * guiScale);
+
+        int fbRegionW = Math.max(1, fbEndX - fbStartX);
+        int fbRegionH = Math.max(1, fbEndY - fbStartY);
+
+        // OpenGL reads from bottom-left, so flip Y
+        int fbFlippedY = fbHeight - fbEndY;
+
+        java.nio.ByteBuffer pixels = org.lwjgl.BufferUtils.createByteBuffer(fbRegionW * fbRegionH * 4);
+        org.lwjgl.opengl.GL11.glReadPixels(
+                fbStartX,
+                fbFlippedY,
+                fbRegionW,
+                fbRegionH,
+                org.lwjgl.opengl.GL11.GL_RGBA,
+                org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE,
+                pixels
+        );
+
+        // Sample mosaic tiles and draw them in GUI space
+        int guiW = endX - startX;
+        int guiH = endY - startY;
+
+        for (int tileY = 0; tileY < guiH; tileY += pixelSize)
+        {
+            for (int tileX = 0; tileX < guiW; tileX += pixelSize)
+            {
+
+                // Sample center of the tile in framebuffer coords
+                int sampleGuiX = tileX + pixelSize / 2;
+                int sampleGuiY = tileY + pixelSize / 2;
+
+                int sampleFbX = (int) (sampleGuiX * guiScale);
+                // Y is flipped in the pixel buffer (row 0 = bottom of region)
+                int sampleFbY = fbRegionH - 1 - (int) (sampleGuiY * guiScale);
+
+                sampleFbX = Math.min(sampleFbX, fbRegionW - 1);
+                sampleFbY = Math.max(0, Math.min(sampleFbY, fbRegionH - 1));
+
+                int idx = (sampleFbY * fbRegionW + sampleFbX) * 4;
+                int r = pixels.get(idx) & 0xFF;
+                int gr = pixels.get(idx + 1) & 0xFF;
+                int b = pixels.get(idx + 2) & 0xFF;
+                // full opacity for the mosaic tile itself
+                int argb = (0xFF << 24) | (r << 16) | (gr << 8) | b;
+
+                int drawX1 = startX + tileX;
+                int drawY1 = startY + tileY;
+                int drawX2 = Math.min(drawX1 + pixelSize, endX);
+                int drawY2 = Math.min(drawY1 + pixelSize, endY);
+
+                g.fill(drawX1, drawY1, drawX2, drawY2, argb);
+            }
+        }
+
+        // Tint layer on top
+        g.fill(startX, startY, endX, endY, tintColor.asInt());
+    }
+
+    /**
      * Fills a rectangle with optional rounded corners and outline.
      *
      * @param g               `GuiGraphics` context to draw on
@@ -28,12 +116,14 @@ public final class RenderUtils
      */
     public static void drawRectangle(GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY, RoundedCorners corners, int insetThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
     {
+        RenderUtils.drawMosaicBackground(g, startPosX, startPosY, endPosX, endPosY, backgroundColor, 4);
+
         insetThickness = Math.max(0, insetThickness);
 
         // Main body
         if (!renderOutline || insetThickness == 0)
         {
-            g.fill(startPosX, startPosY, endPosX, endPosY, backgroundColor.asInt());
+            // g.fill(startPosX, startPosY, endPosX, endPosY, backgroundColor.asInt());
             return;
         }
 
@@ -157,26 +247,10 @@ public final class RenderUtils
         int longArmEndY = posY + (int) (size * 0.3f);
 
         // Draw short arm (with thickness)
-        drawThickLine(
-                guiGraphics,
-                shortArmStartX,
-                shortArmStartY,
-                shortArmEndX,
-                shortArmEndY,
-                thickness,
-                color
-        );
+        drawThickLine(guiGraphics, shortArmStartX, shortArmStartY, shortArmEndX, shortArmEndY, thickness, color);
 
         // Draw long arm (with thickness)
-        drawThickLine(
-                guiGraphics,
-                shortArmEndX,
-                shortArmEndY,
-                longArmEndX,
-                longArmEndY,
-                thickness,
-                color
-        );
+        drawThickLine(guiGraphics, shortArmEndX, shortArmEndY, longArmEndX, longArmEndY, thickness, color);
     }
 
     /**
@@ -321,18 +395,7 @@ public final class RenderUtils
     public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
     {
         // background
-        RenderUtils.drawRectangle(
-                g,
-                startX,
-                startY,
-                endX,
-                endY,
-                corners,
-                1,
-                true,
-                backgroundColor,
-                backgroundColor
-        );
+        RenderUtils.drawRectangle(g, startX, startY, endX, endY, corners, 1, true, backgroundColor, backgroundColor);
 
         // text
         int textWidth = (int) (Minecraft.getInstance().font.width(text) * scale);
@@ -346,18 +409,7 @@ public final class RenderUtils
 
     public static void drawLabelInBox(GuiGraphics g, String text, int padding, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
     {
-        RenderUtils.drawRectangle(
-                g,
-                startX,
-                startY,
-                endX,
-                endY,
-                corners,
-                1,
-                true,
-                backgroundColor,
-                backgroundColor
-        );
+        RenderUtils.drawRectangle(g, startX, startY, endX, endY, corners, 1, true, backgroundColor, backgroundColor);
 
         int boxWidth = (endX - startX) - (padding * 2);
         int boxHeight = (endY - startY) - (padding * 2);
@@ -481,15 +533,13 @@ public final class RenderUtils
      */
     private static void drawThickLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness, Color color)
     {
-        if (thickness <= 0)
-            return;
+        if (thickness <= 0) return;
 
         float dx = x2 - x1;
         float dy = y2 - y1;
         float length = (float) Math.sqrt(dx * dx + dy * dy);
 
-        if (length == 0.0f)
-            return;
+        if (length == 0.0f) return;
 
         float nx = -dy / length;
         float ny = dx / length;
@@ -525,8 +575,7 @@ public final class RenderUtils
             count = intersect(xs, count, x3, y3, x4, y4, y);
             count = intersect(xs, count, x4, y4, x1, y1, y);
 
-            if (count < 2)
-                continue;
+            if (count < 2) continue;
 
             float minX = xs[0];
             float maxX = xs[1];
@@ -567,8 +616,7 @@ public final class RenderUtils
         {
             guiGraphics.fill(x1, y1, x1 + 1, y1 + 1, color);
 
-            if (x1 == x2 && y1 == y2)
-                break;
+            if (x1 == x2 && y1 == y2) break;
 
             int e2 = 2 * err;
             if (e2 > -dy)
