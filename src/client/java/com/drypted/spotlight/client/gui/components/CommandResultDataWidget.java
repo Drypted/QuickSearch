@@ -98,6 +98,8 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
                 (this.selected && !this.isPressed()) ? selectedColor : outlineColor
         );
 
+        g.enableScissor(startPosX + paddingX, startPosY, endPosX - paddingX, endPosY);
+
         // title
         int titleX = startPosX + paddingX;
         int titleY = startPosY + paddingY;
@@ -122,6 +124,8 @@ public class CommandResultDataWidget extends AbstractWidget implements ScrollBox
                 false
         );
         g.pose().popPose();
+
+        g.disableScissor();
 
         // show bind, will be used to quick nav; disabled for now
         // if (this.shouldShowBind())

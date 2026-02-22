@@ -108,6 +108,8 @@ public class ItemsResultDataWidget extends AbstractWidget implements ScrollBoxWi
         int titleX = iconX + ICON_SIZE + ICON_PADDING;
         int titleY = startPosY + padding;
 
+        g.enableScissor(startPosX + padding, startPosY, endPosX - padding, endPosY);
+
         g.drawString(FONT, this.data.getName(), titleX, titleY, textColor.asInt(), false);
 
         // subtitle
@@ -125,6 +127,8 @@ public class ItemsResultDataWidget extends AbstractWidget implements ScrollBoxWi
                 false
         );
         g.pose().popPose();
+
+        g.disableScissor();
 
         // show bind, will be used to quick nav; disabled for now
         // if (this.shouldShowBind())
