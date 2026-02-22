@@ -12,4 +12,14 @@ public interface InputError
     {
         return getSeverity().getColor();
     }
+
+    default boolean isCritical()
+    {
+        return getSeverity().isCritical();
+    }
+
+    default boolean isNone()
+    {
+        return getSeverity() == InputErrorSeverity.NONE;
+    }
 }

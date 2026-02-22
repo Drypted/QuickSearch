@@ -277,6 +277,11 @@ public class ItemsResultDataWidget extends AbstractWidget implements ScrollBoxWi
         this.showOutline = enabled;
     }
 
+    public ItemsResultData getData()
+    {
+        return data;
+    }
+
     // public boolean shouldShowBind()
     // {
     //     return showBind;

@@ -5,14 +5,10 @@ import com.drypted.spotlight.client.gui.models.InputErrorSeverity;
 
 public record CommandFeedback(String message, InputErrorSeverity severity) implements InputError
 {
+    @Override
     public boolean isNone()
     {
         return this.severity == InputErrorSeverity.NONE || this.equals(NO_ERROR);
-    }
-
-    public boolean isCritical()
-    {
-        return severity.isCritical();
     }
 
     /* VALIDATION ERROR IMPLEMENTATION */

@@ -69,9 +69,6 @@ public class GetPlayerHeadCommand implements Command
         );
         head.setCount(1);
 
-
-        SpotlightEntryClient.LOGGER.info(head.getComponents().toString());
-
         GiveItemAction.run(player, head, playerName + " Head");
 
         return CommandFeedback.NO_ERROR;

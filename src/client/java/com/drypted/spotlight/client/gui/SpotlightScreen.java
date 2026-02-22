@@ -2,6 +2,7 @@ package com.drypted.spotlight.client.gui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.actions.Actions;
+import com.drypted.spotlight.client.core.actions.InvalidItemError;
 import com.drypted.spotlight.client.core.commands.Command;
 import com.drypted.spotlight.client.core.commands.CommandFeedback;
 import com.drypted.spotlight.client.core.handlers.CommandsHandler;
@@ -17,7 +18,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +68,16 @@ public class SpotlightScreen extends Screen
         ).showScrollerAlways(true).build();
 
         this.inputWidget.addTextChangeListener(this::onTextChanged);
+        this.inputWidget.addSubmitListener((text) -> {
+            if (isUserInputCommand())
+            {
+                onEnterPressedCommand(text);
+            }
+            else
+            {
+                onEnterPressedItem();
+            }
+        });
 
         if (isHotbarEnabledInConfig())
         {
@@ -146,12 +156,6 @@ public class SpotlightScreen extends Screen
                 return true;
             }
             this.onClose();
-            return true;
-        }
-
-        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
-        {
-            onEnterPressed();
             return true;
         }
 
@@ -311,16 +315,11 @@ public class SpotlightScreen extends Screen
         if (player != null) data.execute(new String[]{}, player);
     }
 
-    private void onEnterPressed()
+    private void onEnterPressedCommand(String text)
     {
-        String text = inputWidget.getText();
-        if (text == null || !isUserInputCommand()) return;
-
         String commandName = text.split(" ")[0].substring(1); // Remove leading "/"
 
         String[] args = getArgs();
-
-        SpotlightEntryClient.LOGGER.info("Detected commands: {}, with args: {}", commandName, String.join(", ", args));
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
@@ -336,6 +335,33 @@ public class SpotlightScreen extends Screen
                     Component.literal(error.getSeverity().getName() + ":\n" + error.getMessage()) //
                             .withStyle(error.getSeverity().getChatColor()), false
             );
+
+        this.onClose();
+    }
+
+    private void onEnterPressedItem()
+    {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) return;
+
+        boolean invalidItem = false;
+
+        // get first item on search result
+        if (this.searchResultsWidget.getChildByIndex(0) instanceof ItemsResultDataWidget widget)
+        {
+            Actions.giveItem(player, widget.getData());
+        }
+        else
+        {
+            invalidItem = true;
+        }
+
+
+        if (invalidItem)
+        {
+            this.inputWidget.showError(new InvalidItemError());
+            return;
+        }
 
         this.onClose();
     }
