@@ -42,8 +42,7 @@ public class Color
     }
 
     /**
-     * Constructs an opaque color from RGB components.
-     * Alpha is set to 255 (fully opaque).
+     * Constructs an opaque color from RGB components. Alpha is set to 255 (fully opaque).
      *
      * @param r red component (0-255)
      * @param g green component (0-255)
@@ -71,8 +70,7 @@ public class Color
     /* FACTORY METHODS */
 
     /**
-     * Creates a color from individual RGBA components.
-     * Uses bit-shifting to pack components into a 32-bit integer.
+     * Creates a color from individual RGBA components. Uses bit-shifting to pack components into a 32-bit integer.
      *
      * <p>Algorithm: ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF)</p>
      *
@@ -80,6 +78,7 @@ public class Color
      * @param g green component (0-255)
      * @param b blue component (0-255)
      * @param a alpha component (0-255)
+     *
      * @return a new Color instance
      */
     public static Color fromRGBA(int r, int g, int b, int a)
@@ -91,6 +90,7 @@ public class Color
      * Creates a color from a 32-bit integer representation.
      *
      * @param aarrggbb the color value in 0xAARRGGBB format
+     *
      * @return a new Color instance
      */
     public static Color fromInt(int aarrggbb)
@@ -99,14 +99,15 @@ public class Color
     }
 
     /**
-     * Creates a color from HSL (Hue, Saturation, Lightness) components.
-     * Uses the HSL to RGB conversion algorithm.
+     * Creates a color from HSL (Hue, Saturation, Lightness) components. Uses the HSL to RGB conversion algorithm.
      *
      * @param h     hue (0.0-1.0, represents 0-360 degrees)
      * @param s     saturation (0.0-1.0, where 0 is gray and 1 is full color)
      * @param l     lightness (0.0-1.0, where 0 is black and 1 is white)
      * @param alpha alpha component (0.0-1.0, where 0 is transparent and 1 is opaque)
+     *
      * @return a new Color instance
+     *
      * @see #toHSL()
      */
     public static Color fromHSL(float h, float s, float l, float alpha)
@@ -150,6 +151,7 @@ public class Color
      * Converts this color to a hexadecimal string.
      *
      * @param includeAlpha whether to include the alpha channel
+     *
      * @return hexadecimal string (e.g., "#RRGGBB" or "#AARRGGBB")
      */
     public String toHex(boolean includeAlpha)
@@ -184,10 +186,10 @@ public class Color
     /* IMMUTABLE OPS */
 
     /**
-     * Returns a new color with the specified alpha value.
-     * Original color remains unchanged.
+     * Returns a new color with the specified alpha value. Original color remains unchanged.
      *
      * @param alpha new alpha value (0-255)
+     *
      * @return a new Color instance
      */
     public Color withOpacity(int alpha)
@@ -196,8 +198,7 @@ public class Color
     }
 
     /**
-     * Returns a new color with half the current opacity.
-     * Original color remains unchanged.
+     * Returns a new color with half the current opacity. Original color remains unchanged.
      *
      * @return a new Color instance with alpha / 2
      */
@@ -207,10 +208,10 @@ public class Color
     }
 
     /**
-     * Returns a new color with the specified red component.
-     * Original color remains unchanged.
+     * Returns a new color with the specified red component. Original color remains unchanged.
      *
      * @param red new red value (0-255)
+     *
      * @return a new Color instance
      */
     public Color withRed(int red)
@@ -219,10 +220,10 @@ public class Color
     }
 
     /**
-     * Returns a new color with the specified green component.
-     * Original color remains unchanged.
+     * Returns a new color with the specified green component. Original color remains unchanged.
      *
      * @param green new green value (0-255)
+     *
      * @return a new Color instance
      */
     public Color withGreen(int green)
@@ -231,10 +232,10 @@ public class Color
     }
 
     /**
-     * Returns a new color with the specified blue component.
-     * Original color remains unchanged.
+     * Returns a new color with the specified blue component. Original color remains unchanged.
      *
      * @param blue new blue value (0-255)
+     *
      * @return a new Color instance
      */
     public Color withBlue(int blue)
@@ -243,112 +244,112 @@ public class Color
     }
 
     /**
-     * Returns a new color with the specified hue.
-     * Preserves saturation, lightness, and alpha.
-     * Original color remains unchanged.
+     * Returns a new color with the specified hue. Preserves saturation, lightness, and alpha. Original color remains
+     * unchanged.
      *
      * @param hue new hue value (0.0-1.0, represents 0-360 degrees)
+     *
      * @return a new Color instance
      */
     public Color withHue(float hue)
     {
         float[] hsl = toHSL();
         hsl[0] = hue;
-        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha());
+        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha() / 255f);
     }
 
     /**
-     * Returns a new color with the specified saturation.
-     * Preserves hue, lightness, and alpha.
-     * Original color remains unchanged.
+     * Returns a new color with the specified saturation. Preserves hue, lightness, and alpha. Original color remains
+     * unchanged.
      *
      * @param saturation new saturation value (0.0-1.0)
+     *
      * @return a new Color instance
      */
     public Color withSaturation(float saturation)
     {
         float[] hsl = toHSL();
         hsl[1] = saturation;
-        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha());
+        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha() / 255f);
     }
 
     /**
-     * Returns a new color with the specified lightness.
-     * Preserves hue, saturation, and alpha.
-     * Original color remains unchanged.
+     * Returns a new color with the specified lightness. Preserves hue, saturation, and alpha. Original color remains
+     * unchanged.
      *
      * @param lightness new lightness value (0.0-1.0)
+     *
      * @return a new Color instance
      */
     public Color withLightness(float lightness)
     {
         float[] hsl = toHSL();
         hsl[2] = lightness;
-        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha());
+        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha() / 255f);
     }
 
 
     /* COLOR OPERATIONS */
 
     /**
-     * Returns a brightened version of this color.
-     * Increases lightness by the specified amount (clamped to 0.0-1.0).
+     * Returns a brightened version of this color. Increases lightness by the specified amount (clamped to 0.0-1.0).
      *
      * @param amount amount to brighten (0.0-1.0)
+     *
      * @return a new Color instance
      */
     public Color brighten(float amount)
     {
         float[] hsl = toHSL();
         hsl[2] = Math.min(1.0f, hsl[2] + amount);
-        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha());
+        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha() / 255f);
     }
 
     /**
-     * Returns a darkened version of this color.
-     * Decreases lightness by the specified amount (clamped to 0.0-1.0).
+     * Returns a darkened version of this color. Decreases lightness by the specified amount (clamped to 0.0-1.0).
      *
      * @param amount amount to darken (0.0-1.0)
+     *
      * @return a new Color instance
      */
     public Color darken(float amount)
     {
         float[] hsl = toHSL();
         hsl[2] = Math.max(0.0f, hsl[2] - amount);
-        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha());
+        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha() / 255f);
     }
 
     /**
-     * Returns a more saturated version of this color.
-     * Increases saturation by the specified amount (clamped to 0.0-1.0).
+     * Returns a more saturated version of this color. Increases saturation by the specified amount (clamped to
+     * 0.0-1.0).
      *
      * @param amount amount to increase saturation (0.0-1.0)
+     *
      * @return a new Color instance
      */
     public Color saturate(float amount)
     {
         float[] hsl = toHSL();
         hsl[1] = Math.min(1.0f, hsl[1] + amount);
-        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha());
+        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha() / 255f);
     }
 
     /**
-     * Returns a desaturated version of this color.
-     * Decreases saturation by the specified amount (clamped to 0.0-1.0).
+     * Returns a desaturated version of this color. Decreases saturation by the specified amount (clamped to 0.0-1.0).
      *
      * @param amount amount to decrease saturation (0.0-1.0)
+     *
      * @return a new Color instance
      */
     public Color desaturate(float amount)
     {
         float[] hsl = toHSL();
         hsl[1] = Math.max(0.0f, hsl[1] - amount);
-        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha());
+        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha() / 255f);
     }
 
     /**
-     * Returns a grayscale version of this color.
-     * Sets saturation to 0 while preserving lightness and alpha.
+     * Returns a grayscale version of this color. Sets saturation to 0 while preserving lightness and alpha.
      *
      * @return a new Color instance
      */
@@ -358,8 +359,8 @@ public class Color
     }
 
     /**
-     * Returns the complementary color (opposite on the color wheel).
-     * Rotates hue by 180 degrees (0.5 in normalized space).
+     * Returns the complementary color (opposite on the color wheel). Rotates hue by 180 degrees (0.5 in normalized
+     * space).
      *
      * @return a new Color instance
      */
@@ -367,32 +368,26 @@ public class Color
     {
         float[] hsl = toHSL();
         hsl[0] = (hsl[0] + 0.5f) % 1.0f;
-        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha());
+        return fromHSL(hsl[0], hsl[1], hsl[2], this.getAlpha() / 255f);
     }
 
     /**
-     * Returns the inverted color (RGB inversion).
-     * Each channel is calculated as 255 - current_value.
-     * Alpha is preserved.
+     * Returns the inverted color (RGB inversion). Each channel is calculated as 255 - current_value. Alpha is
+     * preserved.
      *
      * @return a new Color instance
      */
     public Color invert()
     {
-        return fromRGBA(
-                255 - this.getRed(),
-                255 - this.getGreen(),
-                255 - this.getBlue(),
-                this.getAlpha()
-        );
+        return fromRGBA(255 - this.getRed(), 255 - this.getGreen(), 255 - this.getBlue(), this.getAlpha());
     }
 
     /**
-     * Linearly interpolates between this color and another.
-     * Uses linear interpolation (LERP) formula: a + (b - a) * t
+     * Linearly interpolates between this color and another. Uses linear interpolation (LERP) formula: a + (b - a) * t
      *
      * @param other the target color
      * @param t     interpolation factor (0.0 = this color, 1.0 = other color)
+     *
      * @return a new Color instance
      */
     public Color lerp(Color other, float t)
@@ -408,10 +403,10 @@ public class Color
     }
 
     /**
-     * Mixes this color with another using equal weights.
-     * Equivalent to lerp(other, 0.5).
+     * Mixes this color with another using equal weights. Equivalent to lerp(other, 0.5).
      *
      * @param other the color to mix with
+     *
      * @return a new Color instance
      */
     public Color mix(Color other)
@@ -420,12 +415,12 @@ public class Color
     }
 
     /**
-     * Blends this color over another using alpha compositing.
-     * Uses the "over" operator from Porter-Duff compositing.
+     * Blends this color over another using alpha compositing. Uses the "over" operator from Porter-Duff compositing.
      *
      * <p>Formula: C_out = C_src * α_src + C_dst * (1 - α_src)</p>
      *
      * @param background the background color
+     *
      * @return a new Color instance representing the composited result
      */
     public Color blendOver(Color background)
@@ -530,8 +525,7 @@ public class Color
     }
 
     /**
-     * Calculates the perceived brightness using the relative luminance formula.
-     * Uses ITU-R BT.709 coefficients.
+     * Calculates the perceived brightness using the relative luminance formula. Uses ITU-R BT.709 coefficients.
      *
      * <p>Formula: 0.2126 * R + 0.7152 * G + 0.0722 * B</p>
      *
@@ -623,8 +617,8 @@ public class Color
     }
 
     /**
-     * Helper function for HSL to RGB conversion.
-     * Converts a hue value and intermediate p, q values to an RGB component.
+     * Helper function for HSL to RGB conversion. Converts a hue value and intermediate p, q values to an RGB
+     * component.
      *
      * <p><b>Algorithm (HSL to RGB helper):</b></p>
      * <ul>
@@ -638,23 +632,19 @@ public class Color
      * @param p the base color component value
      * @param q the peak color component value
      * @param t the normalized hue offset
+     *
      * @return the RGB component value (0.0-1.0)
      */
     private static float hueToRGB(float p, float q, float t)
     {
         // Wrap hue to [0, 1] range
-        if (t < 0f)
-            t += 1f;
-        if (t > 1f)
-            t -= 1f;
+        if (t < 0f) t += 1f;
+        if (t > 1f) t -= 1f;
 
         // Piecewise linear function for hue
-        if (t < 1f / 6f)
-            return p + (q - p) * 6f * t;
-        if (t < 1f / 2f)
-            return q;
-        if (t < 2f / 3f)
-            return p + (q - p) * (2f / 3f - t) * 6f;
+        if (t < 1f / 6f) return p + (q - p) * 6f * t;
+        if (t < 1f / 2f) return q;
+        if (t < 2f / 3f) return p + (q - p) * (2f / 3f - t) * 6f;
 
         return p;
     }
@@ -665,10 +655,8 @@ public class Color
     @Override
     public boolean equals(Object obj)
     {
-        if (this == obj)
-            return true;
-        if (obj == null || getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
         Color other = (Color) obj;
         return this.color == other.color;
     }

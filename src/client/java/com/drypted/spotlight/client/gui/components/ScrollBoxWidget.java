@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -324,7 +325,12 @@ public class ScrollBoxWidget extends AbstractWidget
     private void drawChildren(GuiGraphics g, int mouseX, int mouseY, float delta, int x1, int y1, int x2, int y2)
     {
         // Clip
-        g.enableScissor(x1 + 1, y1 + 1, x2 - 1, y2 - 1);
+        g.enableScissor(
+                x1 + this.outlineThickness,
+                y1 + this.outlineThickness,
+                x2 - this.outlineThickness,
+                y2 - this.outlineThickness
+        );
 
         for (WidgetEntry e : children)
         {

@@ -306,7 +306,18 @@ public final class RenderUtils
     public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, int insetThickness, Color backgroundColor, Color textColor)
     {
         // background
-        RenderUtils.drawRectangle(g, startX, startY, endX, endY, corners, insetThickness, true, backgroundColor, backgroundColor);
+        RenderUtils.drawRectangle(
+                g,
+                startX,
+                startY,
+                endX,
+                endY,
+                corners,
+                insetThickness,
+                true,
+                backgroundColor,
+                backgroundColor
+        );
 
         // text
         int textWidth = (int) (Minecraft.getInstance().font.width(text) * scale);
@@ -427,6 +438,15 @@ public final class RenderUtils
     {
         float scale = (float) size / (float) VANILLA_ITEM_SIZE;
         drawScaledItemFactor(g, stack, x, y, scale);
+    }
+
+    public static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color, boolean drawShadow)
+    {
+        g.pose().pushMatrix();
+        g.pose().translate(x, y, g.pose());
+        g.pose().scale(scale, scale, g.pose());
+        g.drawString(Minecraft.getInstance().font, text, 0, 0, color.asInt(), drawShadow);
+        g.pose().popMatrix();
     }
 
     /* MARK: PRIVATE */

@@ -301,11 +301,11 @@ public class SpotlightScreen extends Screen
 
         for (Command result : results)
         {
-            this.searchResultsWidget.addChildRow(CommandResultDataWidget.builder(
-                            0,
-                            0,
-                            result
-                    ).width(searchResultsWidget.getMaxWidth()).onClick((mBC, dC) -> onCommandsResultMouseClick(result)).build() //
+            this.searchResultsWidget.addChildRow( //
+                    CommandResultDataWidget.builder(0, 0, result) //
+                            .width(searchResultsWidget.getMaxWidth()) //
+                            .onClick((mBC, dC) -> onCommandsResultMouseClick(result)) //
+                            .build() //
             );
         }
 
