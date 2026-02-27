@@ -377,7 +377,7 @@ public class ScrollBoxWidget extends AbstractWidget
         // scroller
         g.fill(x, y, x + SCROLLBAR_WIDTH, y + h, scrollerColor.asInt());
         // line
-        g.fill(x, getY() + outlineThickness, x + 1, getBottom() - outlineThickness, outlineColor.asInt());
+        g.fill(x, getY() + outlineThickness, x + outlineThickness, getBottom() - outlineThickness, outlineColor.asInt());
 
         // unsupported cursor change
         // if (isOverScrollbar(mouseX, mouseY))
@@ -554,7 +554,7 @@ public class ScrollBoxWidget extends AbstractWidget
         private final int y;
         private final int width;
         private final int height;
-        private int margin = 2;
+        private int margin = 3;
         private int spacing = margin; // by default, spacing = margin
         private int outlineThickness = Styles.ScrollBox.OUTLINE_THICKNESS;
         private boolean showScrollerAlways = false;
