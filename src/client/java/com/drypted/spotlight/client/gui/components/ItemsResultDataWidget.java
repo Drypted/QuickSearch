@@ -43,14 +43,14 @@ public class ItemsResultDataWidget extends BaseResultDataWidget
     protected void renderContent(@NonNull GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY)
     {
         // icon
-        int iconX = startPosX + paddingX;
-        int iconY = startPosY + paddingY;
+        int iconX = startPosX + outlineThickness + paddingX;
+        int iconY = startPosY + outlineThickness + paddingY;
 
         RenderUtils.drawScaledItemSize(g, this.data.getIcon(), iconX, iconY, ICON_SIZE);
 
         // title
         int titleX = iconX + ICON_SIZE + ICON_PADDING;
-        int titleY = startPosY + paddingY;
+        int titleY = startPosY + outlineThickness + paddingY;
 
         g.drawString(getFont(), this.data.getName(), titleX, titleY, textColor.asInt(), false);
 

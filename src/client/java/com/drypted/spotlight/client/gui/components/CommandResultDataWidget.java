@@ -46,8 +46,8 @@ public class CommandResultDataWidget extends BaseResultDataWidget
     protected void renderContent(@NonNull GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY)
     {
         // title
-        int titleX = startPosX + paddingX;
-        int titleY = startPosY + paddingY;
+        int titleX = startPosX + outlineThickness + paddingX;
+        int titleY = startPosY + outlineThickness + paddingY;
         Color _textColor = this._isPressable ? textColor : textColor.withLightness(textColor.getLightness() / 2);
 
         g.drawString(getFont(), this.command.getName(), titleX, titleY, _textColor.asInt(), false);
