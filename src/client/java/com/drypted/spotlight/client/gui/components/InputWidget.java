@@ -227,6 +227,7 @@ public class InputWidget extends AbstractWidget
                     this.getX() + this.getWidth(),
                     this.getY() - ERROR_TOOLTIP_SPACING,
                     RoundedCorners.all(),
+                    1,
                     this.error.getColor(),
                     normalTextColor
             );
@@ -1150,7 +1151,7 @@ public class InputWidget extends AbstractWidget
         private final int width;
         private int height;
         private boolean isRounded = false;
-        private int outlineThickness = 1;
+        private int outlineThickness = Styles.Input.OUTLINE_THICKNESS;
         private Color backgroundColor = Styles.Input.BACKGROUND_COLOR;
         private Color outlineColor = Styles.Input.OUTLINE_COLOR;
         private Color caretColor = Styles.Input.CARET_COLOR;

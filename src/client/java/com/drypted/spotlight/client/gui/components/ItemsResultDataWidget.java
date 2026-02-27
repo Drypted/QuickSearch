@@ -323,7 +323,7 @@ public class ItemsResultDataWidget extends AbstractWidget implements ScrollBoxWi
         private boolean pressed = false;
         private boolean showOutline = false;
 
-        private int outlineThickness = 1;
+        private int outlineThickness = Styles.ResultData.OUTLINE_THICKNESS;
 
         private BiConsumer<MouseButtonClick, Boolean> onClick = (e, pressed) -> {
         };

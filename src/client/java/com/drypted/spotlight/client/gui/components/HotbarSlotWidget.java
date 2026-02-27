@@ -61,7 +61,7 @@ public class HotbarSlotWidget extends AbstractWidget
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    protected void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         RenderUtils.drawRectangle(
                 guiGraphics,
@@ -107,6 +107,7 @@ public class HotbarSlotWidget extends AbstractWidget
                     this.getRight() - padding,
                     this.getY(),
                     RoundedCorners.fromVerticalSides(true, false),
+                    this.outlineThickness,
                     this.pressed
                             ? this.clickedColor
                             : this.highlighted ? highlightedColor : focusedColor,
@@ -198,7 +199,7 @@ public class HotbarSlotWidget extends AbstractWidget
 
         private int iconPadding = 2;
         private RoundedCorners roundedCorners = RoundedCorners.all();
-        private int outlineThickness = 1;
+        private int outlineThickness = Styles.Hotbar.OUTLINE_THICKNESS;
         private float hotbarTextScale = 0.8f;
         private Color backgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
         private Color textColor = Styles.Hotbar.HELP_TEXT_COLOR;
@@ -309,7 +310,7 @@ public class HotbarSlotWidget extends AbstractWidget
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput)
+    protected void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput)
     {
     }
 }

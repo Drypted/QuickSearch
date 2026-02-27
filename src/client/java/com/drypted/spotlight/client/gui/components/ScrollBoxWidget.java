@@ -27,6 +27,7 @@ public class ScrollBoxWidget extends AbstractWidget
     private final List<WidgetEntry> children = new ArrayList<>();
     private final int margin;
     private final int spacing;
+    private final int outlineThickness;
     private final boolean showScrollerAlways;
     private final Color bgColor;
     private final Color outlineColor;
@@ -41,10 +42,11 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private Consumer<Boolean> onFocus;
 
-    public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
+    public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, int outlineThickness, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
     {
         super(x, y, width, height, Component.empty());
         this.margin = margin;
+        this.outlineThickness = outlineThickness;
         this.showScrollerAlways = showScrollerAlways;
         this.bgColor = bgColor;
         this.spacing = spacing;
@@ -78,8 +80,7 @@ public class ScrollBoxWidget extends AbstractWidget
     @Nullable
     public AbstractWidget getChildByIndex(int index)
     {
-        if (index < 0 || index >= children.size())
-            return null;
+        if (index < 0 || index >= children.size()) return null;
         return children.get(index).widget;
     }
 
@@ -126,8 +127,7 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private boolean scrollbarVisible()
     {
-        if (showScrollerAlways)
-            return true;
+        if (showScrollerAlways) return true;
         return (maxScrollAmount() > 0);
     }
 
@@ -223,8 +223,7 @@ public class ScrollBoxWidget extends AbstractWidget
             for (int i = children.size() - 1; i >= 0; i--)
             {
                 AbstractWidget w = children.get(i).widget;
-                if (w.mouseClicked(mEv, doubleClick))
-                    return true;
+                if (w.mouseClicked(mEv, doubleClick)) return true;
             }
         }
 
@@ -315,7 +314,7 @@ public class ScrollBoxWidget extends AbstractWidget
                 x2,
                 y2,
                 RoundedCorners.none(),
-                1,
+                outlineThickness,
                 true,
                 bgColor,
                 outlineColor
@@ -330,8 +329,7 @@ public class ScrollBoxWidget extends AbstractWidget
         for (WidgetEntry e : children)
         {
             AbstractWidget child = e.widget;
-            if (!child.visible)
-                continue;
+            if (!child.visible) continue;
             child.render(g, mouseX, mouseY, delta);
         }
 
@@ -386,8 +384,7 @@ public class ScrollBoxWidget extends AbstractWidget
     @Override
     public boolean keyPressed(@NonNull KeyEvent kEv)
     {
-        if (children.isEmpty())
-            return super.keyPressed(kEv);
+        if (children.isEmpty()) return super.keyPressed(kEv);
 
         switch (kEv.key())
         {
@@ -419,8 +416,7 @@ public class ScrollBoxWidget extends AbstractWidget
     @Override
     public boolean keyReleased(@NonNull KeyEvent kEv)
     {
-        if (children.isEmpty())
-            return super.keyPressed(kEv);
+        if (children.isEmpty()) return super.keyPressed(kEv);
 
         // unpress all on any key release; if specified, it breaks when moving up and down while holding pressing key
         unpressAllChildren();
@@ -446,10 +442,8 @@ public class ScrollBoxWidget extends AbstractWidget
         // Calculate new index with wrapping
         int newIndex = selectedIndex + delta;
         // wrap around
-        if (newIndex < 0)
-            newIndex = children.size() - 1;
-        else if (newIndex >= children.size())
-            newIndex = 0;
+        if (newIndex < 0) newIndex = children.size() - 1;
+        else if (newIndex >= children.size()) newIndex = 0;
 
         if (oldIndex != newIndex)
         {
@@ -477,8 +471,7 @@ public class ScrollBoxWidget extends AbstractWidget
     {
         final int paddingTop = 8, paddingBottom = 8;
 
-        if (index < 0 || index >= children.size())
-            return;
+        if (index < 0 || index >= children.size()) return;
 
         // compute child top
         int childTop = margin;
@@ -510,11 +503,9 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private void validateSelectedIndex()
     {
-        if (selectedIndex < 0)
-            selectedIndex = children.size() - 1;
+        if (selectedIndex < 0) selectedIndex = children.size() - 1;
 
-        if (selectedIndex >= children.size())
-            selectedIndex = 0;
+        if (selectedIndex >= children.size()) selectedIndex = 0;
     }
 
 
@@ -540,6 +531,7 @@ public class ScrollBoxWidget extends AbstractWidget
         private final int height;
         private int margin = 4;
         private int spacing = margin; // by default, spacing = margin
+        private int outlineThickness = Styles.ScrollBox.OUTLINE_THICKNESS;
         private boolean showScrollerAlways = false;
 
         private Color bgColor = Styles.ScrollBox.BACKGROUND_COLOR;
@@ -564,6 +556,12 @@ public class ScrollBoxWidget extends AbstractWidget
         public Builder spacing(int spacing)
         {
             this.spacing = spacing;
+            return this;
+        }
+
+        public Builder outlineThickness(int outlineThickness)
+        {
+            this.outlineThickness = outlineThickness;
             return this;
         }
 
@@ -606,6 +604,7 @@ public class ScrollBoxWidget extends AbstractWidget
                     height,
                     margin,
                     spacing,
+                    outlineThickness,
                     showScrollerAlways,
                     bgColor,
                     outlineColor,
@@ -620,10 +619,8 @@ public class ScrollBoxWidget extends AbstractWidget
         @Override
         public boolean equals(Object obj)
         {
-            if (this == obj)
-                return true;
-            if (obj == null || getClass() != obj.getClass())
-                return false;
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
             WidgetEntry other = (WidgetEntry) obj;
             return this.id == other.id;
         }

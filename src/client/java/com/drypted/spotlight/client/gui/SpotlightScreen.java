@@ -74,7 +74,7 @@ public class SpotlightScreen extends Screen
                 inputWidget.getY() + SEARCH_BAR_HEIGHT - inputWidget.getOutlineThickness(),
                 inputWidget.getWidth(),
                 resultsHeight
-        ).showScrollerAlways(true).build();
+        ).showScrollerAlways(true).margin(2).build();
 
         this.inputWidget.addTextChangeListener(this::onTextChanged);
         this.inputWidget.addSubmitListener((text) -> {

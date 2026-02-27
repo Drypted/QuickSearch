@@ -15,6 +15,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
+
+    private final int outlineThickness = Styles.Hotbar.HELP_TEXT_OUTLINE_THICKNESS;
 
     private final Color SlotHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
     private final Color SlotFocusedColor = Styles.Hotbar.FOCUSED_COLOR;
@@ -93,7 +96,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     /* RENDERING */
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    protected void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         hotbarSlotWidgets.forEach(widget -> widget.render(
                 guiGraphics,
@@ -113,6 +116,7 @@ public class HotbarCollectionWidget extends AbstractWidget
                     this.getRight(),
                     this.getY() + HELP_TEXT_HEIGHT,
                     RoundedCorners.all(),
+                    this.outlineThickness,
                     this.anySlotHighlighted ? SlotHighlightedColor : SlotFocusedColor,
                     HotbarInstructionTextColor
             );
@@ -211,7 +215,7 @@ public class HotbarCollectionWidget extends AbstractWidget
         widget.setPressed(true);
 
         // if shift pressed, select hotbar slot only
-        if (isModifierPressed(modifiers, GLFW.GLFW_MOD_SHIFT))
+        if (isShiftPressed(modifiers))
         {
             this.selectedHotbarWidget = widget;
             this.highlightSlot(selectedHotbarWidget.getHotbarIndex());
@@ -252,9 +256,9 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     /* STATICS */
 
-    private static boolean isModifierPressed(int modifiers, int modifierToCheck)
+    private static boolean isShiftPressed(int modifiers)
     {
-        return (modifiers & modifierToCheck) != 0;
+        return (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
     }
 
     /* GETTERS */
@@ -311,7 +315,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     /* OVERRIDES */
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput)
+    protected void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput)
     {
     }
 }
