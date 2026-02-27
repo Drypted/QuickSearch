@@ -5,7 +5,7 @@
 
 ## Fixes
 
-- Fix GiveItem and ReplaceItem not updating on client
+- [X] Fix GiveItem and ReplaceItem not updating on client
 - Fix head command
 - Fix commands not showing up
 - Fix autocomplete not showing up when typing two words letter

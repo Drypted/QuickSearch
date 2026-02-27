@@ -50,6 +50,9 @@ public class ReplaceHotbarItemAction extends Action
 
         mc.gameMode.handleCreativeModeItemAdd(stack, hotbarSlot);
 
+        player.getInventory().setItem(slotIndex, stack);
+        player.getInventory().getItem(slotIndex).setPopTime(5); // item pickup animation
+
         if (SpotlightEntryClient.getConfig().showItemMessage)
             player.displayClientMessage(Component.literal("Set slot " + (slotIndex + 1) + " to " + name), true);
 

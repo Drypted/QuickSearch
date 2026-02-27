@@ -64,6 +64,9 @@ public class GiveItemAction extends Action
         // if no empty slot was found, then handleCreativeModeItemAdd will drop the item
         gameMode.handleCreativeModeItemAdd(stack, containerSlot);
 
+        player.getInventory().add(stack);
+        player.inventoryMenu.broadcastChanges();
+
         // Feedback
         if (SpotlightEntryClient.getConfig().showItemMessage)
             player.displayClientMessage(Component.literal("Gave " + name), true);
