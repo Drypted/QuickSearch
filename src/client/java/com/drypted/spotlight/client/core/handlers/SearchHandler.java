@@ -55,7 +55,8 @@ public class SearchHandler
             {
                 ItemsResultData data = ItemsResultData.fromItem(item);
                 combined.putIfAbsent(data.getSerializedDefinition(), data);
-            } catch (Exception ignored)
+            }
+            catch (Exception ignored)
             {
                 // Some items are not safe to instantiate
             }
@@ -97,8 +98,7 @@ public class SearchHandler
     }
 
     /**
-     * Performs an asynchronous search.
-     * Cancels any currently running search, filters the data on a background thread,
+     * Performs an asynchronous search. Cancels any currently running search, filters the data on a background thread,
      * and executes the callback on the Minecraft Main Thread.
      *
      * @param query      The text to search for.

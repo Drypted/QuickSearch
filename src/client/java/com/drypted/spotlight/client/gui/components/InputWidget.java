@@ -101,8 +101,8 @@ public class InputWidget extends AbstractWidget
     {
         // Determine outline color based on state
         Color currentOutlineColor = shouldShowError() ?
-                Objects.requireNonNull(this.error).getColor() :
-                this.outlineColor;
+                                    Objects.requireNonNull(this.error).getColor() :
+                                    this.outlineColor;
 
         // Background
         RenderUtils.drawRectangle(
@@ -171,8 +171,8 @@ public class InputWidget extends AbstractWidget
             // Render text
             // Priority: disabled > message > normal
             Color textColor = isDisabled ?
-                    disabledTextColor :
-                    shouldShowError() ? Objects.requireNonNull(this.error).getColor() : normalTextColor;
+                              disabledTextColor :
+                              shouldShowError() ? Objects.requireNonNull(this.error).getColor() : normalTextColor;
             guiGraphics.drawString(FONT, beforeSelection, textX - scrollOffset, textY, textColor.asInt(), false);
 
             guiGraphics.drawString(
@@ -309,8 +309,8 @@ public class InputWidget extends AbstractWidget
     private int getTextAreaWidth()
     {
         int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ?
-                (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT) :
-                0;
+                             (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT) :
+                             0;
         return this.getWidth() - (TEXT_PADDING_X * 2) - indicatorSpace;
     }
 
@@ -379,7 +379,8 @@ public class InputWidget extends AbstractWidget
             }
         }
 
-        if (isReadOnly && (keyEvent.key() == GLFW.GLFW_KEY_BACKSPACE || keyEvent.key() == GLFW.GLFW_KEY_DELETE)) return false;
+        if (isReadOnly && (keyEvent.key() == GLFW.GLFW_KEY_BACKSPACE || keyEvent.key() == GLFW.GLFW_KEY_DELETE))
+            return false;
 
         // Movement and editing
         return switch (keyEvent.key())
@@ -1090,7 +1091,8 @@ public class InputWidget extends AbstractWidget
 
     private boolean shouldShowError()
     {
-        return this.hasError && this.error != null && this.error.getMessage() != null && !this.error.getMessage().isEmpty();
+        return this.hasError && this.error != null && this.error.getMessage() != null && !this.error.getMessage()
+                .isEmpty();
     }
 
     /* Public Methods */

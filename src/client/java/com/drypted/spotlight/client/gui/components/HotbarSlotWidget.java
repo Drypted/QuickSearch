@@ -74,10 +74,10 @@ public class HotbarSlotWidget extends AbstractWidget
                 true,
                 this.backgroundColor,
                 this.pressed
-                        ? this.clickedColor
-                        : this.highlighted
-                        ? this.highlightedColor
-                        : this.shouldShowBind() ? this.focusedColor : this.outlineColor
+                ? this.clickedColor
+                : this.highlighted
+                  ? this.highlightedColor
+                  : this.shouldShowBind() ? this.focusedColor : this.outlineColor
         );
 
         // show icon if search result data is available
@@ -109,8 +109,8 @@ public class HotbarSlotWidget extends AbstractWidget
                     RoundedCorners.fromVerticalSides(true, false),
                     this.outlineThickness,
                     this.pressed
-                            ? this.clickedColor
-                            : this.highlighted ? highlightedColor : focusedColor,
+                    ? this.clickedColor
+                    : this.highlighted ? highlightedColor : focusedColor,
                     textColor
             );
         }

@@ -20,7 +20,8 @@ public class GiveItemAction extends Action
         {
             stack = item.createItemStack(maxStackSize, false);
             // signature: createItemStack(int maxStackSize, boolean checkSize)
-        } catch (CommandSyntaxException ignored)
+        }
+        catch (CommandSyntaxException ignored)
         {
             handleError(player, ERROR.INVALID_ITEM);
             return;

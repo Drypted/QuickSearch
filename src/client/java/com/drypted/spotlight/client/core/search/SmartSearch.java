@@ -6,15 +6,12 @@ import java.util.stream.Stream;
 /**
  * A comprehensive search system that implements multiple matching strategies to find relevant items.
  * <p>
- * This class provides intelligent search capabilities including:
- * - Exact string matching
- * - Prefix matching (e.g., "dia" matches "diamond")
- * - Fuzzy matching to handle typos (e.g., "dimond" matches "diamond")
- * - Trigram-based similarity for partial matches
- * - Subsequence matching (e.g., "dmnd" matches "diamond")
+ * This class provides intelligent search capabilities including: - Exact string matching - Prefix matching (e.g., "dia"
+ * matches "diamond") - Fuzzy matching to handle typos (e.g., "dimond" matches "diamond") - Trigram-based similarity for
+ * partial matches - Subsequence matching (e.g., "dmnd" matches "diamond")
  * <p>
- * The search uses inverted indices and trigram indices for efficient candidate selection,
- * then scores each candidate to rank results by relevance.
+ * The search uses inverted indices and trigram indices for efficient candidate selection, then scores each candidate to
+ * rank results by relevance.
  *
  * @param <T> The type of searchable items (must implement {@link Searchable})
  */
@@ -23,41 +20,38 @@ public class SmartSearch<T extends Searchable>
     /* CONSTANTS */
 
     /**
-     * Maximum allowed edit distance for fuzzy matching using Levenshtein distance.
-     * An edit distance of 3 means up to 3 character changes (insertions, deletions, substitutions)
-     * are tolerated when matching. For example: "dimond" → "diamond" has distance 1.
+     * Maximum allowed edit distance for fuzzy matching using Levenshtein distance. An edit distance of 3 means up to 3
+     * character changes (insertions, deletions, substitutions) are tolerated when matching. For example: "dimond" →
+     * "diamond" has distance 1.
      */
     private static final int MAXIMUM_FUZZY_EDIT_DISTANCE = 3;
 
     /**
-     * Minimum similarity score (0.0 to 1.0) required for trigram-based matching.
-     * A trigram is a sequence of 3 consecutive characters. This threshold determines
-     * how similar two strings must be based on their shared trigrams.
+     * Minimum similarity score (0.0 to 1.0) required for trigram-based matching. A trigram is a sequence of 3
+     * consecutive characters. This threshold determines how similar two strings must be based on their shared trigrams.
      * 0.3 means at least 30% of trigrams must match.
      */
     private static final double MINIMUM_TRIGRAM_SIMILARITY_THRESHOLD = 0.3;
 
     /**
-     * Maximum prefix length to index for efficient prefix lookups.
-     * Indexing prefixes up to 3 characters provides good balance between memory usage
-     * and query performance for typical search queries.
+     * Maximum prefix length to index for efficient prefix lookups. Indexing prefixes up to 3 characters provides good
+     * balance between memory usage and query performance for typical search queries.
      */
     private static final int MAXIMUM_PREFIX_LENGTH = 3;
 
     /* INSTANCE FIELDS */
 
     /**
-     * The complete list of searchable items managed by this search instance.
-     * This list is immutable after being set via constructor or rebuildIndices().
+     * The complete list of searchable items managed by this search instance. This list is immutable after being set via
+     * constructor or rebuildIndices().
      */
     private List<T> searchableItems = Collections.emptyList();
 
     /**
      * Inverted index mapping individual words to the indices of items containing those words.
      * <p>
-     * Example structure:
-     * "diamond" → [0, 5, 12]  (items at positions 0, 5, and 12 contain "diamond")
-     * "sword" → [3, 8, 15]
+     * Example structure: "diamond" → [0, 5, 12]  (items at positions 0, 5, and 12 contain "diamond") "sword" → [3, 8,
+     * 15]
      * <p>
      * This enables fast lookup of items containing specific words without scanning all items.
      */
@@ -66,26 +60,22 @@ public class SmartSearch<T extends Searchable>
     /**
      * Prefix index mapping word prefixes (first 1-3 characters) to full words in the inverted index.
      * <p>
-     * This enables efficient prefix matching without scanning all indexed words.
-     * For each word, we store mappings for prefixes of length 1, 2, and 3.
+     * This enables efficient prefix matching without scanning all indexed words. For each word, we store mappings for
+     * prefixes of length 1, 2, and 3.
      * <p>
-     * Example structure:
-     * "d" → ["diamond", "door", "dirt"]
-     * "di" → ["diamond", "dirt"]
-     * "dia" → ["diamond"]
+     * Example structure: "d" → ["diamond", "door", "dirt"] "di" → ["diamond", "dirt"] "dia" → ["diamond"]
      * <p>
-     * When searching for "dia", we can directly lookup matching words instead of
-     * scanning through all indexed words. This reduces prefix matching from O(#words)
-     * to O(#words_with_prefix), a significant improvement for large datasets.
+     * When searching for "dia", we can directly lookup matching words instead of scanning through all indexed words.
+     * This reduces prefix matching from O(#words) to O(#words_with_prefix), a significant improvement for large
+     * datasets.
      */
     private Map<String, Set<String>> prefixToWordsMap = Collections.emptyMap();
 
     /**
      * Trigram index mapping trigrams to the indices of items containing those trigrams.
      * <p>
-     * A trigram is a sequence of 3 consecutive characters. For example, "diamond" contains:
-     * "  d", " di", "dia", "iam", "amo", "mon", "ond", "nd ", "d  "
-     * (padded with spaces at start/end)
+     * A trigram is a sequence of 3 consecutive characters. For example, "diamond" contains: "  d", " di", "dia", "iam",
+     * "amo", "mon", "ond", "nd ", "d  " (padded with spaces at start/end)
      * <p>
      * This index enables fuzzy matching by finding items with similar character sequences.
      */
@@ -113,8 +103,7 @@ public class SmartSearch<T extends Searchable>
     /**
      * Replaces the current item list and rebuilds all search indices.
      * <p>
-     * This is useful when the searchable dataset changes and you need to update the indices
-     * to reflect the new data.
+     * This is useful when the searchable dataset changes and you need to update the indices to reflect the new data.
      *
      * @param items The new list of items to search. If null, the search will be empty.
      */
@@ -136,13 +125,13 @@ public class SmartSearch<T extends Searchable>
     /**
      * Searches for items matching the query and returns the best matches sorted by relevance.
      * <p>
-     * The search process:
-     * 1. Finds candidate items using indices (inverted index and trigram index)
-     * 2. Scores each candidate based on match quality (exact, prefix, fuzzy, etc.)
-     * 3. Returns items sorted by score (lower scores = better matches)
+     * The search process: 1. Finds candidate items using indices (inverted index and trigram index) 2. Scores each
+     * candidate based on match quality (exact, prefix, fuzzy, etc.) 3. Returns items sorted by score (lower scores =
+     * better matches)
      *
      * @param searchQuery    The text to search for (case-insensitive)
      * @param maximumResults Maximum number of results to return. Use 0 or negative for unlimited.
+     *
      * @return A stream of matching items, sorted by relevance (best matches first)
      */
     public Stream<T> search(String searchQuery, int maximumResults)
@@ -198,7 +187,8 @@ public class SmartSearch<T extends Searchable>
                     return new SearchResultWithScore<>(item, scoreResult.totalScore(), itemIndex);
                 }).filter(Objects::nonNull)
                 // Step 3: Sort by score (lower is better), then by original position for stability
-                .sorted(Comparator.comparingInt(SearchResultWithScore<T>::score).thenComparingInt(SearchResultWithScore::originalIndex)).limit(
+                .sorted(Comparator.comparingInt(SearchResultWithScore<T>::score)
+                        .thenComparingInt(SearchResultWithScore::originalIndex)).limit(
                         maximumResults > 0 ? maximumResults : Integer.MAX_VALUE).map(SearchResultWithScore::item);
     }
 
@@ -207,22 +197,15 @@ public class SmartSearch<T extends Searchable>
     /**
      * Builds the inverted index that maps individual words to item indices.
      * <p>
-     * An inverted index allows fast lookup of "which items contain this word?"
-     * without having to scan through all items.
+     * An inverted index allows fast lookup of "which items contain this word?" without having to scan through all
+     * items.
      * <p>
-     * The index includes:
-     * - Individual words from item names (split on spaces, hyphens, underscores)
-     * - Individual words from item paths (split on spaces, hyphens, underscores, slashes, colons, backslashes)
-     * - Full names and paths (for exact matching)
+     * The index includes: - Individual words from item names (split on spaces, hyphens, underscores) - Individual words
+     * from item paths (split on spaces, hyphens, underscores, slashes, colons, backslashes) - Full names and paths (for
+     * exact matching)
      * <p>
-     * Example:
-     * Item 0: name="Diamond Sword", path="items/diamond_sword"
-     * Index entries created:
-     * "diamond" → [0]
-     * "sword" → [0]
-     * "items" → [0]
-     * "diamond sword" → [0]
-     * "items/diamond_sword" → [0]
+     * Example: Item 0: name="Diamond Sword", path="items/diamond_sword" Index entries created: "diamond" → [0] "sword"
+     * → [0] "items" → [0] "diamond sword" → [0] "items/diamond_sword" → [0]
      * <p>
      * Additionally builds a prefix index for efficient prefix matching (see prefixToWordsMap).
      */
@@ -277,10 +260,7 @@ public class SmartSearch<T extends Searchable>
     /**
      * Adds a word to the prefix index for all its prefixes (up to MAXIMUM_PREFIX_LENGTH).
      * <p>
-     * For example, "diamond" will add:
-     * - "d" → ["diamond"]
-     * - "di" → ["diamond"]
-     * - "dia" → ["diamond"]
+     * For example, "diamond" will add: - "d" → ["diamond"] - "di" → ["diamond"] - "dia" → ["diamond"]
      * <p>
      * This allows fast lookup of words starting with a given prefix.
      *
@@ -301,17 +281,14 @@ public class SmartSearch<T extends Searchable>
     /**
      * Builds the trigram index for fuzzy matching support.
      * <p>
-     * A trigram is a sequence of 3 consecutive characters. For example:
-     * "cat" produces: "  c", " ca", "cat", "at ", "t  "
-     * (spaces are added as padding at the beginning and end)
+     * A trigram is a sequence of 3 consecutive characters. For example: "cat" produces: "  c", " ca", "cat", "at ", "t
+     * " (spaces are added as padding at the beginning and end)
      * <p>
-     * Trigrams are useful for fuzzy matching because similar strings share many trigrams.
-     * For example:
-     * "diamond" and "dimond" share most trigrams despite the typo
-     * "quick" and "quit" share fewer trigrams, indicating less similarity
+     * Trigrams are useful for fuzzy matching because similar strings share many trigrams. For example: "diamond" and
+     * "dimond" share most trigrams despite the typo "quick" and "quit" share fewer trigrams, indicating less
+     * similarity
      * <p>
-     * This index maps each trigram to all items containing that trigram, allowing
-     * efficient fuzzy search.
+     * This index maps each trigram to all items containing that trigram, allowing efficient fuzzy search.
      */
     private void buildTrigramToItemIndicesMap()
     {
@@ -348,18 +325,16 @@ public class SmartSearch<T extends Searchable>
     /**
      * Generates all trigrams from the given text.
      * <p>
-     * A trigram is a sequence of exactly 3 consecutive characters. This method adds
-     * padding (two spaces) at the beginning and end of the text to capture edge trigrams.
+     * A trigram is a sequence of exactly 3 consecutive characters. This method adds padding (two spaces) at the
+     * beginning and end of the text to capture edge trigrams.
      * <p>
-     * Examples:
-     * "cat" → {"  c", " ca", "cat", "at ", "t  "}
-     * "go" → {"go"} (text shorter than 3 chars is returned as-is)
+     * Examples: "cat" → {"  c", " ca", "cat", "at ", "t  "} "go" → {"go"} (text shorter than 3 chars is returned as-is)
      * "test" → {"  t", " te", "tes", "est", "st ", "t  "}
      * <p>
-     * The padding ensures that the first and last characters are properly weighted
-     * in similarity calculations.
+     * The padding ensures that the first and last characters are properly weighted in similarity calculations.
      *
      * @param text The text to generate trigrams from
+     *
      * @return A set of all trigrams found in the text
      */
     private Set<String> generateTrigramsFromText(String text)
@@ -389,20 +364,19 @@ public class SmartSearch<T extends Searchable>
     /**
      * Calculates the similarity between two strings using trigram analysis.
      * <p>
-     * This method uses the Jaccard similarity coefficient on trigram sets:
-     * similarity = (number of shared trigrams) / (total number of unique trigrams)
+     * This method uses the Jaccard similarity coefficient on trigram sets: similarity = (number of shared trigrams) /
+     * (total number of unique trigrams)
      * <p>
      * The result ranges from 0.0 (completely different) to 1.0 (identical).
      * <p>
-     * Examples:
-     * "diamond" vs "diamond" → 1.0 (identical)
-     * "diamond" vs "dimond" → ~0.7 (one letter different)
-     * "cat" vs "dog" → ~0.0 (completely different)
+     * Examples: "diamond" vs "diamond" → 1.0 (identical) "diamond" vs "dimond" → ~0.7 (one letter different) "cat" vs
+     * "dog" → ~0.0 (completely different)
      * <p>
      * This is useful for fuzzy matching as it's tolerant of small differences like typos.
      *
      * @param firstText  The first string to compare
      * @param secondText The second string to compare
+     *
      * @return A similarity score between 0.0 and 1.0, where 1.0 means identical
      */
     private double calculateTrigramSimilarity(String firstText, String secondText)
@@ -433,27 +407,23 @@ public class SmartSearch<T extends Searchable>
     /**
      * Calculates the Levenshtein distance between two strings with early termination.
      * <p>
-     * The Levenshtein distance (also called edit distance) is the minimum number of
-     * single-character edits (insertions, deletions, or substitutions) needed to
-     * change one string into another.
+     * The Levenshtein distance (also called edit distance) is the minimum number of single-character edits (insertions,
+     * deletions, or substitutions) needed to change one string into another.
      * <p>
-     * Examples:
-     * "cat" → "cat" : distance = 0 (identical)
-     * "cat" → "hat" : distance = 1 (substitute c→h)
-     * "cat" → "cats" : distance = 1 (insert s)
-     * "saturday" → "sunday" : distance = 3
+     * Examples: "cat" → "cat" : distance = 0 (identical) "cat" → "hat" : distance = 1 (substitute c→h) "cat" → "cats" :
+     * distance = 1 (insert s) "saturday" → "sunday" : distance = 3
      * <p>
-     * This implementation uses a space-optimized algorithm with two rolling rows
-     * instead of a full 2D matrix, reducing memory usage from O(m×n) to O(n).
-     * It also supports early termination when the distance exceeds the maximum
+     * This implementation uses a space-optimized algorithm with two rolling rows instead of a full 2D matrix, reducing
+     * memory usage from O(m×n) to O(n). It also supports early termination when the distance exceeds the maximum
      * threshold, further improving performance.
      * <p>
-     * Time complexity: O(m × n) where m and n are the string lengths.
-     * Space complexity: O(n) where n is the length of the second string.
+     * Time complexity: O(m × n) where m and n are the string lengths. Space complexity: O(n) where n is the length of
+     * the second string.
      *
      * @param firstString     The first string
      * @param secondString    The second string
      * @param maximumDistance The maximum distance to calculate. If exceeded, returns Integer.MAX_VALUE.
+     *
      * @return The minimum number of edits needed, or Integer.MAX_VALUE if it exceeds maximumDistance
      */
     private int calculateLevenshteinDistance(String firstString, String secondString, int maximumDistance)
@@ -518,20 +488,20 @@ public class SmartSearch<T extends Searchable>
      * <p>
      * This method uses three strategies to find candidates:
      * <p>
-     * 1. Exact word matches: Items containing the exact query as a word
-     * Example: query "diamond" finds items with "diamond" in their name/path
+     * 1. Exact word matches: Items containing the exact query as a word Example: query "diamond" finds items with
+     * "diamond" in their name/path
      * <p>
-     * 2. Prefix matches: Items containing words that start with the query
-     * Example: query "dia" finds items with "diamond", "diagonal", etc.
-     * Uses the prefix index for O(#words_with_prefix) performance instead of O(#all_words)
+     * 2. Prefix matches: Items containing words that start with the query Example: query "dia" finds items with
+     * "diamond", "diagonal", etc. Uses the prefix index for O(#words_with_prefix) performance instead of O(#all_words)
      * <p>
-     * 3. Trigram matches: Items sharing enough trigrams with the query
-     * Example: query "dimond" finds items with "diamond" (fuzzy match)
+     * 3. Trigram matches: Items sharing enough trigrams with the query Example: query "dimond" finds items with
+     * "diamond" (fuzzy match)
      * <p>
-     * This pre-filtering step dramatically improves performance by reducing the number
-     * of items that need detailed scoring.
+     * This pre-filtering step dramatically improves performance by reducing the number of items that need detailed
+     * scoring.
      *
      * @param normalizedQuery The search query in lowercase
+     *
      * @return A set of item indices that are potential matches
      */
     private Set<Integer> findCandidateItemIndices(String normalizedQuery)
@@ -614,35 +584,25 @@ public class SmartSearch<T extends Searchable>
      * <p>
      * Scoring priority tiers (from best to worst):
      * <p>
-     * EXACT MATCHES (scores 0-3):
-     * 0  - Display name exactly matches query
-     * 1  - Identifier/path exactly matches query
-     * 2  - A complete word in display name exactly matches query
-     * 3  - A complete word in identifier exactly matches query
+     * EXACT MATCHES (scores 0-3): 0  - Display name exactly matches query 1  - Identifier/path exactly matches query 2
+     * - A complete word in display name exactly matches query 3  - A complete word in identifier exactly matches query
      * <p>
-     * PREFIX MATCHES (scores 5-30):
-     * 5  - Display name starts with query
-     * 10 - A word in display name starts with query
-     * 15 - A word in identifier starts with query
-     * 20 - Display name contains query
-     * 25 - Identifier starts with query
-     * 30 - Identifier contains query
+     * PREFIX MATCHES (scores 5-30): 5  - Display name starts with query 10 - A word in display name starts with query
+     * 15 - A word in identifier starts with query 20 - Display name contains query 25 - Identifier starts with query 30
+     * - Identifier contains query
      * <p>
-     * FUZZY MATCHES (scores 40-90):
-     * 40-55 - Levenshtein distance match in display name (closer = better)
-     * 50-65 - Levenshtein distance match in identifier (closer = better)
-     * 60-80 - Trigram similarity match in display name
-     * 70-90 - Trigram similarity match in identifier
+     * FUZZY MATCHES (scores 40-90): 40-55 - Levenshtein distance match in display name (closer = better) 50-65 -
+     * Levenshtein distance match in identifier (closer = better) 60-80 - Trigram similarity match in display name 70-90
+     * - Trigram similarity match in identifier
      * <p>
-     * SUBSEQUENCE MATCHES (scores 100-110):
-     * 100 - Query is a subsequence of display name (e.g., "dmnd" in "diamond")
+     * SUBSEQUENCE MATCHES (scores 100-110): 100 - Query is a subsequence of display name (e.g., "dmnd" in "diamond")
      * 110 - Query is a subsequence of identifier
      * <p>
-     * NO MATCH:
-     * 1000 - Item doesn't match query in any meaningful way
+     * NO MATCH: 1000 - Item doesn't match query in any meaningful way
      *
      * @param item            The item to score
      * @param normalizedQuery The search query in lowercase
+     *
      * @return Scoring result containing the total score and match type
      */
     private ItemScoreResult calculateItemScore(T item, String normalizedQuery)
@@ -873,18 +833,18 @@ public class SmartSearch<T extends Searchable>
     /**
      * Checks if the needle string is a subsequence of the haystack string.
      * <p>
-     * A subsequence means all characters from needle appear in haystack in the same order,
-     * but not necessarily consecutively.
+     * A subsequence means all characters from needle appear in haystack in the same order, but not necessarily
+     * consecutively.
      * <p>
-     * Examples:
-     * isSubsequenceOf("ace", "abcde") → true (a-b-c-d-e contains a-c-e in order)
-     * isSubsequenceOf("aec", "abcde") → false (e comes before c in haystack)
-     * isSubsequenceOf("dmnd", "diamond") → true (d-i-a-m-o-n-d contains d-m-n-d in order)
+     * Examples: isSubsequenceOf("ace", "abcde") → true (a-b-c-d-e contains a-c-e in order) isSubsequenceOf("aec",
+     * "abcde") → false (e comes before c in haystack) isSubsequenceOf("dmnd", "diamond") → true (d-i-a-m-o-n-d contains
+     * d-m-n-d in order)
      * <p>
      * This is useful for matching abbreviations or partial typing patterns.
      *
      * @param needle   The sequence to search for
      * @param haystack The string to search within
+     *
      * @return true if needle is a subsequence of haystack, false otherwise
      */
     private boolean isSubsequenceOf(String needle, String haystack)
@@ -908,9 +868,9 @@ public class SmartSearch<T extends Searchable>
     /**
      * Represents a search result with its associated score and original position.
      * <p>
-     * This is an internal data structure used during the scoring and sorting phase.
-     * The originalIndex preserves the item's position in the source list, which is used
-     * as a tiebreaker when scores are equal (to maintain stable sorting).
+     * This is an internal data structure used during the scoring and sorting phase. The originalIndex preserves the
+     * item's position in the source list, which is used as a tiebreaker when scores are equal (to maintain stable
+     * sorting).
      */
     private record SearchResultWithScore<T>(T item, int score, int originalIndex)
     {
@@ -919,8 +879,8 @@ public class SmartSearch<T extends Searchable>
     /**
      * Represents the score assigned to an item along with the type of match that produced it.
      * <p>
-     * The matchType indicates which matching strategy produced the best score, which is
-     * useful for debugging, telemetry, and understanding search behavior.
+     * The matchType indicates which matching strategy produced the best score, which is useful for debugging,
+     * telemetry, and understanding search behavior.
      */
     private record ItemScoreResult(int totalScore, ResultMatchType matchType)
     {
@@ -929,8 +889,8 @@ public class SmartSearch<T extends Searchable>
     /**
      * Enumeration of all possible match types that can produce a score.
      * <p>
-     * Each type corresponds to a specific matching strategy used during scoring.
-     * The match type in ItemScoreResult indicates which strategy produced the best score.
+     * Each type corresponds to a specific matching strategy used during scoring. The match type in ItemScoreResult
+     * indicates which strategy produced the best score.
      */
     private enum ResultMatchType
     {

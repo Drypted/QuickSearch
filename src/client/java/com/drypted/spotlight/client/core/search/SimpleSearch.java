@@ -18,6 +18,7 @@ public final class SimpleSearch<T extends Searchable>
      *
      * @param query      query text
      * @param maxResults maximum results to return
+     *
      * @return matched results (up to maxResults)
      */
     public List<T> search(String query, int maxResults)

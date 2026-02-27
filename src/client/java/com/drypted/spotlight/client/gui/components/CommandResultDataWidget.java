@@ -56,7 +56,15 @@ public class CommandResultDataWidget extends BaseResultDataWidget
         int subtitleY = titleY + getFont().lineHeight + SUBTITLE_SPACING;
         float subtitleScale = 0.75f;
 
-        RenderUtils.drawScaledText(g, this.command.getDescription(), subtitleScale, titleX, subtitleY, _textColor, false);
+        RenderUtils.drawScaledText(
+                g,
+                this.command.getDescription(),
+                subtitleScale,
+                titleX,
+                subtitleY,
+                _textColor,
+                false
+        );
 
         // show bind, will be used to quick nav; disabled for now
         // if (this.shouldShowBind())

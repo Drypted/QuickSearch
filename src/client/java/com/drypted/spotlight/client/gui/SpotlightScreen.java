@@ -174,7 +174,8 @@ public class SpotlightScreen extends Screen
             for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
                 HotbarSlotWidget hotbarWidget = this.hotbarCollectionWidget.getWidgets().get(i);
-                if (hotbarWidget != null && kEv.key() == this.minecraft.options.keyHotbarSlots[i].getDefaultKey().getValue())
+                if (hotbarWidget != null && kEv.key() == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
+                        .getValue())
                 {
                     this.hotbarCollectionWidget.onHotbarKeyPressed(hotbarWidget, kEv.modifiers());
                     return true;
@@ -253,11 +254,10 @@ public class SpotlightScreen extends Screen
             }
 
             this.searchResultsWidget.addChildRow( //
-                    ItemsResultDataWidget.builder(
-                            0,
-                            0,
-                            result
-                    ).width(searchResultsWidget.getMaxWidth()).onClick((mBC, dC) -> onItemsResultClicked(result)).build() //
+                    ItemsResultDataWidget.builder(0, 0, result)
+                            .width(searchResultsWidget.getMaxWidth())
+                            .onClick((mBC, dC) -> onItemsResultClicked(result))
+                            .build() //
             );
 
             matchCount++;
@@ -302,9 +302,9 @@ public class SpotlightScreen extends Screen
         for (Command result : results)
         {
             this.searchResultsWidget.addChildRow( //
-                    CommandResultDataWidget.builder(0, 0, result) //
-                            .width(searchResultsWidget.getMaxWidth()) //
-                            .onClick((mBC, dC) -> onCommandsResultMouseClick(result)) //
+                    CommandResultDataWidget.builder(0, 0, result)
+                            .width(searchResultsWidget.getMaxWidth())
+                            .onClick((mBC, dC) -> onCommandsResultMouseClick(result))
                             .build() //
             );
         }

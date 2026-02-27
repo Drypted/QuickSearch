@@ -12,11 +12,7 @@ public final class Styles
     private static final Color QUATERNARY_COLOR = Color.fromInt(0xFF_6CB6FE);
 
     /**
-     * #0D1B2A ink black
-     * #0D0221 midnight violet
-     * #150578 navy
-     * #0E0E52 deep twilight
-     * #ED1C24 racing red
+     * #0D1B2A ink black #0D0221 midnight violet #150578 navy #0E0E52 deep twilight #ED1C24 racing red
      */
 
     private static final Color INFO_COLOR = Color.fromInt(0xFF_0084D1);

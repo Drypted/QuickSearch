@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
