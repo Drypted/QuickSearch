@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.Nullable;
 
 public class ReplaceHotbarItemAction extends Action
 {
@@ -30,7 +31,7 @@ public class ReplaceHotbarItemAction extends Action
     }
 
 
-    public static void run(LocalPlayer player, ItemStack stack, String displayName, int slotIndex)
+    public static void run(LocalPlayer player, @Nullable ItemStack stack, String displayName, int slotIndex)
     {
         Minecraft mc = Minecraft.getInstance();
 
@@ -60,7 +61,7 @@ public class ReplaceHotbarItemAction extends Action
         player.getInventory().setItem(slotIndex, stack);
         player.getInventory().getItem(slotIndex).setPopTime(5); // item pickup animation
 
-        if (SpotlightEntryClient.getConfig().showItemMessage)
+        if (SpotlightEntryClient.getConfig().showItemMessage && !displayName.isEmpty())
             player.displayClientMessage(Component.literal("Set slot " + (slotIndex + 1) + " to " + displayName), true);
 
         final float volume = 0.5f;

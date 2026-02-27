@@ -47,7 +47,7 @@ public class GetPlayerHeadCommand implements Command
     public CommandFeedback execute(String[] args, LocalPlayer player)
     {
         CommandFeedback argsError = validateArgs(args);
-        if (argsError.isCritical()) return argsError;
+        if (argsError.haltsExecution()) return argsError;
         else if (!argsError.isNone()) player.displayClientMessage(
                 Component.literal(argsError.getSeverity().getName() + ": " + argsError.getMessage()) //
                         .withStyle(ChatFormatting.GOLD), false

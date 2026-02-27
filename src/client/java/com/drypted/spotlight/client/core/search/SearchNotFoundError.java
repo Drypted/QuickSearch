@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.core.search;
 
 import com.drypted.spotlight.client.gui.models.InputError;
-import com.drypted.spotlight.client.gui.models.InputErrorSeverity;
+import com.drypted.spotlight.client.gui.models.InputFeedbackType;
 
 public class SearchNotFoundError implements InputError
 {
@@ -12,8 +12,8 @@ public class SearchNotFoundError implements InputError
     }
 
     @Override
-    public InputErrorSeverity getSeverity()
+    public InputFeedbackType getSeverity()
     {
-        return InputErrorSeverity.WARNING;
+        return InputFeedbackType.WARNING;
     }
 }

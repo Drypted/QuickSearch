@@ -316,7 +316,7 @@ public class SpotlightScreen extends Screen
 
     private void onCommandsResultMouseClick(Command data)
     {
-        if (data.validateArgs(getArgs()).isCritical()) return;
+        if (data.validateArgs(getArgs()).haltsExecution()) return;
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) data.execute(new String[]{}, player);
@@ -331,7 +331,7 @@ public class SpotlightScreen extends Screen
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
         CommandFeedback error = CommandsHandler.execute(commandName, args, player);
-        if (error.isCritical())
+        if (error.haltsExecution())
         {
             this.inputWidget.showError(error);
             return;
@@ -339,7 +339,7 @@ public class SpotlightScreen extends Screen
 
         if (!error.getMessage().isEmpty()) //
             player.displayClientMessage(
-                    Component.literal(error.getSeverity().getName() + ":\n" + error.getMessage()) //
+                    Component.literal(error.getSeverity().getName() + ": " + error.getMessage()) //
                             .withStyle(error.getSeverity().getChatColor()), false
             );
 

@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.core.actions;
 
 import com.drypted.spotlight.client.gui.models.InputError;
-import com.drypted.spotlight.client.gui.models.InputErrorSeverity;
+import com.drypted.spotlight.client.gui.models.InputFeedbackType;
 
 public class InvalidItemError implements InputError
 {
@@ -12,8 +12,8 @@ public class InvalidItemError implements InputError
     }
 
     @Override
-    public InputErrorSeverity getSeverity()
+    public InputFeedbackType getSeverity()
     {
-        return InputErrorSeverity.ERROR;
+        return InputFeedbackType.ERROR;
     }
 }

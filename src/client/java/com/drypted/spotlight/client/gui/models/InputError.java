@@ -6,20 +6,20 @@ public interface InputError
 {
     String getMessage();
 
-    InputErrorSeverity getSeverity();
+    InputFeedbackType getSeverity();
 
     default Color getColor()
     {
         return getSeverity().getColor();
     }
 
-    default boolean isCritical()
+    default boolean haltsExecution()
     {
-        return getSeverity().isCritical();
+        return getSeverity().haltsExecution();
     }
 
     default boolean isNone()
     {
-        return getSeverity() == InputErrorSeverity.NONE;
+        return getSeverity() == InputFeedbackType.NONE;
     }
 }

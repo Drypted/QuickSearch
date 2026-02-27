@@ -1,14 +1,14 @@
 package com.drypted.spotlight.client.core.commands;
 
 import com.drypted.spotlight.client.gui.models.InputError;
-import com.drypted.spotlight.client.gui.models.InputErrorSeverity;
+import com.drypted.spotlight.client.gui.models.InputFeedbackType;
 
-public record CommandFeedback(String message, InputErrorSeverity severity) implements InputError
+public record CommandFeedback(String message, InputFeedbackType severity) implements InputError
 {
     @Override
     public boolean isNone()
     {
-        return this.severity == InputErrorSeverity.NONE || this.equals(NO_ERROR);
+        return this.severity == InputFeedbackType.NONE || this.equals(NO_ERROR);
     }
 
     /* VALIDATION ERROR IMPLEMENTATION */
@@ -20,7 +20,7 @@ public record CommandFeedback(String message, InputErrorSeverity severity) imple
     }
 
     @Override
-    public InputErrorSeverity getSeverity()
+    public InputFeedbackType getSeverity()
     {
         return severity;
     }
@@ -29,19 +29,23 @@ public record CommandFeedback(String message, InputErrorSeverity severity) imple
 
     public static CommandFeedback withInfo(String message)
     {
-        return new CommandFeedback(message, InputErrorSeverity.INFO);
+        return new CommandFeedback(message, InputFeedbackType.INFO);
     }
 
+    public static CommandFeedback withSuccess(String message)
+    {
+        return new CommandFeedback(message, InputFeedbackType.SUCCESS);
+    }
 
     public static CommandFeedback withWarning(String message)
     {
-        return new CommandFeedback(message, InputErrorSeverity.WARNING);
+        return new CommandFeedback(message, InputFeedbackType.WARNING);
     }
 
     public static CommandFeedback withError(String message)
     {
-        return new CommandFeedback(message, InputErrorSeverity.ERROR);
+        return new CommandFeedback(message, InputFeedbackType.ERROR);
     }
 
-    public static CommandFeedback NO_ERROR = new CommandFeedback("", InputErrorSeverity.NONE);
+    public static CommandFeedback NO_ERROR = new CommandFeedback("", InputFeedbackType.NONE);
 }

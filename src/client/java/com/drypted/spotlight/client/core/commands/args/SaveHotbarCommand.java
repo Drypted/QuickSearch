@@ -53,7 +53,7 @@ public class SaveHotbarCommand implements Command
         try
         {
             HotbarStorage.save(name, player.getInventory(), registryAccess);
-            return CommandFeedback.withInfo("Saved hotbar as \"" + name + "\"");
+            return CommandFeedback.withSuccess("Saved hotbar as \"" + name + "\"");
         }
         catch (IOException e)
         {

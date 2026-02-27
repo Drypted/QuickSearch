@@ -80,27 +80,15 @@ public class LoadHotbarCommand implements Command
         {
             ItemStack stack = stacks.get(i);
 
-            if (stack == null || stack.isEmpty() || stack.getItem() == Items.AIR)
+            String itemName = "";
+            if (stack != null && !stack.isEmpty() && stack.getItem() != Items.AIR)
             {
-                // Clear the slot directly
-                int hotbarSlot = InventoryMenu.USE_ROW_SLOT_START + i;
-                mc.gameMode.handleCreativeModeItemAdd(ItemStack.EMPTY, hotbarSlot);
-                player.getInventory().setItem(i, ItemStack.EMPTY);
-                player.inventoryMenu.broadcastChanges();
-                continue;
+                itemName = stack.getHoverName().getString();
             }
 
-            String itemName = stack.getItem().getName(stack).getString();
-            ReplaceHotbarItemAction.run(player, buildItemInput(stack), itemName, stack.getCount(), i);
+            ReplaceHotbarItemAction.run(player, stack, itemName, i);
         }
 
-        return CommandFeedback.withInfo("Loaded hotbar \"" + name + "\"");
-    }
-
-    private static ItemInput buildItemInput(ItemStack stack)
-    {
-        ResourceKey<Item> key = BuiltInRegistries.ITEM.getResourceKey(stack.getItem()).orElseThrow();
-        Holder<Item> holder = BuiltInRegistries.ITEM.getOrThrow(key);
-        return new ItemInput(holder, stack.getComponentsPatch());
+        return CommandFeedback.withSuccess("Loaded hotbar \"" + name + "\"");
     }
 }

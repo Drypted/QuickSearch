@@ -16,6 +16,7 @@ public final class Styles
      */
 
     private static final Color INFO_COLOR = Color.fromInt(0xFF_0084D1);
+    private static final Color SUCCESS_COLOR = Color.fromInt(0xFF_00C853);
     private static final Color WARNING_COLOR = Color.fromInt(0xFF_FFBA00);
     private static final Color ERROR_COLOR = Colors.RED;
 
@@ -56,6 +57,7 @@ public final class Styles
         public static final Color SELECTION_TEXT = Color.fromInt(0xFF_1E1E1E);
         // misc
         public static final Color INFO_COLOR = Styles.INFO_COLOR;
+        public static final Color SUCCESS_COLOR = Styles.SUCCESS_COLOR;
         public static final Color WARNING_COLOR = Styles.WARNING_COLOR;
         public static final Color ERROR_COLOR = Styles.ERROR_COLOR;
         public static final Color LOADER_COLOR = Color.fromInt(0xFF_3B82F6);

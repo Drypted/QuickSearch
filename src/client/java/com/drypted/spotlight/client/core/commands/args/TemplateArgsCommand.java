@@ -43,7 +43,7 @@ public class TemplateArgsCommand implements Command
     {
         CommandFeedback error = validateArgs(args);
 
-        if (error.isCritical())
+        if (error.haltsExecution())
         {
             return error;
         }
