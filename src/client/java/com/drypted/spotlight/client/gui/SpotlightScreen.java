@@ -74,7 +74,7 @@ public class SpotlightScreen extends Screen
                 inputWidget.getY() + SEARCH_BAR_HEIGHT - inputWidget.getOutlineThickness(),
                 inputWidget.getWidth(),
                 resultsHeight
-        ).showScrollerAlways(true).margin(2).build();
+        ).showScrollerAlways(true).build();
 
         this.inputWidget.addTextChangeListener(this::onTextChanged);
         this.inputWidget.addSubmitListener((text) -> {
@@ -255,7 +255,7 @@ public class SpotlightScreen extends Screen
 
             this.searchResultsWidget.addChildRow( //
                     ItemsResultDataWidget.builder(0, 0, result)
-                            .width(searchResultsWidget.getMaxWidth())
+                            .width(searchResultsWidget.getChildWidth())
                             .onClick((mBC, dC) -> onItemsResultClicked(result))
                             .build() //
             );
@@ -303,7 +303,7 @@ public class SpotlightScreen extends Screen
         {
             this.searchResultsWidget.addChildRow( //
                     CommandResultDataWidget.builder(0, 0, result)
-                            .width(searchResultsWidget.getMaxWidth())
+                            .width(searchResultsWidget.getChildWidth())
                             .onClick((mBC, dC) -> onCommandsResultMouseClick(result))
                             .build() //
             );

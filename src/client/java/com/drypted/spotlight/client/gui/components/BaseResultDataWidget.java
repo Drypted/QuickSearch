@@ -90,7 +90,12 @@ public abstract class BaseResultDataWidget extends AbstractWidget implements Scr
                 (this.selected && !this.isPressed()) ? selectedColor : outlineColor
         );
 
-        g.enableScissor(startPosX + paddingX, startPosY, endPosX - paddingX, endPosY);
+        g.enableScissor(
+                startPosX + paddingX + outlineThickness,
+                startPosY + outlineThickness,
+                endPosX - paddingX - outlineThickness,
+                endPosY - outlineThickness
+        );
         renderContent(g, startPosX, startPosY, endPosX, endPosY);
         g.disableScissor();
     }
