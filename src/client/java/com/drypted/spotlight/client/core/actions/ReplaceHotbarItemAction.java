@@ -9,10 +9,28 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class ReplaceHotbarItemAction extends Action
 {
-    public static void run(LocalPlayer player, ItemInput item, String name, int maxStackSize, int slotIndex)
+    public static void run(LocalPlayer player, ItemInput item, String displayName, int maxStackSize, int slotIndex)
+    {
+        ItemStack stack;
+        try
+        {
+            stack = item.createItemStack(maxStackSize, false);
+            // signature: createItemStack(int maxStackSize, boolean checkSize)
+        }
+        catch (CommandSyntaxException ignored)
+        {
+            stack = null;
+        }
+
+        ReplaceHotbarItemAction.run(player, stack, displayName, slotIndex);
+    }
+
+
+    public static void run(LocalPlayer player, ItemStack stack, String displayName, int slotIndex)
     {
         Minecraft mc = Minecraft.getInstance();
 
@@ -29,22 +47,10 @@ public class ReplaceHotbarItemAction extends Action
             return;
         }
 
-        ItemStack stack;
-        try
+        if (stack == null || stack.isEmpty() || stack.getItem() == Items.AIR)
         {
-            stack = item.createItemStack(maxStackSize, false);
-            // signature: createItemStack(int maxStackSize, boolean checkSize)
-        }
-        catch (CommandSyntaxException ignored)
-        {
-            handleError(player, ERROR.INVALID_ITEM);
-            return;
-        }
-
-        if (stack.isEmpty())
-        {
-            handleError(player, ERROR.INVALID_ITEM);
-            return;
+            // replace with empty slot
+            stack = ItemStack.EMPTY;
         }
 
         int hotbarSlot = InventoryMenu.USE_ROW_SLOT_START + slotIndex; // hotbar slots are 36-44
@@ -55,7 +61,7 @@ public class ReplaceHotbarItemAction extends Action
         player.getInventory().getItem(slotIndex).setPopTime(5); // item pickup animation
 
         if (SpotlightEntryClient.getConfig().showItemMessage)
-            player.displayClientMessage(Component.literal("Set slot " + (slotIndex + 1) + " to " + name), true);
+            player.displayClientMessage(Component.literal("Set slot " + (slotIndex + 1) + " to " + displayName), true);
 
         final float volume = 0.5f;
         final float pitch = ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f;
