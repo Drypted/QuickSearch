@@ -9,6 +9,7 @@ import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.core.search.SearchNotFoundError;
 import com.drypted.spotlight.client.gui.components.*;
+import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.models.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -29,17 +30,15 @@ import java.util.regex.Pattern;
 
 public class SpotlightScreen extends Screen
 {
-    // private static final int searchBarWidth = 200;
     private static final int SEARCH_BAR_HEIGHT = 22;
-
     private static final int DISTANCE_FROM_CENTER = 20;
-    // private static final int resultsHeight = 100;
-
     private static final int HOTBAR_SLOTS = 9;
 
     private InputWidget inputWidget;
     private ScrollBoxWidget searchResultsWidget;
     private @Nullable HotbarCollectionWidget hotbarCollectionWidget;
+    /// What item to give user on input submit
+    private @Nullable ItemsResultData submitItemResult;
 
     private final boolean showCommandOnStartup;
 
@@ -80,11 +79,11 @@ public class SpotlightScreen extends Screen
         this.inputWidget.addSubmitListener((text) -> {
             if (isUserInputCommand())
             {
-                onEnterPressedCommand(text);
+                onSubmitCommand(text);
             }
             else
             {
-                onEnterPressedItem();
+                onSubmitItem();
             }
         });
 
@@ -222,6 +221,8 @@ public class SpotlightScreen extends Screen
             return;
         }
 
+        submitItemResult = results.getFirst();
+
         inputWidget.clearError();
 
         // Set suggestion to first result if user is still typing the command name
@@ -254,7 +255,7 @@ public class SpotlightScreen extends Screen
             }
 
             this.searchResultsWidget.addChildRow( //
-                    ItemsResultDataWidget.builder(0, 0, result)
+                    ResultDataWidget.builder(0, 0, result.getIcon(), result.getName(), result.getSerializedDefinition())
                             .width(searchResultsWidget.getChildWidth())
                             .onClick((mBC, dC) -> onItemsResultClicked(result))
                             .build() //
@@ -302,8 +303,10 @@ public class SpotlightScreen extends Screen
         for (Command result : results)
         {
             this.searchResultsWidget.addChildRow( //
-                    CommandResultDataWidget.builder(0, 0, result)
+                    ResultDataWidget.builder(0, 0, null, result.getName(), result.getDescription())
                             .width(searchResultsWidget.getChildWidth())
+                            .disabled(true)
+                            .paddingX(10)
                             .onClick((mBC, dC) -> onCommandsResultMouseClick(result))
                             .build() //
             );
@@ -322,7 +325,7 @@ public class SpotlightScreen extends Screen
         if (player != null) data.execute(new String[]{}, player);
     }
 
-    private void onEnterPressedCommand(String text)
+    private void onSubmitCommand(String text)
     {
         String commandName = text.split(" ")[0].substring(1); // Remove leading "/"
 
@@ -346,23 +349,21 @@ public class SpotlightScreen extends Screen
         this.onClose();
     }
 
-    private void onEnterPressedItem()
+    private void onSubmitItem()
     {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
 
         boolean invalidItem = false;
 
-        // get first item on search result
-        if (this.searchResultsWidget.getChildByIndex(0) instanceof ItemsResultDataWidget widget)
+        if (this.submitItemResult != null)
         {
-            Actions.giveItem(player, widget.getData());
+            Actions.giveItem(player, this.submitItemResult);
         }
         else
         {
             invalidItem = true;
         }
-
 
         if (invalidItem)
         {
@@ -436,6 +437,9 @@ public class SpotlightScreen extends Screen
     {
         setHotbarWidgetVisible(visible);
         setVisible(this.searchResultsWidget, visible);
+
+        if (visible) this.inputWidget.setRounded(RoundedCorners.fromVerticalSides(true, false));
+        else this.inputWidget.setRounded(RoundedCorners.all());
     }
 
     private void setHotbarWidgetVisible(boolean visible)
@@ -452,6 +456,7 @@ public class SpotlightScreen extends Screen
         this.inputWidget.clearError();
         this.inputWidget.clearSuggestion();
         this.searchResultsWidget.removeAllChildren();
+        this.submitItemResult = null;
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
             this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
     }

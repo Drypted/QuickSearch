@@ -24,6 +24,8 @@ public class ScrollBoxWidget extends AbstractWidget
 {
     private static final int SCROLLBAR_WIDTH = 6;
 
+    private RoundedCorners rounded;
+
     private final List<WidgetEntry> children = new ArrayList<>();
     private final int margin;
     private final int spacing;
@@ -42,12 +44,13 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private Consumer<Boolean> onFocus;
 
-    public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, int outlineThickness, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
+    public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, int outlineThickness, RoundedCorners rounded, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
     {
         super(x, y, width, height, Component.empty());
         this.margin = margin;
         this.outlineThickness = outlineThickness;
         this.showScrollerAlways = showScrollerAlways;
+        this.rounded = rounded;
         this.bgColor = bgColor;
         this.spacing = spacing;
         this.outlineColor = outlineColor;
@@ -321,18 +324,7 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private void drawBackground(GuiGraphics g, int x1, int y1, int x2, int y2)
     {
-        RenderUtils.drawRectangle(
-                g,
-                x1,
-                y1,
-                x2,
-                y2,
-                RoundedCorners.none(),
-                outlineThickness,
-                true,
-                bgColor,
-                outlineColor
-        );
+        RenderUtils.drawRectangle(g, x1, y1, x2, y2, rounded, outlineThickness, true, bgColor, outlineColor);
     }
 
     private void drawChildren(GuiGraphics g, int mouseX, int mouseY, float delta, int x1, int y1, int x2, int y2)
@@ -377,7 +369,13 @@ public class ScrollBoxWidget extends AbstractWidget
         // scroller
         g.fill(x, y, x + SCROLLBAR_WIDTH, y + h, scrollerColor.asInt());
         // line
-        g.fill(x, getY() + outlineThickness, x + outlineThickness, getBottom() - outlineThickness, outlineColor.asInt());
+        g.fill(
+                x,
+                getY() + outlineThickness,
+                x + outlineThickness,
+                getBottom() - outlineThickness,
+                outlineColor.asInt()
+        );
 
         // unsupported cursor change
         // if (isOverScrollbar(mouseX, mouseY))
@@ -557,6 +555,7 @@ public class ScrollBoxWidget extends AbstractWidget
         private int margin = 3;
         private int spacing = margin; // by default, spacing = margin
         private int outlineThickness = Styles.ScrollBox.OUTLINE_THICKNESS;
+        private RoundedCorners rounded = RoundedCorners.fromVerticalSides(false, true);
         private boolean showScrollerAlways = false;
 
         private Color bgColor = Styles.ScrollBox.BACKGROUND_COLOR;
@@ -587,6 +586,13 @@ public class ScrollBoxWidget extends AbstractWidget
         public Builder outlineThickness(int outlineThickness)
         {
             this.outlineThickness = outlineThickness;
+            return this;
+        }
+
+
+        public Builder rounded(RoundedCorners rounded)
+        {
+            this.rounded = rounded;
             return this;
         }
 
@@ -630,6 +636,7 @@ public class ScrollBoxWidget extends AbstractWidget
                     margin,
                     spacing,
                     outlineThickness,
+                    rounded,
                     showScrollerAlways,
                     bgColor,
                     outlineColor,

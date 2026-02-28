@@ -36,7 +36,6 @@ public class InputWidget extends AbstractWidget
     private static final int ERROR_TOOLTIP_SPACING = 2;
 
     // Visual configuration
-    private final boolean isRounded;
     private final int outlineThickness;
     private final Color backgroundColor;
     private final Color outlineColor;
@@ -46,6 +45,8 @@ public class InputWidget extends AbstractWidget
     private final Color selectionBackgroundColor;
     private final Color selectionTextColor;
     private final Color placeholderColor;
+
+    private RoundedCorners rounded;
 
     // Text state
     private String text = "";
@@ -81,10 +82,10 @@ public class InputWidget extends AbstractWidget
 
     private final Color LoaderColor = Styles.Input.LOADER_COLOR;
 
-    public InputWidget(int x, int y, int width, int height, boolean isRounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor)
+    public InputWidget(int x, int y, int width, int height, RoundedCorners rounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor)
     {
         super(x, y, width, height, Component.empty());
-        this.isRounded = isRounded;
+        this.rounded = rounded;
         this.outlineThickness = outlineThickness;
         this.backgroundColor = backgroundColor;
         this.outlineColor = outlineColor;
@@ -111,7 +112,7 @@ public class InputWidget extends AbstractWidget
                 this.getY(),
                 this.getX() + this.getWidth(),
                 this.getY() + this.getHeight(),
-                RoundedCorners.fromSingle(this.isRounded),
+                this.rounded,
                 this.outlineThickness,
                 true,
                 this.backgroundColor,
@@ -1060,6 +1061,16 @@ public class InputWidget extends AbstractWidget
         return outlineThickness;
     }
 
+    public RoundedCorners getRounded()
+    {
+        return rounded;
+    }
+
+    public void setRounded(RoundedCorners rounded)
+    {
+        this.rounded = rounded;
+    }
+
     /* ERROR */
 
     public Predicate<String> getValidator()
@@ -1152,7 +1163,7 @@ public class InputWidget extends AbstractWidget
         private final int y;
         private final int width;
         private int height;
-        private boolean isRounded = false;
+        private RoundedCorners rounded = RoundedCorners.all();
         private int outlineThickness = Styles.Input.OUTLINE_THICKNESS;
         private Color backgroundColor = Styles.Input.BACKGROUND_COLOR;
         private Color outlineColor = Styles.Input.OUTLINE_COLOR;
@@ -1180,9 +1191,9 @@ public class InputWidget extends AbstractWidget
             return this;
         }
 
-        public Builder isRounded(boolean isRounded)
+        public Builder rounded(RoundedCorners rounded)
         {
-            this.isRounded = isRounded;
+            this.rounded = rounded;
             return this;
         }
 
@@ -1265,7 +1276,7 @@ public class InputWidget extends AbstractWidget
                     y,
                     width,
                     height,
-                    isRounded,
+                    rounded,
                     outlineThickness,
                     backgroundColor,
                     outlineColor,

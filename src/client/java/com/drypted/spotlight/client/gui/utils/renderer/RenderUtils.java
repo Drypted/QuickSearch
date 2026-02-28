@@ -32,7 +32,7 @@ public final class RenderUtils
         insetThickness = Math.max(0, insetThickness);
 
         // Main body
-        if (!renderOutline || insetThickness == 0)
+        if (insetThickness == 0)
         {
             g.fill(startPosX, startPosY, endPosX, endPosY, backgroundColor.asInt());
             return;
@@ -46,13 +46,15 @@ public final class RenderUtils
                 backgroundColor.asInt()
         );
 
+        Color outerLineColor = renderOutline ? outlineColor : backgroundColor;
+
         // LEFT
         g.fill(
                 startPosX,
                 startPosY + (corners.topLeft() ? insetThickness : 0),
                 startPosX + insetThickness,
                 endPosY - (corners.bottomLeft() ? insetThickness : 0),
-                outlineColor.asInt()
+                outerLineColor.asInt()
         );
 
         // RIGHT
@@ -61,7 +63,7 @@ public final class RenderUtils
                 startPosY + (corners.topRight() ? insetThickness : 0),
                 endPosX,
                 endPosY - (corners.bottomRight() ? insetThickness : 0),
-                outlineColor.asInt()
+                outerLineColor.asInt()
         );
 
         // TOP
@@ -70,7 +72,7 @@ public final class RenderUtils
                 startPosY,
                 endPosX - (corners.topRight() ? insetThickness : 0),
                 startPosY + insetThickness,
-                outlineColor.asInt()
+                outerLineColor.asInt()
         );
 
         // BOTTOM
@@ -79,12 +81,11 @@ public final class RenderUtils
                 endPosY - insetThickness,
                 endPosX - (corners.bottomRight() ? insetThickness : 0),
                 endPosY,
-                outlineColor.asInt()
+                outerLineColor.asInt()
         );
 
         // Corner pixels for rounded
-
-        if (corners.topLeft())
+        if (corners.topLeft() && renderOutline)
         {
             g.fill(
                     startPosX + insetThickness,
@@ -95,7 +96,7 @@ public final class RenderUtils
             );
         }
 
-        if (corners.topRight())
+        if (corners.topRight() && renderOutline)
         {
             g.fill(
                     endPosX - (2 * insetThickness),
@@ -106,7 +107,7 @@ public final class RenderUtils
             );
         }
 
-        if (corners.bottomLeft())
+        if (corners.bottomLeft() && renderOutline)
         {
             g.fill(
                     startPosX + insetThickness,
@@ -117,7 +118,7 @@ public final class RenderUtils
             );
         }
 
-        if (corners.bottomRight())
+        if (corners.bottomRight() && renderOutline)
         {
             g.fill(
                     endPosX - (2 * insetThickness),
