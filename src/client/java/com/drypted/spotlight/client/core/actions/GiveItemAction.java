@@ -77,8 +77,12 @@ public class GiveItemAction extends Action
         gameMode.handleCreativeModeItemAdd(stack, containerSlot);
 
         // update client
-        player.getInventory().add(stack);
-        player.inventoryMenu.broadcastChanges();
+        if (containerSlot != -1) // -1 drops item
+        {
+            player.getInventory().setItem(invSlot, stack);
+            if (invSlot < 9) // show animation if item in hotbar only
+                player.getInventory().getItem(invSlot).setPopTime(5); // item pickup animation
+        }
 
         // Feedback
         if (SpotlightEntryClient.getConfig().showItemMessage)
