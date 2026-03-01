@@ -1,19 +1,19 @@
 package com.drypted.spotlight.client.core.commands.args;
 
-import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.ArgumentedCommand;
 import com.drypted.spotlight.client.core.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.commands.argument.types.WordArgumentType;
 import com.drypted.spotlight.client.core.storage.HotbarStorage;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.RegistryAccess;
 
 import java.io.IOException;
 
-public class SaveHotbarCommand implements Command
+public class SaveHotbarCommand extends ArgumentedCommand
 {
-    @Override
-    public boolean requiresArgs()
+    public SaveHotbarCommand()
     {
-        return true;
+        super(new WordArgumentType("<name>"));
     }
 
     @Override
@@ -28,18 +28,6 @@ public class SaveHotbarCommand implements Command
         return "Save the current hotbar combination";
     }
 
-    @Override
-    public CommandFeedback validateArgs(String[] args)
-    {
-        if (args.length != 1) return CommandFeedback.withError("Please input only one argument");
-
-        if (!args[0].matches("^[a-zA-Z]+$"))
-        {
-            return CommandFeedback.withError("Please input only alphabets");
-        }
-
-        return CommandFeedback.NO_ERROR;
-    }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)

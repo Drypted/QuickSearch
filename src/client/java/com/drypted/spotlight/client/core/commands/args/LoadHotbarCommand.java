@@ -1,30 +1,24 @@
 package com.drypted.spotlight.client.core.commands.args;
 
 import com.drypted.spotlight.client.core.actions.ReplaceHotbarItemAction;
-import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.ArgumentedCommand;
 import com.drypted.spotlight.client.core.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.commands.argument.types.SavedHotbarArgumentType;
 import com.drypted.spotlight.client.core.storage.HotbarStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.commands.arguments.item.ItemInput;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.io.IOException;
 import java.util.List;
 
-public class LoadHotbarCommand implements Command
+public class LoadHotbarCommand extends ArgumentedCommand
 {
-    @Override
-    public boolean requiresArgs()
+    public LoadHotbarCommand()
     {
-        return true;
+        super(new SavedHotbarArgumentType());
     }
 
     @Override
@@ -39,18 +33,6 @@ public class LoadHotbarCommand implements Command
         return "Load a saved hotbar combination";
     }
 
-    @Override
-    public CommandFeedback validateArgs(String[] args)
-    {
-        if (args.length != 1) return CommandFeedback.withError("Please input only one argument");
-
-        if (!args[0].matches("^[a-zA-Z]+$"))
-        {
-            return CommandFeedback.withError("Please input only alphabets");
-        }
-
-        return CommandFeedback.NO_ERROR;
-    }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)

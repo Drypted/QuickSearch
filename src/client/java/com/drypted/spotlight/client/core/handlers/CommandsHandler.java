@@ -5,6 +5,8 @@ import com.drypted.spotlight.client.core.commands.CommandFeedback;
 import com.drypted.spotlight.client.core.commands.args.GetPlayerHeadCommand;
 import com.drypted.spotlight.client.core.commands.args.LoadHotbarCommand;
 import com.drypted.spotlight.client.core.commands.args.SaveHotbarCommand;
+import com.drypted.spotlight.client.core.commands.args.TemplateArgsCommand;
+import com.drypted.spotlight.client.core.commands.no_args.TemplateNoArgsCommand;
 import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +38,9 @@ public class CommandsHandler
         register(new GetPlayerHeadCommand());
         register(new SaveHotbarCommand());
         register(new LoadHotbarCommand());
+        register(new TemplateArgsCommand());
         // no args
+        register(new TemplateNoArgsCommand());
 
         rebuildCommandIndex();
     }
@@ -88,5 +92,19 @@ public class CommandsHandler
         }
 
         return CommandFeedback.withError("Please enter a valid command name!");
+    }
+
+    /**
+     * Returns argument suggestions for the currently active command based on what the user has typed.
+     *
+     * @param commandName The command name (without leading "/")
+     * @param args        The arguments typed so far
+     * @return A list of suggestion strings for the current argument slot, or empty list
+     */
+    public static List<String> getArgSuggestions(String commandName, String[] args)
+    {
+        Command cmd = REGISTRY.get(commandName.toLowerCase());
+        if (cmd == null) return List.of();
+        return cmd.getSuggestions(args);
     }
 }

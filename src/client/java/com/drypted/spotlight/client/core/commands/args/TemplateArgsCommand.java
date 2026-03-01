@@ -1,16 +1,17 @@
 package com.drypted.spotlight.client.core.commands.args;
 
-import com.drypted.spotlight.client.core.commands.Command;
+import com.drypted.spotlight.client.core.commands.ArgumentedCommand;
 import com.drypted.spotlight.client.core.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.commands.argument.types.StringArgumentType;
+import com.drypted.spotlight.client.core.commands.argument.types.WordArgumentType;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
-public class TemplateArgsCommand implements Command
+public class TemplateArgsCommand extends ArgumentedCommand
 {
-    @Override
-    public boolean requiresArgs()
+    public TemplateArgsCommand()
     {
-        return true;
+        super(new WordArgumentType("<word>"), new StringArgumentType("<sentence>"));
     }
 
     @Override
@@ -23,19 +24,6 @@ public class TemplateArgsCommand implements Command
     public String getDescription()
     {
         return "Test With Args commands.";
-    }
-
-    @Override
-    public CommandFeedback validateArgs(String[] args)
-    {
-        if (args.length != 1) return CommandFeedback.withError("Please input only one argument");
-
-        if (!args[0].matches("^[a-zA-Z]+$"))
-        {
-            return CommandFeedback.withError("Please input only alphabets");
-        }
-
-        return CommandFeedback.NO_ERROR;
     }
 
     @Override

@@ -32,8 +32,8 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private static final float SUBTITLE_SCALE = 0.75f;
 
     private final @Nullable ItemStack icon;
-    private final String title;
-    private final String subtitle;
+    private final @Nullable String title;
+    private final @Nullable String subtitle;
 
     private final int paddingX;
     private final int paddingY;
@@ -54,7 +54,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    private ResultDataWidget(int x, int y, @Nullable ItemStack icon, String title, String subtitle, int width, int paddingX, int paddingY, boolean isRounded, float outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
+    private ResultDataWidget(int x, int y, @Nullable ItemStack icon, @Nullable String title, @Nullable String subtitle, int width, int paddingX, int paddingY, boolean isRounded, float outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
     {
         super(x, y, width, 0, Component.empty());
         this.icon = icon;
@@ -71,9 +71,17 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         this.selectedColor = selectedColor;
         this.outlineColor = outlineColor;
 
+        //        this.setHeight((2 * paddingY) + Math.max(
+        //                ICON_PADDING,
+        //                getFont().lineHeight + SUBTITLE_SPACING + (int) (getFont().lineHeight * SUBTITLE_SCALE)
+        //        ));
+        boolean shouldRenderIcon = this.icon != null && !this.icon.isEmpty() && this.icon.getItem() != Items.AIR;
+        boolean shouldRenderTitle = this.title != null && !this.title.isEmpty();
+        boolean shouldRenderSubtitle = this.subtitle != null && !this.subtitle.isEmpty();
         this.setHeight((2 * paddingY) + Math.max(
-                ICON_PADDING,
-                getFont().lineHeight + SUBTITLE_SPACING + (int) (getFont().lineHeight * SUBTITLE_SCALE)
+                shouldRenderIcon ? ICON_SIZE : 0, //
+                (shouldRenderTitle ? getFont().lineHeight : 0) + //
+                        (shouldRenderSubtitle ? SUBTITLE_SPACING + (int) (getFont().lineHeight * SUBTITLE_SCALE) : 0)
         ));
     }
 
@@ -132,16 +140,22 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         // title
         int titleX = iconX + (shouldRenderIcon ? (ICON_SIZE + ICON_PADDING) : 0);
         int titleY = startPosY + paddingY;
-
         Color _textColor = this.isDisabled() ? textColor.withLightness(textColor.getLightness() / 2) : textColor;
 
-        g.drawString(getFont(), this.title, titleX, titleY, _textColor.asInt(), false);
+        boolean shouldRenderTitle = this.title != null && !this.title.isEmpty();
+        if (shouldRenderTitle) g.drawString(getFont(), this.title, titleX, titleY, _textColor.asInt(), false);
 
         // subtitle
-        int subtitleY = titleY + getFont().lineHeight + SUBTITLE_SPACING;
-        float subtitleScale = 0.75f;
+        boolean shouldRenderSubtitle = this.subtitle != null && !this.subtitle.isEmpty();
 
-        RenderUtils.drawScaledText(g, this.subtitle, subtitleScale, titleX, subtitleY, _textColor, false);
+        if (shouldRenderSubtitle)
+        {
+            int subtitleY = startPosY + paddingY;
+            // add spacing if title is also rendered
+            if (shouldRenderTitle) subtitleY += getFont().lineHeight + SUBTITLE_SPACING;
+
+            RenderUtils.drawScaledText(g, this.subtitle, SUBTITLE_SCALE, titleX, subtitleY, _textColor, false);
+        }
 
         // show bind, will be used to quick nav; disabled for now
         // if (this.shouldShowBind())
@@ -323,7 +337,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
 
     /* BUILDER */
 
-    public static Builder builder(int x, int y, @Nullable ItemStack icon, String title, String subtitle)
+    public static Builder builder(int x, int y, @Nullable ItemStack icon, @Nullable String title, @Nullable String subtitle)
     {
         return new Builder(x, y, icon, title, subtitle);
     }
@@ -333,8 +347,8 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         private final int x;
         private final int y;
         private final @Nullable ItemStack icon;
-        private final String title;
-        private final String subtitle;
+        private final @Nullable String title;
+        private final @Nullable String subtitle;
 
         private int width = 0;
         private int paddingX = 7;
@@ -355,7 +369,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         private BiConsumer<MouseButtonClick, Boolean> onClick = (e, p) -> {
         };
 
-        private Builder(int x, int y, @Nullable ItemStack icon, String title, String subtitle)
+        private Builder(int x, int y, @Nullable ItemStack icon, @Nullable String title, @Nullable String subtitle)
         {
             this.x = x;
             this.y = y;

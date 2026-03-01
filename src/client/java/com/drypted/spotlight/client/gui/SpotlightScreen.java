@@ -129,14 +129,28 @@ public class SpotlightScreen extends Screen
         // Delegate logic to appropriate handler
         if (text.startsWith("/"))
         {
-            CommandsHandler.getCommands(text, this::displayCommands);
+            String afterSlash = text.substring(1);
+            String commandName = afterSlash.split("\\s+")[0];
+            boolean hasSpaceAfterCommand = afterSlash.length() > commandName.length();
 
-            // validate command
-            String commandName = text.substring(1).split("\\s+")[0];
             Command command = CommandsHandler.getRawCommand(commandName);
-            if (command != null)
+
+            if (command != null && hasSpaceAfterCommand)
             {
-                inputWidget.showError(command.validateArgs(getArgs()));
+                // User has typed a valid command name + space → show argument suggestions
+                String[] args = getArgs();
+                displayArgSuggestions(command, args);
+                inputWidget.showError(command.validateArgs(args));
+            }
+            else
+            {
+                // Still typing the command name → show command list
+                CommandsHandler.getCommands(text, this::displayCommands);
+
+                if (command != null)
+                {
+                    inputWidget.showError(command.validateArgs(getArgs()));
+                }
             }
         }
         else
@@ -315,6 +329,89 @@ public class SpotlightScreen extends Screen
         setItemResultsVisible(true);
         setHotbarWidgetVisible(false);
         inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
+    }
+
+    /**
+     * Display argument suggestions for a recognized command.
+     * Shows suggestions in the dropdown and sets the top suggestion as ghost text.
+     */
+    private void displayArgSuggestions(Command command, String[] args)
+    {
+        clearResults();
+
+        // always show usage hint at top
+        this.searchResultsWidget.addChildRow(
+                ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
+                        .width(searchResultsWidget.getChildWidth())
+                        .disabled(true)
+                        .paddingX(10)
+                        .build()
+        );
+
+        List<String> suggestions = command.getSuggestions(args);
+
+        if (suggestions.isEmpty())
+        {
+            setItemResultsVisible(true);
+            setHotbarWidgetVisible(false);
+            inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
+            return;
+        }
+
+        // Set ghost-text suggestion: build the full input text with the top suggestion completing the current arg
+        String currentText = inputWidget.getText();
+        String currentPartial = args.length > 0 ? args[args.length - 1] : "";
+        if (!suggestions.isEmpty())
+        {
+            String topSuggestion = suggestions.getFirst();
+            if (topSuggestion.toLowerCase().startsWith(currentPartial.toLowerCase()))
+            {
+                // Build the full suggestion: current text up to the partial, then the full suggestion
+                String prefix = currentText.substring(0, currentText.length() - currentPartial.length());
+                inputWidget.setSuggestion(prefix + topSuggestion);
+            }
+        }
+
+        // Populate the dropdown with all suggestions
+        for (final String suggestion : suggestions)
+        {
+            this.searchResultsWidget.addChildRow(
+                    ResultDataWidget.builder(0, 0, null, null, suggestion)
+                            .width(searchResultsWidget.getChildWidth())
+                            .paddingX(10)
+                            .onClick((mBC, dC) -> onArgSuggestionClicked(suggestion))
+                            .build()
+            );
+        }
+
+        setItemResultsVisible(true);
+        setHotbarWidgetVisible(false);
+        inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
+    }
+
+    /**
+     * Called when user clicks an argument suggestion in the dropdown.
+     * Replaces the current partial argument with the selected suggestion.
+     */
+    private void onArgSuggestionClicked(String suggestion)
+    {
+        String currentText = inputWidget.getText();
+        String[] args = getArgs();
+        String currentPartial = args.length > 0 ? args[args.length - 1] : "";
+
+        // Replace the current partial with the full suggestion
+        String newText;
+        if (!currentPartial.isEmpty())
+        {
+            newText = currentText.substring(0, currentText.length() - currentPartial.length()) + suggestion;
+        }
+        else
+        {
+            // No partial yet — append suggestion after the trailing space
+            newText = currentText + suggestion;
+        }
+
+        inputWidget.setText(newText);
     }
 
     private void onCommandsResultMouseClick(Command data)
