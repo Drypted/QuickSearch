@@ -18,8 +18,8 @@ public interface InputError
         return getSeverity().haltsExecution();
     }
 
-    default boolean isNone()
+    default boolean isNotNone()
     {
-        return getSeverity() == InputFeedbackType.NONE;
+        return getSeverity() != InputFeedbackType.NONE;
     }
 }

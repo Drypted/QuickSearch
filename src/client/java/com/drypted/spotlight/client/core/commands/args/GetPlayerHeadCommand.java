@@ -37,7 +37,7 @@ public class GetPlayerHeadCommand extends ArgumentedCommand
     {
         CommandFeedback argsError = validateArgs(args);
         if (argsError.haltsExecution()) return argsError;
-        else if (!argsError.isNone()) player.displayClientMessage(
+        else if (argsError.isNotNone()) player.displayClientMessage(
                 Component.literal(argsError.getSeverity().getName() + ": " + argsError.getMessage()) //
                         .withStyle(ChatFormatting.GOLD), false
         );

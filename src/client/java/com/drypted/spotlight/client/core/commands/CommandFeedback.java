@@ -6,9 +6,9 @@ import com.drypted.spotlight.client.gui.models.InputFeedbackType;
 public record CommandFeedback(String message, InputFeedbackType severity) implements InputError
 {
     @Override
-    public boolean isNone()
+    public boolean isNotNone()
     {
-        return this.severity == InputFeedbackType.NONE || this.equals(NO_ERROR);
+        return this.severity != InputFeedbackType.NONE && !this.equals(NO_ERROR);
     }
 
     /* VALIDATION ERROR IMPLEMENTATION */

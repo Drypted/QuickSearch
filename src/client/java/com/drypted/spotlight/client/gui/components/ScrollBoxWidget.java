@@ -247,7 +247,7 @@ public class ScrollBoxWidget extends AbstractWidget
     {
         this.scrolling = false;
 
-        for (WidgetEntry entry : children)
+        for (WidgetEntry entry : new ArrayList<>(children))
         {
             entry.widget.mouseReleased(mEv);
         }

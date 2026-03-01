@@ -33,7 +33,7 @@ public class SaveHotbarCommand extends ArgumentedCommand
     public CommandFeedback execute(String[] args, LocalPlayer player)
     {
         CommandFeedback argsError = validateArgs(args);
-        if (!argsError.isNone()) return argsError;
+        if (argsError.isNotNone()) return argsError;
 
         String name = args[0].toLowerCase();
         RegistryAccess registryAccess = player.level().registryAccess();

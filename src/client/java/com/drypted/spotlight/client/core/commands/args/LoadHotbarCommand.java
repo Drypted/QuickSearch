@@ -38,7 +38,7 @@ public class LoadHotbarCommand extends ArgumentedCommand
     public CommandFeedback execute(String[] args, LocalPlayer player)
     {
         CommandFeedback argsError = validateArgs(args);
-        if (!argsError.isNone()) return argsError;
+        if (argsError.isNotNone()) return argsError;
 
         String name = args[0].toLowerCase();
         HolderLookup.Provider provider = player.level().registryAccess();

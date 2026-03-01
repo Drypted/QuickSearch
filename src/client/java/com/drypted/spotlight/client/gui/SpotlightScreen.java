@@ -344,7 +344,6 @@ public class SpotlightScreen extends Screen
                 ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
                         .width(searchResultsWidget.getChildWidth())
                         .disabled(true)
-                        .paddingX(10)
                         .build()
         );
 
@@ -378,7 +377,8 @@ public class SpotlightScreen extends Screen
             this.searchResultsWidget.addChildRow(
                     ResultDataWidget.builder(0, 0, null, null, suggestion)
                             .width(searchResultsWidget.getChildWidth())
-                            .paddingX(10)
+                            .paddingX(7)
+                            .paddingY(4)
                             .onClick((mBC, dC) -> onArgSuggestionClicked(suggestion))
                             .build()
             );
