@@ -649,6 +649,68 @@ public class Color
         return p;
     }
 
+    /* TEXT */
+
+    /**
+     * Returns either black or white text depending on which provides better contrast against this color.
+     *
+     * @param minContrast minimum WCAG contrast ratio (e.g. 4.5 for normal text, 3.0 for disabled/large text, 7.0 for
+     *                    high contrast)
+     *
+     * @return a new Color instance (black or white)
+     */
+    public Color getReadableTextColor(float minContrast)
+    {
+        Color black = new Color(0, 0, 0, 255);
+        Color white = new Color(255, 255, 255, 255);
+
+        float contrastWithBlack = contrastRatio(this, black);
+        float contrastWithWhite = contrastRatio(this, white);
+
+        boolean blackValid = contrastWithBlack >= minContrast;
+        boolean whiteValid = contrastWithWhite >= minContrast;
+
+        if (blackValid && !whiteValid) return black;
+        if (whiteValid && !blackValid) return white;
+
+        // If both valid or both invalid, return higher contrast
+        return contrastWithBlack > contrastWithWhite ? black : white;
+    }
+
+    /**
+     * Computes WCAG contrast ratio between two colors. Formula: (L1 + 0.05) / (L2 + 0.05)
+     */
+    private static float contrastRatio(Color c1, Color c2)
+    {
+        float l1 = relativeLuminance(c1);
+        float l2 = relativeLuminance(c2);
+
+        float lighter = Math.max(l1, l2);
+        float darker = Math.min(l1, l2);
+
+        return (lighter + 0.05f) / (darker + 0.05f);
+    }
+
+    /**
+     * Computes WCAG relative luminance using sRGB gamma correction.
+     */
+    private static float relativeLuminance(Color c)
+    {
+        float r = linearize(c.getRed() / 255f);
+        float g = linearize(c.getGreen() / 255f);
+        float b = linearize(c.getBlue() / 255f);
+
+        return 0.2126f * r + 0.7152f * g + 0.0722f * b;
+    }
+
+    /**
+     * Converts sRGB to linear RGB.
+     */
+    private static float linearize(float channel)
+    {
+        return channel <= 0.04045f ? channel / 12.92f : (float) Math.pow((channel + 0.055f) / 1.055f, 2.4f);
+    }
+
 
     /* OBJECT METHODS */
 

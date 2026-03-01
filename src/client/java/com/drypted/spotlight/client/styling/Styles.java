@@ -5,24 +5,24 @@ import com.drypted.spotlight.client.gui.utils.Colors;
 
 public final class Styles
 {
-    private static final Color PRIMARY_COLOR = Color.fromInt(0xFF_1C90FF);
-    private static final Color SECONDARY_COLOR = Color.fromInt(0xFF_007CF5);
-    private static final Color TERTIARY_COLOR = Color.fromInt(0xFF_006ACE);
+    private static final Color PRIMARY_COLOR = Color.fromInt(0xFF_0D1B2A);
+    //    private static final Color SECONDARY_COLOR = Color.fromInt(0xFF_007CF5);
+    //    private static final Color TERTIARY_COLOR = Color.fromInt(0xFF_006ACE);
+    //    private static final Color QUATERNARY_COLOR = Color.fromInt(0xFF_6CB6FE);
 
-    private static final Color QUATERNARY_COLOR = Color.fromInt(0xFF_6CB6FE);
-
-    /**
-     * #0D1B2A ink black #0D0221 midnight violet #150578 navy #0E0E52 deep twilight #ED1C24 racing red
-     */
+    private static final Color SECONDARY_COLOR = PRIMARY_COLOR.brighten(0.275f).saturate(0.4f);
+    private static final Color TERTIARY_COLOR = SECONDARY_COLOR.brighten(0.15f).saturate(0.4f);
+    private static final Color QUATERNARY_COLOR = TERTIARY_COLOR.brighten(0.075f).saturate(0.4f);
 
     private static final Color INFO_COLOR = Color.fromInt(0xFF_0084D1);
     private static final Color SUCCESS_COLOR = Color.fromInt(0xFF_00C853);
     private static final Color WARNING_COLOR = Color.fromInt(0xFF_FFBA00);
     private static final Color ERROR_COLOR = Colors.RED;
 
-    private static final Color BACKGROUND = Color.fromInt(0xAA_0D1B2A);
-    private static final Color OUTLINE = Color.fromInt(0xFF_0D1B2A);
-    private static final Color TEXT = Color.fromInt(0xFF_FFFFFF);
+    private static final Color BACKGROUND = PRIMARY_COLOR.withOpacity(128);
+    private static final Color OUTLINE = PRIMARY_COLOR;
+    private static final Color TEXT = PRIMARY_COLOR.getReadableTextColor(4.5f);
+    private static final Color DISABLED_TEXT = PRIMARY_COLOR.getReadableTextColor(3.0f).withHalfOpacity();
 
     public static final float THICK = 1.5f;
     public static final float THIN = 1.f;
@@ -53,8 +53,8 @@ public final class Styles
         // text
         public static final Color CARET_COLOR = Styles.TEXT;
         public static final Color TEXT_COLOR = Styles.TEXT;
-        public static final Color DISABLED_TEXT = Colors.GRAY;
-        public static final Color PLACEHOLDER_TEXT = Colors.GRAY;
+        public static final Color DISABLED_TEXT = Styles.DISABLED_TEXT;
+        public static final Color PLACEHOLDER_TEXT = Styles.DISABLED_TEXT;
         // selection
         public static final Color SELECTION_BACKGROUND = Color.fromInt(0xFF_93C5FD);
         public static final Color SELECTION_TEXT = Color.fromInt(0xFF_1E1E1E);
@@ -73,7 +73,7 @@ public final class Styles
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND.withOpacity(128);
         public static final Color TEXT_COLOR = Styles.TEXT;
         // indicators
-        public static final Color SELECTED_OUTLINE_COLOR = Styles.PRIMARY_COLOR;
+        public static final Color SELECTED_OUTLINE_COLOR = Styles.TERTIARY_COLOR;
         public static final Color CLICKED_OUTLINE_COLOR = Styles.SECONDARY_COLOR;
         public static final Color HOVER_OUTLINE_COLOR = Styles.QUATERNARY_COLOR;
     }
