@@ -65,15 +65,11 @@ public class HotbarCollectionWidget extends AbstractWidget
         {
             final HotbarSlotWidget hotbarWidget = HotbarSlotWidget.builder(
                     i, //
-                    (int) Math.ceil(cursor),
-                    startY,
-                    (int) Math.ceil(iconSize),
-                    (int) Math.ceil(iconSize)
+                    (int) Math.ceil(cursor), startY, (int) Math.ceil(iconSize), (int) Math.ceil(iconSize)
             ).build();
             hotbarWidget.onClick(mouseButtonClick -> {
                 ItemsResultData item = hotbarWidget.getSearchResultData();
-                if (item == null || item.isEmpty())
-                    return;
+                if (item == null) return;
 
                 onHotbarKeyPressed(hotbarWidget, 0);
             });
@@ -98,12 +94,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     @Override
     protected void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        hotbarSlotWidgets.forEach(widget -> widget.render(
-                guiGraphics,
-                mouseX,
-                mouseY,
-                partialTick
-        ));
+        hotbarSlotWidgets.forEach(widget -> widget.render(guiGraphics, mouseX, mouseY, partialTick));
 
         if (SpotlightEntryClient.getConfig().showHotbarHelpText && this.isFocused())
         {
@@ -196,8 +187,10 @@ public class HotbarCollectionWidget extends AbstractWidget
         // unhighlight all first
         hotbarSlotWidgets.forEach(widget -> widget.setHighlighted(false));
         // get slot index and set show bind to true for that widget
-        hotbarSlotWidgets.stream().filter(widget -> widget.getHotbarIndex() == slotIndex)
-                .findFirst().ifPresent(widget -> widget.setHighlighted(true));
+        hotbarSlotWidgets.stream()
+                .filter(widget -> widget.getHotbarIndex() == slotIndex)
+                .findFirst()
+                .ifPresent(widget -> widget.setHighlighted(true));
     }
 
     private void unhighlightAllSlots()
@@ -225,27 +218,18 @@ public class HotbarCollectionWidget extends AbstractWidget
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null)
         {
-            // if there is item in the selected hotbar slot
-            ItemsResultData item = widget.getSearchResultData();
-
             // if a slot is already selected, use that slot
             if (selectedHotbarWidget != null)
             {
-                if (selectedHotbarWidget.getSearchResultData() != null)
-                    Actions.replaceHotbarItem(
-                            player,
-                            selectedHotbarWidget.getSearchResultData(),
-                            widget.getHotbarIndex()
-                    );
+                Actions.replaceHotbarItem(player, selectedHotbarWidget.getSearchResultData(), widget.getHotbarIndex());
 
                 // used this one
                 selectedHotbarWidget = null;
                 this.unhighlightAllSlots();
+                return;
             }
-            else if (item != null)
-            {
-                Actions.replaceHotbarItem(player, item, widget.getHotbarIndex());
-            }
+
+            Actions.replaceHotbarItem(player, widget.getSearchResultData(), widget.getHotbarIndex());
         }
     }
 
@@ -274,8 +258,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     public void setFocused(boolean focused)
     {
         super.setFocused(focused);
-        if (!focused)
-            this.selectedHotbarWidget = null;
+        if (!focused) this.selectedHotbarWidget = null;
 
         hotbarSlotWidgets.forEach(w -> w.setShowBind(focused));
     }

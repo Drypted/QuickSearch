@@ -1,7 +1,6 @@
 package com.drypted.spotlight.client.core.actions;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.arguments.item.ItemInput;
@@ -14,17 +13,16 @@ import org.jetbrains.annotations.Nullable;
 
 public class ReplaceHotbarItemAction extends Action
 {
-    public static void run(LocalPlayer player, ItemInput item, String displayName, int maxStackSize, int slotIndex)
+    public static void run(LocalPlayer player, @Nullable ItemInput item, String displayName, int maxStackSize, int slotIndex)
     {
-        ItemStack stack;
+        ItemStack stack = null;
         try
         {
-            stack = item.createItemStack(maxStackSize, false);
             // signature: createItemStack(int maxStackSize, boolean checkSize)
+            if (item != null) stack = item.createItemStack(maxStackSize, false);
         }
-        catch (CommandSyntaxException ignored)
+        catch (Exception ignored)
         {
-            stack = null;
         }
 
         ReplaceHotbarItemAction.run(player, stack, displayName, slotIndex);
@@ -61,8 +59,13 @@ public class ReplaceHotbarItemAction extends Action
         player.getInventory().setItem(slotIndex, stack);
         player.getInventory().getItem(slotIndex).setPopTime(5); // item pickup animation
 
-        if (SpotlightEntryClient.getConfig().showItemMessage && !displayName.isEmpty())
-            player.displayClientMessage(Component.literal("Set slot " + (slotIndex + 1) + " to " + displayName), true);
+        if (SpotlightEntryClient.getConfig().showItemMessage)
+        {
+            String message = "Set slot " + (slotIndex + 1) + " to " + displayName;
+            if (displayName.isEmpty()) message = "Cleared slot " + (slotIndex + 1);
+
+            player.displayClientMessage(Component.literal(message), true);
+        }
 
         final float volume = 0.5f;
         final float pitch = ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f;
