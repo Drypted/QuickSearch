@@ -24,10 +24,13 @@ public final class Styles
     private static final Color OUTLINE = Color.fromInt(0xFF_0D1B2A);
     private static final Color TEXT = Color.fromInt(0xFF_FFFFFF);
 
+    public static final float THICK = 1.5f;
+    public static final float THIN = 1.f;
+
     public static final class Hotbar
     {
-        public static final int OUTLINE_THICKNESS = 1;
-        public static final int HELP_TEXT_OUTLINE_THICKNESS = 1;
+        public static final float OUTLINE_THICKNESS = THIN;
+        public static final float HELP_TEXT_OUTLINE_THICKNESS = THIN;
         // hotbar slot outline
         public static final Color FOCUSED_COLOR = Styles.OUTLINE;
         public static final Color SLOT_PRESSED_COLOR = Styles.SECONDARY_COLOR;
@@ -43,7 +46,7 @@ public final class Styles
 
     public static final class Input
     {
-        public static final int OUTLINE_THICKNESS = 2;
+        public static final float OUTLINE_THICKNESS = THICK;
         // box
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND;
         public static final Color OUTLINE_COLOR = Styles.OUTLINE;
@@ -65,7 +68,7 @@ public final class Styles
 
     public static final class ResultData
     {
-        public static final int OUTLINE_THICKNESS = 1;
+        public static final float OUTLINE_THICKNESS = THIN;
         // box
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND.withOpacity(128);
         public static final Color TEXT_COLOR = Styles.TEXT;
@@ -77,7 +80,7 @@ public final class Styles
 
     public static final class ScrollBox
     {
-        public static final int OUTLINE_THICKNESS = 2;
+        public static final float OUTLINE_THICKNESS = THICK;
         // box
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND;
         public static final Color OUTLINE_COLOR = Styles.OUTLINE;

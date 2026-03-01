@@ -70,7 +70,7 @@ public class SpotlightScreen extends Screen
 
         this.searchResultsWidget = ScrollBoxWidget.builder(
                 searchBarX,
-                inputWidget.getY() + SEARCH_BAR_HEIGHT - inputWidget.getOutlineThickness(),
+                (int) (inputWidget.getY() + SEARCH_BAR_HEIGHT - inputWidget.getOutlineThickness()),
                 inputWidget.getWidth(),
                 resultsHeight
         ).showScrollerAlways(true).build();

@@ -44,7 +44,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
 
-    private final int outlineThickness = Styles.Hotbar.HELP_TEXT_OUTLINE_THICKNESS;
+    private final float outlineThickness = Styles.Hotbar.HELP_TEXT_OUTLINE_THICKNESS;
 
     private final Color SlotHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
     private final Color SlotFocusedColor = Styles.Hotbar.FOCUSED_COLOR;

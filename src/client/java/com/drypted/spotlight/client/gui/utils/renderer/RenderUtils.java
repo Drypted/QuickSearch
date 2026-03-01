@@ -3,10 +3,21 @@ package com.drypted.spotlight.client.gui.utils.renderer;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.utils.Color;
 import com.drypted.spotlight.client.gui.utils.Colors;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Matrix3x2f;
+import org.joml.Matrix3x2fc;
+import org.joml.Vector2f;
+import org.jspecify.annotations.NonNull;
 
 public final class RenderUtils
 {
@@ -22,112 +33,163 @@ public final class RenderUtils
      * @param endPosX         End X position
      * @param endPosY         End Y position
      * @param corners         `RoundedCorners` specifying which corners are rounded; requires insetThickness > 0
-     * @param insetThickness  Thickness of the outline in pixels
+     * @param insetThickness  Thickness of the outline in pixels (Can be fractional)
      * @param renderOutline   Whether to render the outline
      * @param backgroundColor Background color
      * @param outlineColor    Outline color
      */
-    public static void drawRectangle(GuiGraphics g, int startPosX, int startPosY, int endPosX, int endPosY, RoundedCorners corners, int insetThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
+    public static void drawRectangle(GuiGraphics g, float startPosX, float startPosY, float endPosX, float endPosY, RoundedCorners corners, float insetThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
     {
-        insetThickness = Math.max(0, insetThickness);
+        insetThickness = Math.max(0f, insetThickness);
 
-        // Main body
-        if (insetThickness == 0)
+        if (insetThickness == 0f)
         {
-            g.fill(startPosX, startPosY, endPosX, endPosY, backgroundColor.asInt());
+            drawQuad(g, startPosX, startPosY, endPosX, endPosY, backgroundColor);
             return;
         }
 
-        g.fill(
-                startPosX + insetThickness,
-                startPosY + insetThickness,
-                endPosX - insetThickness,
-                endPosY - insetThickness,
-                backgroundColor.asInt()
-        );
+        float innerLeft = startPosX + insetThickness;
+        float innerTop = startPosY + insetThickness;
+        float innerRight = endPosX - insetThickness;
+        float innerBottom = endPosY - insetThickness;
+
+        // Inner body
+        drawQuad(g, innerLeft, innerTop, innerRight, innerBottom, backgroundColor);
 
         Color outerLineColor = renderOutline ? outlineColor : backgroundColor;
 
         // LEFT
-        g.fill(
+        drawQuad(
+                g,
                 startPosX,
-                startPosY + (corners.topLeft() ? insetThickness : 0),
+                startPosY + (corners.topLeft() ? insetThickness : 0f),
                 startPosX + insetThickness,
-                endPosY - (corners.bottomLeft() ? insetThickness : 0),
-                outerLineColor.asInt()
+                endPosY - (corners.bottomLeft() ? insetThickness : 0f),
+                outerLineColor
         );
 
         // RIGHT
-        g.fill(
+        drawQuad(
+                g,
                 endPosX - insetThickness,
-                startPosY + (corners.topRight() ? insetThickness : 0),
+                startPosY + (corners.topRight() ? insetThickness : 0f),
                 endPosX,
-                endPosY - (corners.bottomRight() ? insetThickness : 0),
-                outerLineColor.asInt()
+                endPosY - (corners.bottomRight() ? insetThickness : 0f),
+                outerLineColor
         );
 
         // TOP
-        g.fill(
-                startPosX + (corners.topLeft() ? insetThickness : 0),
+        drawQuad(
+                g,
+                startPosX + (corners.topLeft() ? insetThickness : 0f),
                 startPosY,
-                endPosX - (corners.topRight() ? insetThickness : 0),
+                endPosX - (corners.topRight() ? insetThickness : 0f),
                 startPosY + insetThickness,
-                outerLineColor.asInt()
+                outerLineColor
         );
 
         // BOTTOM
-        g.fill(
-                startPosX + (corners.bottomLeft() ? insetThickness : 0),
+        drawQuad(
+                g,
+                startPosX + (corners.bottomLeft() ? insetThickness : 0f),
                 endPosY - insetThickness,
-                endPosX - (corners.bottomRight() ? insetThickness : 0),
+                endPosX - (corners.bottomRight() ? insetThickness : 0f),
                 endPosY,
-                outerLineColor.asInt()
+                outerLineColor
         );
 
-        // Corner pixels for rounded
-        if (corners.topLeft() && renderOutline)
+        // CORNER INNER PIXELS (when outline shown)
+        if (renderOutline && corners.topLeft())
         {
-            g.fill(
-                    startPosX + insetThickness,
-                    startPosY + insetThickness,
-                    startPosX + (2 * insetThickness),
-                    startPosY + (2 * insetThickness),
-                    outlineColor.asInt()
+            drawQuad(g, innerLeft, innerTop, innerLeft + insetThickness, innerTop + insetThickness, outerLineColor);
+        }
+        if (renderOutline && corners.topRight())
+        {
+            drawQuad(g, innerRight - insetThickness, innerTop, innerRight, innerTop + insetThickness, outerLineColor);
+        }
+        if (renderOutline && corners.bottomLeft())
+        {
+            drawQuad(
+                    g,
+                    innerLeft,
+                    innerBottom - insetThickness,
+                    innerLeft + insetThickness,
+                    innerBottom,
+                    outerLineColor
             );
         }
+        if (renderOutline && corners.bottomRight())
+        {
+            drawQuad(
+                    g,
+                    innerRight - insetThickness,
+                    innerBottom - insetThickness,
+                    innerRight,
+                    innerBottom,
+                    outerLineColor
+            );
+        }
+    }
 
-        if (corners.topRight() && renderOutline)
-        {
-            g.fill(
-                    endPosX - (2 * insetThickness),
-                    startPosY + insetThickness,
-                    endPosX - insetThickness,
-                    startPosY + (2 * insetThickness),
-                    outlineColor.asInt()
-            );
-        }
+    private static void drawQuad(GuiGraphics g, float x1, float y1, float x2, float y2, Color color)
+    {
+        drawFloatQuad(g, x1, y1, x2, y1, x2, y2, x1, y2, color.asInt());
+    }
 
-        if (corners.bottomLeft() && renderOutline)
-        {
-            g.fill(
-                    startPosX + insetThickness,
-                    endPosY - (2 * insetThickness),
-                    startPosX + (2 * insetThickness),
-                    endPosY - insetThickness,
-                    outlineColor.asInt()
-            );
-        }
+    /**
+     * Submits an arbitrary float-coordinate quad to the GUI render pipeline. Vertices are in order: top-left,
+     * top-right, bottom-right, bottom-left.
+     */
+    private static void drawFloatQuad(GuiGraphics g, float ax, float ay, float bx, float by, float cx, float cy, float dx, float dy, int color)
+    {
+        Matrix3x2fc pose = new Matrix3x2f(g.pose());
+        ScreenRectangle scissor = g.scissorStack.peek();
+        ScreenRectangle bounds = computeBounds(pose, ax, ay, bx, by, cx, cy, dx, dy, scissor);
 
-        if (corners.bottomRight() && renderOutline)
+        g.guiRenderState.submitGuiElement(new GuiElementRenderState()
         {
-            g.fill(
-                    endPosX - (2 * insetThickness),
-                    endPosY - (2 * insetThickness),
-                    endPosX - insetThickness,
-                    endPosY - insetThickness,
-                    outlineColor.asInt()
-            );
-        }
+            @Override
+            public void buildVertices(@NonNull VertexConsumer consumer)
+            {
+                consumer.addVertexWith2DPose(pose, ax, ay).setColor(color);
+                consumer.addVertexWith2DPose(pose, dx, dy).setColor(color);
+                consumer.addVertexWith2DPose(pose, cx, cy).setColor(color);
+                consumer.addVertexWith2DPose(pose, bx, by).setColor(color);
+            }
+
+            @Override
+            public @NonNull RenderPipeline pipeline() {return RenderPipelines.GUI;}
+
+            @Override
+            public @NonNull TextureSetup textureSetup() {return TextureSetup.noTexture();}
+
+            @Override
+            public ScreenRectangle scissorArea() {return scissor;}
+
+            @Override
+            public ScreenRectangle bounds() {return bounds;}
+        });
+    }
+
+    private static ScreenRectangle computeBounds(Matrix3x2fc pose, float ax, float ay, float bx, float by, float cx, float cy, float dx, float dy, ScreenRectangle scissor)
+    {
+        Vector2f pa = pose.transformPosition(ax, ay, new Vector2f());
+        Vector2f pb = pose.transformPosition(bx, by, new Vector2f());
+        Vector2f pc = pose.transformPosition(cx, cy, new Vector2f());
+        Vector2f pd = pose.transformPosition(dx, dy, new Vector2f());
+
+        float minX = Math.min(Math.min(pa.x, pb.x), Math.min(pc.x, pd.x));
+        float maxX = Math.max(Math.max(pa.x, pb.x), Math.max(pc.x, pd.x));
+        float minY = Math.min(Math.min(pa.y, pb.y), Math.min(pc.y, pd.y));
+        float maxY = Math.max(Math.max(pa.y, pb.y), Math.max(pc.y, pd.y));
+
+        ScreenRectangle rect = new ScreenRectangle(
+                Mth.floor(minX),
+                Mth.floor(minY),
+                Mth.ceil(maxX - minX),
+                Mth.ceil(maxY - minY)
+        );
+        return scissor != null ? scissor.intersection(rect) : rect;
     }
 
     /* LOADERS */
@@ -270,7 +332,7 @@ public final class RenderUtils
         if (drawShadow)
         {
             guiGraphics.pose().pushMatrix();
-            guiGraphics.pose().translate(thickness * shadowOffset, thickness * shadowOffset, guiGraphics.pose());
+            guiGraphics.pose().translate(thickness * shadowOffset, thickness * shadowOffset);
 
             drawThickLine(guiGraphics, startX, startY, endX, endY, thickness, Colors.SHADOW);
             drawThickLine(guiGraphics, startX, endY, endX, startY, thickness, Colors.SHADOW);
@@ -304,7 +366,7 @@ public final class RenderUtils
         RenderUtils.drawScaledText(g, text, scale, posX, posY, textColor);
     }
 
-    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, int insetThickness, Color backgroundColor, Color textColor)
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color textColor)
     {
         // background
         RenderUtils.drawRectangle(
@@ -368,7 +430,6 @@ public final class RenderUtils
     public static void __debugDrawWidgetBounds(GuiGraphics g, AbstractWidget widget, boolean above)
     {
         g.pose().pushMatrix();
-        g.pose().translate(0, 0, g.pose()); // set z order
         drawRectangle(
                 g,
                 widget.getX(),
@@ -424,8 +485,8 @@ public final class RenderUtils
     public static void drawScaledItemFactor(GuiGraphics g, ItemStack stack, int x, int y, float scaleFactor)
     {
         g.pose().pushMatrix();
-        g.pose().translate(x, y, g.pose());
-        g.pose().scale(scaleFactor, scaleFactor, g.pose());
+        g.pose().translate(x, y);
+        g.pose().scale(scaleFactor, scaleFactor);
         g.renderItem(stack, 0, 0);
         g.pose().popMatrix();
     }
@@ -444,8 +505,8 @@ public final class RenderUtils
     public static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color, boolean drawShadow)
     {
         g.pose().pushMatrix();
-        g.pose().translate(x, y, g.pose());
-        g.pose().scale(scale, scale, g.pose());
+        g.pose().translate(x, y);
+        g.pose().scale(scale, scale);
         g.drawString(Minecraft.getInstance().font, text, 0, 0, color.asInt(), drawShadow);
         g.pose().popMatrix();
     }
@@ -490,47 +551,12 @@ public final class RenderUtils
     }
 
     /**
-     * Fills a convex quadrilateral using scanline rasterization.
+     * Fills a convex quadrilateral with float precision using the GUI render pipeline. Vertices in order: (x1,y1),
+     * (x2,y2), (x3,y3), (x4,y4) — must be convex and wound correctly.
      */
     private static void fillQuad(GuiGraphics guiGraphics, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int color)
     {
-        int minY = (int) Math.floor(Math.min(Math.min(y1, y2), Math.min(y3, y4)));
-        int maxY = (int) Math.ceil(Math.max(Math.max(y1, y2), Math.max(y3, y4)));
-
-        for (int y = minY; y <= maxY; y++)
-        {
-            float[] xs = new float[4];
-            int count = 0;
-
-            count = intersect(xs, count, x1, y1, x2, y2, y);
-            count = intersect(xs, count, x2, y2, x3, y3, y);
-            count = intersect(xs, count, x3, y3, x4, y4, y);
-            count = intersect(xs, count, x4, y4, x1, y1, y);
-
-            if (count < 2) continue;
-
-            float minX = xs[0];
-            float maxX = xs[1];
-
-            if (minX > maxX)
-            {
-                float tmp = minX;
-                minX = maxX;
-                maxX = tmp;
-            }
-
-            guiGraphics.fill((int) Math.floor(minX), y, (int) Math.ceil(maxX), y + 1, color);
-        }
-    }
-
-    private static int intersect(float[] xs, int count, float x1, float y1, float x2, float y2, int y)
-    {
-        if ((y1 <= y && y2 > y) || (y2 <= y && y1 > y))
-        {
-            float t = (y - y1) / (y2 - y1);
-            xs[count++] = x1 + t * (x2 - x1);
-        }
-        return count;
+        drawFloatQuad(guiGraphics, x1, y1, x2, y2, x3, y3, x4, y4, color);
     }
 
     /**
@@ -567,8 +593,8 @@ public final class RenderUtils
     private static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color)
     {
         g.pose().pushMatrix();
-        g.pose().translate(x, y, g.pose());
-        g.pose().scale(scale, scale, g.pose());
+        g.pose().translate(x, y);
+        g.pose().scale(scale, scale);
         g.drawString(Minecraft.getInstance().font, text, 0, 0, color.asInt());
         g.pose().popMatrix();
     }

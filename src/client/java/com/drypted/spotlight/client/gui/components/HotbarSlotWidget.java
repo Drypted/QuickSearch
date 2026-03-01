@@ -22,7 +22,7 @@ public class HotbarSlotWidget extends AbstractWidget
     private final String hotbarKey;
     private final int iconPadding;
     private final RoundedCorners roundedCorners;
-    private final int outlineThickness;
+    private final float outlineThickness;
     private final float hotbarKeyTextScale;
     private final Color backgroundColor;
     private final Color textColor;
@@ -39,7 +39,7 @@ public class HotbarSlotWidget extends AbstractWidget
 
     private boolean pressed = false;
 
-    public HotbarSlotWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, int outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedColor, Color outlineColor, Color highlightedColor, Color clickedColor, Consumer<MouseButtonClick> onClickCallback)
+    public HotbarSlotWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, float outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedColor, Color outlineColor, Color highlightedColor, Color clickedColor, Consumer<MouseButtonClick> onClickCallback)
     {
         super(x, y, width, height, Component.empty());
         this.hotbarIndex = hotbarIndex;
@@ -199,7 +199,7 @@ public class HotbarSlotWidget extends AbstractWidget
 
         private int iconPadding = 2;
         private RoundedCorners roundedCorners = RoundedCorners.all();
-        private int outlineThickness = Styles.Hotbar.OUTLINE_THICKNESS;
+        private float outlineThickness = Styles.Hotbar.OUTLINE_THICKNESS;
         private float hotbarTextScale = 0.8f;
         private Color backgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
         private Color textColor = Styles.Hotbar.HELP_TEXT_COLOR;

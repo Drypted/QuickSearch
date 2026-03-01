@@ -38,7 +38,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private final int paddingX;
     private final int paddingY;
     private final boolean isRounded;
-    private final int outlineThickness;
+    private final float outlineThickness;
     private Color backgroundColor;
     private Color textColor;
     private Color hoverColor;
@@ -54,7 +54,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    private ResultDataWidget(int x, int y, @Nullable ItemStack icon, String title, String subtitle, int width, int paddingX, int paddingY, boolean isRounded, int outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
+    private ResultDataWidget(int x, int y, @Nullable ItemStack icon, String title, String subtitle, int width, int paddingX, int paddingY, boolean isRounded, float outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
     {
         super(x, y, width, 0, Component.empty());
         this.icon = icon;
@@ -110,10 +110,10 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         );
 
         g.enableScissor(
-                startPosX + paddingX + outlineThickness,
-                startPosY + outlineThickness,
-                endPosX - paddingX - outlineThickness,
-                endPosY - outlineThickness
+                (int) (startPosX + paddingX + outlineThickness),
+                (int) (startPosY + outlineThickness),
+                (int) (endPosX - paddingX - outlineThickness),
+                (int) (endPosY - outlineThickness)
         );
         renderContent(g, startPosX, startPosY);
         g.disableScissor();
@@ -122,7 +122,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private void renderContent(@NonNull GuiGraphics g, int startPosX, int startPosY)
     {
         // icon
-        int iconX = startPosX + outlineThickness + paddingX;
+        int iconX = (int) (startPosX + outlineThickness + paddingX);
         int iconY = startPosY + paddingY;
 
         boolean shouldRenderIcon = this.icon != null && !this.icon.isEmpty() && this.icon.getItem() != Items.AIR;
@@ -348,7 +348,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         private Color outlineColor = Colors.CLEAR;
         private boolean pressed = false;
         private boolean showOutline = false;
-        private int outlineThickness = Styles.ResultData.OUTLINE_THICKNESS;
+        private float outlineThickness = Styles.ResultData.OUTLINE_THICKNESS;
 
         private boolean disabled = false;
 

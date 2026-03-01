@@ -3,8 +3,10 @@ package com.drypted.spotlight.client.gui.components;
 import com.drypted.spotlight.client.gui.models.RoundedCorners;
 import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
 import com.drypted.spotlight.client.gui.utils.Color;
+import com.drypted.spotlight.client.gui.utils.Colors;
 import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
 import com.drypted.spotlight.client.styling.Styles;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -29,7 +31,7 @@ public class ScrollBoxWidget extends AbstractWidget
     private final List<WidgetEntry> children = new ArrayList<>();
     private final int margin;
     private final int spacing;
-    private final int outlineThickness;
+    private final float outlineThickness;
     private final boolean showScrollerAlways;
     private final Color bgColor;
     private final Color outlineColor;
@@ -44,7 +46,7 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private Consumer<Boolean> onFocus;
 
-    public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, int outlineThickness, RoundedCorners rounded, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
+    public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, float outlineThickness, RoundedCorners rounded, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
     {
         super(x, y, width, height, Component.empty());
         this.margin = margin;
@@ -109,7 +111,7 @@ public class ScrollBoxWidget extends AbstractWidget
     private int contentHeight()
     {
         // outlineThickness is included on both top and bottom, mirroring how layoutChildren positions children
-        int height = margin + outlineThickness;
+        int height = (int) (margin + outlineThickness);
 
         for (int i = 0; i < children.size(); i++)
         {
@@ -118,7 +120,7 @@ public class ScrollBoxWidget extends AbstractWidget
             if (i < children.size() - 1) height += spacing;
         }
 
-        return height + margin + outlineThickness;
+        return (int) (height + margin + outlineThickness);
     }
 
     private double scrollRate()
@@ -137,42 +139,42 @@ public class ScrollBoxWidget extends AbstractWidget
         return (maxScrollAmount() > 0);
     }
 
-    private int scrollerHeight()
+    private float scrollerHeight()
     {
         // viewport and content are both measured in the inner space (inside the outline border)
-        final int viewportHeight = height - outlineThickness * 2;
+        final float viewportHeight = height - outlineThickness * 2;
         final int totalContentHeight = contentHeight();
 
-        final float rawScrollerHeight = (float) (viewportHeight * viewportHeight) / (float) totalContentHeight;
+        final float rawScrollerHeight = (viewportHeight * viewportHeight) / (float) totalContentHeight;
 
         final int minScrollerHeight = 32;
 
         // max scroller height is viewport height
-        return Mth.clamp((int) rawScrollerHeight, minScrollerHeight, viewportHeight);
+        return Mth.clamp(rawScrollerHeight, minScrollerHeight, viewportHeight);
     }
 
-    private int scrollBarX()
+    private float scrollBarX()
     {
         // inset by outlineThickness so the scrollbar sits inside the border, not on top of it
         return getRight() - outlineThickness - SCROLLBAR_WIDTH;
     }
 
-    private int scrollBarY()
+    private float scrollBarY()
     {
         final int maxScrollAmount = maxScrollAmount();
         // scrollbar track starts inside the outline border
-        final int topY = getY() + outlineThickness;
+        final float topY = getY() + outlineThickness;
 
         if (maxScrollAmount <= 0)
         {
             return topY;
         }
 
-        final int availableTrackHeight = (height - outlineThickness * 2) - scrollerHeight();
+        final float availableTrackHeight = (height - outlineThickness * 2) - scrollerHeight();
         final double scrollRatio = scrollAmount / maxScrollAmount;
-        final int scrollerOffset = (int) (scrollRatio * availableTrackHeight);
+        final double scrollerOffset = scrollRatio * availableTrackHeight;
 
-        return topY + scrollerOffset;
+        return (float) (topY + scrollerOffset);
     }
 
     private void setScrollAmount(double amount)
@@ -200,9 +202,9 @@ public class ScrollBoxWidget extends AbstractWidget
         }
         else
         {
-            final int scrollerHeight = scrollerHeight();
+            final float scrollerHeight = scrollerHeight();
             // track height is the inner viewport height (inside outline), not the full widget height
-            final int trackHeight = (height - outlineThickness * 2) - scrollerHeight;
+            final int trackHeight = (int) ((height - outlineThickness * 2) - scrollerHeight);
 
             // This centers the scroller thumb on the mouse cursor
             final double mouseOffset = mouseY - getY() - outlineThickness - scrollerHeight / 2.0;
@@ -282,7 +284,7 @@ public class ScrollBoxWidget extends AbstractWidget
     {
         // left inset:  outlineThickness + margin
         // right inset: outlineThickness + margin + scrollbar (when visible); scrollbar itself sits inset by outlineThickness
-        int inset = (margin + outlineThickness) * 2;
+        int inset = (int) ((margin + outlineThickness) * 2);
         if (scrollbarVisible()) inset += SCROLLBAR_WIDTH;
         return this.width - inset;
     }
@@ -301,21 +303,26 @@ public class ScrollBoxWidget extends AbstractWidget
 
         drawBackground(g, x1, y1, x2, y2);
         drawChildren(g, mouseX, mouseY, delta, x1, y1, x2, y2);
-        renderCustomScrollbar(g, mouseX, mouseY);
+        renderCustomScrollbar(g);
+
+        if (isOverScrollbar(mouseX, mouseY))
+        {
+            g.requestCursor(this.scrolling ? CursorTypes.RESIZE_NS : CursorTypes.POINTING_HAND);
+        }
     }
 
     private void layoutChildren()
     {
         int scroll = (int) scrollAmount;
         // children start after both the outline border and the margin on the top
-        int yOffset = outlineThickness + margin;
+        int yOffset = (int) (outlineThickness + margin);
 
         for (WidgetEntry entry : children)
         {
             AbstractWidget widget = entry.widget;
 
             // x: respect outline border + margin; keep children clear of the scrollbar on the right
-            widget.setPosition(getX() + outlineThickness + margin, getY() + yOffset - scroll);
+            widget.setPosition((int) (getX() + outlineThickness + margin), getY() + yOffset - scroll);
             widget.setWidth(getChildWidth());
 
             yOffset += widget.getHeight() + spacing;
@@ -331,10 +338,10 @@ public class ScrollBoxWidget extends AbstractWidget
     {
         // Clip to the inner content area, keeping children behind the outline and clear of the scrollbar
         g.enableScissor(
-                x1 + outlineThickness,
-                y1 + outlineThickness,
-                x2 - outlineThickness - (scrollbarVisible() ? SCROLLBAR_WIDTH : 0),
-                y2 - outlineThickness
+                (int) (x1 + outlineThickness),
+                (int) (y1 + outlineThickness),
+                (int) (x2 - outlineThickness - (scrollbarVisible() ? SCROLLBAR_WIDTH : 0)),
+                (int) (y2 - outlineThickness)
         );
 
         for (WidgetEntry e : children)
@@ -347,41 +354,52 @@ public class ScrollBoxWidget extends AbstractWidget
         g.disableScissor();
     }
 
-    private void renderCustomScrollbar(GuiGraphics g, int mouseX, int mouseY)
+    private void renderCustomScrollbar(GuiGraphics g)
     {
         if (!scrollbarVisible())
         {
             return;
         }
 
-        int x = scrollBarX();
-        int y = scrollBarY();
-        int h = scrollerHeight();
-
         // scrollbar background
-        g.fill(
-                x,
+        RenderUtils.drawRectangle(
+                g,
+                scrollBarX(),
                 getY() + outlineThickness,
-                x + SCROLLBAR_WIDTH,
+                scrollBarX() + SCROLLBAR_WIDTH,
                 getBottom() - outlineThickness,
-                scrollbarColor.asInt()
+                RoundedCorners.none(),
+                0,
+                false,
+                scrollbarColor,
+                outlineColor
         );
         // scroller
-        g.fill(x, y, x + SCROLLBAR_WIDTH, y + h, scrollerColor.asInt());
-        // line
-        g.fill(
-                x,
-                getY() + outlineThickness,
-                x + outlineThickness,
-                getBottom() - outlineThickness,
-                outlineColor.asInt()
+        RenderUtils.drawRectangle(
+                g,
+                scrollBarX(),
+                scrollBarY(),
+                scrollBarX() + SCROLLBAR_WIDTH,
+                scrollBarY() + scrollerHeight(),
+                RoundedCorners.none(),
+                outlineThickness,
+                true,
+                scrollerColor,
+                outlineColor
         );
-
-        // unsupported cursor change
-        // if (isOverScrollbar(mouseX, mouseY))
-        // {
-        //     g.requestCursor(this.scrolling ? CursorTypes.RESIZE_NS : CursorTypes.POINTING_HAND);
-        // }
+        // line
+        RenderUtils.drawRectangle(
+                g,
+                scrollBarX(),
+                getY() + outlineThickness,
+                scrollBarX() + outlineThickness,
+                getBottom() - outlineThickness,
+                RoundedCorners.none(),
+                0,
+                false,
+                outlineColor,
+                Colors.CLEAR
+        );
     }
 
     /* Select Element with keys */
@@ -497,7 +515,7 @@ public class ScrollBoxWidget extends AbstractWidget
         if (index < 0 || index >= children.size()) return;
 
         // compute child top in content space; must match the layout origin used in layoutChildren
-        int childTop = outlineThickness + margin;
+        int childTop = (int) (outlineThickness + margin);
 
         for (int i = 0; i < index; i++)
         {
@@ -554,7 +572,7 @@ public class ScrollBoxWidget extends AbstractWidget
         private final int height;
         private int margin = 3;
         private int spacing = margin; // by default, spacing = margin
-        private int outlineThickness = Styles.ScrollBox.OUTLINE_THICKNESS;
+        private float outlineThickness = Styles.ScrollBox.OUTLINE_THICKNESS;
         private RoundedCorners rounded = RoundedCorners.fromVerticalSides(false, true);
         private boolean showScrollerAlways = false;
 

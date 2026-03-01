@@ -36,7 +36,7 @@ public class InputWidget extends AbstractWidget
     private static final int ERROR_TOOLTIP_SPACING = 2;
 
     // Visual configuration
-    private final int outlineThickness;
+    private final float outlineThickness;
     private final Color backgroundColor;
     private final Color outlineColor;
     private final Color caretColor;
@@ -82,7 +82,7 @@ public class InputWidget extends AbstractWidget
 
     private final Color LoaderColor = Styles.Input.LOADER_COLOR;
 
-    public InputWidget(int x, int y, int width, int height, RoundedCorners rounded, int outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor)
+    public InputWidget(int x, int y, int width, int height, RoundedCorners rounded, float outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor)
     {
         super(x, y, width, height, Component.empty());
         this.rounded = rounded;
@@ -1056,7 +1056,7 @@ public class InputWidget extends AbstractWidget
         notifyTextChanged(); // Re-validate current text
     }
 
-    public int getOutlineThickness()
+    public float getOutlineThickness()
     {
         return outlineThickness;
     }
@@ -1164,7 +1164,7 @@ public class InputWidget extends AbstractWidget
         private final int width;
         private int height;
         private RoundedCorners rounded = RoundedCorners.all();
-        private int outlineThickness = Styles.Input.OUTLINE_THICKNESS;
+        private float outlineThickness = Styles.Input.OUTLINE_THICKNESS;
         private Color backgroundColor = Styles.Input.BACKGROUND_COLOR;
         private Color outlineColor = Styles.Input.OUTLINE_COLOR;
         private Color caretColor = Styles.Input.CARET_COLOR;
