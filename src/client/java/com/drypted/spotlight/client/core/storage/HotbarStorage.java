@@ -63,6 +63,15 @@ public class HotbarStorage
         return hotbar.load(provider);
     }
 
+    public static void remove(String name) throws IOException
+    {
+        JsonObject root = readFile();
+        if (root.remove(name.toLowerCase()) != null)
+        {
+            writeFile(root);
+        }
+    }
+
     public static Set<String> getStoredNames() throws IOException
     {
         return readFile().keySet();

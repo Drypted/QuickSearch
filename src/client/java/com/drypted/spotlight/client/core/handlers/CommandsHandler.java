@@ -2,11 +2,7 @@ package com.drypted.spotlight.client.core.handlers;
 
 import com.drypted.spotlight.client.core.commands.Command;
 import com.drypted.spotlight.client.core.commands.CommandFeedback;
-import com.drypted.spotlight.client.core.commands.args.GetPlayerHeadCommand;
-import com.drypted.spotlight.client.core.commands.args.LoadHotbarCommand;
-import com.drypted.spotlight.client.core.commands.args.SaveHotbarCommand;
-import com.drypted.spotlight.client.core.commands.args.TemplateArgsCommand;
-import com.drypted.spotlight.client.core.commands.no_args.TemplateNoArgsCommand;
+import com.drypted.spotlight.client.core.commands.args.*;
 import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +35,7 @@ public class CommandsHandler
         register(new GetPlayerHeadCommand());
         register(new SaveHotbarCommand());
         try {register(new LoadHotbarCommand());} catch (IOException ignored) {}
+        try {register(new DeleteHotbarCommand());} catch (IOException ignored) {}
         // no args
 
         rebuildCommandIndex();
