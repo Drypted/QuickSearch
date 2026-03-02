@@ -11,6 +11,7 @@ import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,10 +38,8 @@ public class CommandsHandler
         // args
         register(new GetPlayerHeadCommand());
         register(new SaveHotbarCommand());
-        register(new LoadHotbarCommand());
-        register(new TemplateArgsCommand());
+        try {register(new LoadHotbarCommand());} catch (IOException ignored) {}
         // no args
-        register(new TemplateNoArgsCommand());
 
         rebuildCommandIndex();
     }
@@ -99,6 +98,7 @@ public class CommandsHandler
      *
      * @param commandName The command name (without leading "/")
      * @param args        The arguments typed so far
+     *
      * @return A list of suggestion strings for the current argument slot, or empty list
      */
     public static List<String> getArgSuggestions(String commandName, String[] args)

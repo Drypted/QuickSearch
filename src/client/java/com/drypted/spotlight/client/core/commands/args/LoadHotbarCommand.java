@@ -3,7 +3,7 @@ package com.drypted.spotlight.client.core.commands.args;
 import com.drypted.spotlight.client.core.actions.ReplaceHotbarItemAction;
 import com.drypted.spotlight.client.core.commands.ArgumentedCommand;
 import com.drypted.spotlight.client.core.commands.CommandFeedback;
-import com.drypted.spotlight.client.core.commands.argument.types.SavedHotbarArgumentType;
+import com.drypted.spotlight.client.core.commands.argument.types.StringOptionArgumentType;
 import com.drypted.spotlight.client.core.storage.HotbarStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -16,9 +16,9 @@ import java.util.List;
 
 public class LoadHotbarCommand extends ArgumentedCommand
 {
-    public LoadHotbarCommand()
+    public LoadHotbarCommand() throws IOException
     {
-        super(new SavedHotbarArgumentType());
+        super(new StringOptionArgumentType(HotbarStorage.getStoredNames()));
     }
 
     @Override
