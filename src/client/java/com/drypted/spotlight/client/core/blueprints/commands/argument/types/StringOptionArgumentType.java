@@ -7,6 +7,7 @@ import com.drypted.spotlight.client.core.blueprints.commands.argument.ArgumentTy
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Accepts a saved hotbar preset name. Provides live suggestions from stored hotbar names.
@@ -14,9 +15,9 @@ import java.util.Set;
 public class StringOptionArgumentType implements ArgumentType<String>
 {
     private static final String PATTERN = "^[a-zA-Z]+$";
-    private final Set<String> options;
+    private final Supplier<Set<String>> options;
 
-    public StringOptionArgumentType(Set<String> options)
+    public StringOptionArgumentType(Supplier<Set<String>> options)
     {
         this.options = options;
     }
@@ -43,12 +44,12 @@ public class StringOptionArgumentType implements ArgumentType<String>
     {
         if (partial == null || partial.isBlank())
         {
-            return new ArrayList<>(options);
+            return new ArrayList<>(options.get());
         }
 
         String lower = partial.toLowerCase().trim();
         List<String> matches = new ArrayList<>();
-        for (String name : options)
+        for (String name : options.get())
         {
             if (name.toLowerCase().startsWith(lower))
             {
