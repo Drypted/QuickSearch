@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.ui.components;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.config.ModConfig;
 import com.drypted.spotlight.client.core.blueprints.feedback.InputError;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
@@ -350,7 +351,6 @@ public class InputWidget extends AbstractWidget
         // Accept suggestion with Tab (only if cursor is at end and no selection)
         if (keyEvent.key() == GLFW.GLFW_KEY_TAB && shouldShowSuggestion())
         {
-            // TODO: TEST
             switch (SpotlightEntryClient.getConfig().search.completionType)
             {
                 case SINGLE_WORD ->
@@ -363,6 +363,10 @@ public class InputWidget extends AbstractWidget
                 {
                     // Complete the entire suggestion
                     setText(suggestion);
+                }
+                case null, default ->
+                {
+                    // pass
                 }
             }
             clearSuggestion(); // Clear suggestion after accepting
@@ -1141,7 +1145,8 @@ public class InputWidget extends AbstractWidget
 
     private boolean shouldShowSuggestion()
     {
-        return !suggestion.isEmpty() // not empty
+        return SpotlightEntryClient.getConfig().search.completionType != ModConfig.CompletionType.NONE // not disabled
+                && !suggestion.isEmpty() // not empty
                 && cursorPos == text.length() // cursor at end
                 && !hasSelection()  // not selecting
                 && suggestion.length() > text.length() // suggestion is an extension of current text
