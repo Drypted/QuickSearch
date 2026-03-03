@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.gui.utils;
+package com.drypted.spotlight.client.core.blueprints.common;
 
 public class Colors
 {

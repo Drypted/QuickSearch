@@ -1,6 +1,6 @@
-package com.drypted.spotlight.client.core.commands;
+package com.drypted.spotlight.client.core.blueprints.commands;
 
-import com.drypted.spotlight.client.core.commands.argument.ArgumentType;
+import com.drypted.spotlight.client.core.blueprints.commands.argument.ArgumentType;
 
 import java.util.ArrayList;
 import java.util.Collections;

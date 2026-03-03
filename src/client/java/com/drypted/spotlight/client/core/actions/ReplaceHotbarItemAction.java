@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.core.actions;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.core.blueprints.Action;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.arguments.item.ItemInput;

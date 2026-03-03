@@ -1,8 +1,8 @@
-package com.drypted.spotlight.client.gui.utils.renderer;
+package com.drypted.spotlight.client.gui.renderer;
 
-import com.drypted.spotlight.client.gui.models.RoundedCorners;
-import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.Colors;
+import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.common.Color;
+import com.drypted.spotlight.client.core.blueprints.common.Colors;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -19,7 +19,7 @@ import org.joml.Matrix3x2fc;
 import org.joml.Vector2f;
 import org.jspecify.annotations.NonNull;
 
-public final class RenderUtils
+public final class RenderCommon
 {
     private static final int VANILLA_ITEM_SIZE = 16;
     private static final float BACKGROUND_PIXEL_SIZE = 8f;
@@ -350,7 +350,7 @@ public final class RenderUtils
     {
         final int fontWidth = (int) ((float) Minecraft.getInstance().font.width(text) * scale);
         final int fontHeight = (int) ((float) Minecraft.getInstance().font.lineHeight * scale);
-        RenderUtils.drawRectangle(
+        RenderCommon.drawRectangle(
                 g,
                 posX - paddingX,
                 posY - paddingY,
@@ -363,13 +363,13 @@ public final class RenderUtils
                 outlineColor
         );
 
-        RenderUtils.drawScaledText(g, text, scale, posX, posY, textColor);
+        RenderCommon.drawScaledText(g, text, scale, posX, posY, textColor);
     }
 
     public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color textColor)
     {
         // background
-        RenderUtils.drawRectangle(
+        RenderCommon.drawRectangle(
                 g,
                 startX,
                 startY,
@@ -389,12 +389,12 @@ public final class RenderUtils
         int textPosX = startX + ((endX - startX) / 2) - (textWidth / 2);
         int textPosY = startY + (endY - startY) / 2 - (textHeight / 2);
 
-        RenderUtils.drawScaledText(g, text, scale, textPosX, textPosY, textColor);
+        RenderCommon.drawScaledText(g, text, scale, textPosX, textPosY, textColor);
     }
 
     public static void drawLabelInBox(GuiGraphics g, String text, int padding, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
     {
-        RenderUtils.drawRectangle(g, startX, startY, endX, endY, corners, 1, true, backgroundColor, backgroundColor);
+        RenderCommon.drawRectangle(g, startX, startY, endX, endY, corners, 1, true, backgroundColor, backgroundColor);
 
         int boxWidth = (endX - startX) - (padding * 2);
         int boxHeight = (endY - startY) - (padding * 2);

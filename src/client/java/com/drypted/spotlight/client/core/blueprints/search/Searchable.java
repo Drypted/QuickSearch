@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.core.search;
+package com.drypted.spotlight.client.core.blueprints.search;
 
 /**
  * Interface for objects that can be searched. Implement this interface to make any type searchable with SmartSearch.

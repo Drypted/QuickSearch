@@ -1,6 +1,6 @@
-package com.drypted.spotlight.client.models;
+package com.drypted.spotlight.client.core.blueprints;
 
-import com.drypted.spotlight.client.core.search.Searchable;
+import com.drypted.spotlight.client.core.blueprints.search.Searchable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.Holder;

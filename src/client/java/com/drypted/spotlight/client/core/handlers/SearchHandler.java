@@ -2,7 +2,7 @@ package com.drypted.spotlight.client.core.handlers;
 
 import com.drypted.spotlight.client.core.search.SimpleSearch;
 import com.drypted.spotlight.client.core.search.SmartSearch;
-import com.drypted.spotlight.client.models.ItemsResultData;
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;

@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.core.actions;
 
-import com.drypted.spotlight.client.models.ItemsResultData;
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import net.minecraft.client.player.LocalPlayer;
 import org.jspecify.annotations.Nullable;
 

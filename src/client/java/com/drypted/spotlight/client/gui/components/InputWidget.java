@@ -1,9 +1,9 @@
 package com.drypted.spotlight.client.gui.components;
 
-import com.drypted.spotlight.client.gui.models.InputError;
-import com.drypted.spotlight.client.gui.models.RoundedCorners;
-import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.core.blueprints.gui.InputError;
+import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.common.Color;
+import com.drypted.spotlight.client.gui.renderer.RenderCommon;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -106,7 +106,7 @@ public class InputWidget extends AbstractWidget
                                     this.outlineColor;
 
         // Background
-        RenderUtils.drawRectangle(
+        RenderCommon.drawRectangle(
                 guiGraphics,
                 this.getX(),
                 this.getY(),
@@ -219,7 +219,7 @@ public class InputWidget extends AbstractWidget
         if (shouldShowError())
         {
             assert this.error != null;
-            RenderUtils.drawLabelWithScale(
+            RenderCommon.drawLabelWithScale(
                     guiGraphics,
                     error.getMessage(),
                     0.65f,
@@ -285,7 +285,7 @@ public class InputWidget extends AbstractWidget
         int loadingX = this.getX() + this.getWidth() - INDICATOR_PADDING_RIGHT - size;
         int loadingY = this.getY() + INDICATOR_PADDING_RIGHT;
 
-        RenderUtils.drawThreeDotPulseSpinner(
+        RenderCommon.drawThreeDotPulseSpinner(
                 guiGraphics,
                 loadingX,
                 loadingY,

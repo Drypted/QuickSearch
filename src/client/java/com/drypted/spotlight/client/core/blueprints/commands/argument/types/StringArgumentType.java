@@ -1,8 +1,8 @@
-package com.drypted.spotlight.client.core.commands.argument.types;
+package com.drypted.spotlight.client.core.blueprints.commands.argument.types;
 
-import com.drypted.spotlight.client.core.commands.CommandFeedback;
-import com.drypted.spotlight.client.core.commands.argument.ArgumentParseException;
-import com.drypted.spotlight.client.core.commands.argument.ArgumentType;
+import com.drypted.spotlight.client.core.blueprints.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.blueprints.commands.argument.ArgumentParseException;
+import com.drypted.spotlight.client.core.blueprints.commands.argument.ArgumentType;
 
 import java.util.List;
 

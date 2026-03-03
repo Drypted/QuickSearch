@@ -1,8 +1,11 @@
 package com.drypted.spotlight.client.core.handlers;
 
-import com.drypted.spotlight.client.core.commands.Command;
-import com.drypted.spotlight.client.core.commands.CommandFeedback;
-import com.drypted.spotlight.client.core.commands.args.*;
+import com.drypted.spotlight.client.core.blueprints.commands.Command;
+import com.drypted.spotlight.client.core.blueprints.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.commands.args.DeleteHotbarCommand;
+import com.drypted.spotlight.client.core.commands.args.GetPlayerHeadCommand;
+import com.drypted.spotlight.client.core.commands.args.LoadHotbarCommand;
+import com.drypted.spotlight.client.core.commands.args.SaveHotbarCommand;
 import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;

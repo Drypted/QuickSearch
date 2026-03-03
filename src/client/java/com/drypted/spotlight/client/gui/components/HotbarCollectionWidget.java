@@ -2,10 +2,10 @@ package com.drypted.spotlight.client.gui.components;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.actions.Actions;
-import com.drypted.spotlight.client.gui.models.RoundedCorners;
-import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
-import com.drypted.spotlight.client.models.ItemsResultData;
+import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.common.Color;
+import com.drypted.spotlight.client.gui.renderer.RenderCommon;
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -98,7 +98,7 @@ public class HotbarCollectionWidget extends AbstractWidget
 
         if (SpotlightEntryClient.getConfig().showHotbarHelpText && this.isFocused())
         {
-            RenderUtils.drawLabelWithScale(
+            RenderCommon.drawLabelWithScale(
                     guiGraphics,
                     hotbarInstructionText.getText(),
                     0.75f,
@@ -130,7 +130,7 @@ public class HotbarCollectionWidget extends AbstractWidget
         final int endX = startX + CLOSE_BUTTON_SIZE;
         final int endY = startY + CLOSE_BUTTON_SIZE;
 
-        RenderUtils.drawX(guiGraphics, startX, startY, endX, endY, CloseButtonColor, 1, true);
+        RenderCommon.drawX(guiGraphics, startX, startY, endX, endY, CloseButtonColor, 1, true);
     }
 
     private void drawCloseButtonTooltip(GuiGraphics guiGraphics, double mouseX, double mouseY)
@@ -148,7 +148,7 @@ public class HotbarCollectionWidget extends AbstractWidget
         guiGraphics.pose().pushMatrix();
         guiGraphics.pose().translate(0.0F, 0.0F, guiGraphics.pose());
 
-        RenderUtils.drawLabel(
+        RenderCommon.drawLabel(
                 guiGraphics,
                 CLOSE_BUTTON_TOOLTIP_TEXT,
                 posX,

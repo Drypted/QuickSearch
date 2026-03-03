@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.core.commands.argument;
+package com.drypted.spotlight.client.core.blueprints.commands.argument;
 
 /**
  * Thrown when an argument cannot be parsed from the raw input.

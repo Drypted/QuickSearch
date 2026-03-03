@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.gui.utils;
+package com.drypted.spotlight.client.core.blueprints.common;
 
 /**
  * Immutable color representation with RGBA components stored as a 32-bit integer.

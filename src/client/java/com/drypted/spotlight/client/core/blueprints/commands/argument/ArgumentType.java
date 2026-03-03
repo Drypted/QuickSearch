@@ -1,6 +1,6 @@
-package com.drypted.spotlight.client.core.commands.argument;
+package com.drypted.spotlight.client.core.blueprints.commands.argument;
 
-import com.drypted.spotlight.client.core.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.blueprints.commands.CommandFeedback;
 
 import java.util.List;
 

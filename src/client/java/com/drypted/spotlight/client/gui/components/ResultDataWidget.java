@@ -1,11 +1,11 @@
 package com.drypted.spotlight.client.gui.components;
 
-import com.drypted.spotlight.client.gui.models.MouseButtonClick;
-import com.drypted.spotlight.client.gui.models.RoundedCorners;
-import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
-import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.Colors;
-import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.core.blueprints.gui.MouseButtonClick;
+import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.gui.ScrollBoxWidgetEntry;
+import com.drypted.spotlight.client.core.blueprints.common.Color;
+import com.drypted.spotlight.client.core.blueprints.common.Colors;
+import com.drypted.spotlight.client.gui.renderer.RenderCommon;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -104,7 +104,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
 
         boolean renderOutline = this.isHovered() || this.isPressed() || this.isFocused();
 
-        RenderUtils.drawRectangle(
+        RenderCommon.drawRectangle(
                 g,
                 startPosX,
                 startPosY,
@@ -135,7 +135,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
 
         boolean shouldRenderIcon = this.icon != null && !this.icon.isEmpty() && this.icon.getItem() != Items.AIR;
 
-        if (shouldRenderIcon) RenderUtils.drawScaledItemSize(g, this.icon, iconX, iconY, ICON_SIZE);
+        if (shouldRenderIcon) RenderCommon.drawScaledItemSize(g, this.icon, iconX, iconY, ICON_SIZE);
 
         // title
         int titleX = iconX + (shouldRenderIcon ? (ICON_SIZE + ICON_PADDING) : 0);
@@ -154,14 +154,14 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
             // add spacing if title is also rendered
             if (shouldRenderTitle) subtitleY += getFont().lineHeight + SUBTITLE_SPACING;
 
-            RenderUtils.drawScaledText(g, this.subtitle, SUBTITLE_SCALE, titleX, subtitleY, _textColor, false);
+            RenderCommon.drawScaledText(g, this.subtitle, SUBTITLE_SCALE, titleX, subtitleY, _textColor, false);
         }
 
         // show bind, will be used to quick nav; disabled for now
         // if (this.shouldShowBind())
         // {
         //     final int size = 8;
-        //     RenderUtils.drawText(
+        //     RenderCommon.drawText(
         //             g,
         //             "O",
         //             0.75f,

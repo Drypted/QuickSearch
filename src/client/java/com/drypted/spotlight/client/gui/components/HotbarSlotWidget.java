@@ -1,10 +1,10 @@
 package com.drypted.spotlight.client.gui.components;
 
-import com.drypted.spotlight.client.gui.models.MouseButtonClick;
-import com.drypted.spotlight.client.gui.models.RoundedCorners;
-import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
-import com.drypted.spotlight.client.models.ItemsResultData;
+import com.drypted.spotlight.client.core.blueprints.gui.MouseButtonClick;
+import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.common.Color;
+import com.drypted.spotlight.client.gui.renderer.RenderCommon;
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -63,7 +63,7 @@ public class HotbarSlotWidget extends AbstractWidget
     @Override
     protected void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
-        RenderUtils.drawRectangle(
+        RenderCommon.drawRectangle(
                 guiGraphics,
                 this.getX(),
                 this.getY(),
@@ -84,7 +84,7 @@ public class HotbarSlotWidget extends AbstractWidget
         if (itemsResultData != null && !itemsResultData.isEmpty())
         {
             int iconSize = this.getHeight() - 2 * iconPadding;
-            RenderUtils.drawScaledItemSize(
+            RenderCommon.drawScaledItemSize(
                     guiGraphics,
                     itemsResultData.getIcon(),
                     this.getX() + iconPadding,
@@ -98,7 +98,7 @@ public class HotbarSlotWidget extends AbstractWidget
         {
             final int padding = 4;
 
-            RenderUtils.drawLabelWithScale(
+            RenderCommon.drawLabelWithScale(
                     guiGraphics,
                     hotbarKey,
                     hotbarKeyTextScale,

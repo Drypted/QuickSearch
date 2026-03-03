@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.gui.models;
+package com.drypted.spotlight.client.core.blueprints.gui;
 
 import net.minecraft.client.input.MouseButtonEvent;
 

@@ -1,5 +1,6 @@
-package com.drypted.spotlight.client.core.actions;
+package com.drypted.spotlight.client.core.blueprints;
 
+import com.drypted.spotlight.client.core.actions.ReplaceHotbarItemAction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;

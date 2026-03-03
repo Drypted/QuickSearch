@@ -1,6 +1,6 @@
-package com.drypted.spotlight.client.core.commands;
+package com.drypted.spotlight.client.core.blueprints.commands;
 
-import com.drypted.spotlight.client.core.search.Searchable;
+import com.drypted.spotlight.client.core.blueprints.search.Searchable;
 import net.minecraft.client.player.LocalPlayer;
 
 import java.util.List;

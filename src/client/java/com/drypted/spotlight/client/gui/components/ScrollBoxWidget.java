@@ -1,10 +1,10 @@
 package com.drypted.spotlight.client.gui.components;
 
-import com.drypted.spotlight.client.gui.models.RoundedCorners;
-import com.drypted.spotlight.client.gui.models.ScrollBoxWidgetEntry;
-import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.Colors;
-import com.drypted.spotlight.client.gui.utils.renderer.RenderUtils;
+import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.gui.ScrollBoxWidgetEntry;
+import com.drypted.spotlight.client.core.blueprints.common.Color;
+import com.drypted.spotlight.client.core.blueprints.common.Colors;
+import com.drypted.spotlight.client.gui.renderer.RenderCommon;
 import com.drypted.spotlight.client.styling.Styles;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.gui.GuiGraphics;
@@ -331,7 +331,7 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private void drawBackground(GuiGraphics g, int x1, int y1, int x2, int y2)
     {
-        RenderUtils.drawRectangle(g, x1, y1, x2, y2, rounded, outlineThickness, true, bgColor, outlineColor);
+        RenderCommon.drawRectangle(g, x1, y1, x2, y2, rounded, outlineThickness, true, bgColor, outlineColor);
     }
 
     private void drawChildren(GuiGraphics g, int mouseX, int mouseY, float delta, int x1, int y1, int x2, int y2)
@@ -362,7 +362,7 @@ public class ScrollBoxWidget extends AbstractWidget
         }
 
         // scrollbar background
-        RenderUtils.drawRectangle(
+        RenderCommon.drawRectangle(
                 g,
                 scrollBarX(),
                 getY() + outlineThickness,
@@ -375,7 +375,7 @@ public class ScrollBoxWidget extends AbstractWidget
                 outlineColor
         );
         // scroller
-        RenderUtils.drawRectangle(
+        RenderCommon.drawRectangle(
                 g,
                 scrollBarX(),
                 scrollBarY(),
@@ -388,7 +388,7 @@ public class ScrollBoxWidget extends AbstractWidget
                 outlineColor
         );
         // line
-        RenderUtils.drawRectangle(
+        RenderCommon.drawRectangle(
                 g,
                 scrollBarX(),
                 getY() + outlineThickness,

@@ -1,5 +1,7 @@
 package com.drypted.spotlight.client.core.search;
 
+import com.drypted.spotlight.client.core.blueprints.search.Searchable;
+
 import java.util.*;
 import java.util.stream.Stream;
 

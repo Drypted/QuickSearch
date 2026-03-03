@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.core.actions;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.core.blueprints.Action;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;

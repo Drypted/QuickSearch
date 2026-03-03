@@ -1,9 +1,9 @@
 package com.drypted.spotlight.client.core.commands.args;
 
-import com.drypted.spotlight.client.core.commands.ArgumentedCommand;
-import com.drypted.spotlight.client.core.commands.CommandFeedback;
-import com.drypted.spotlight.client.core.commands.argument.types.StringArgumentType;
-import com.drypted.spotlight.client.core.commands.argument.types.WordArgumentType;
+import com.drypted.spotlight.client.core.blueprints.commands.ArgumentedCommand;
+import com.drypted.spotlight.client.core.blueprints.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.blueprints.commands.argument.types.StringArgumentType;
+import com.drypted.spotlight.client.core.blueprints.commands.argument.types.WordArgumentType;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 

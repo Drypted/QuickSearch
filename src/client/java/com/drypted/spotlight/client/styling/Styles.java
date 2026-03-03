@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.styling;
 
-import com.drypted.spotlight.client.gui.utils.Color;
-import com.drypted.spotlight.client.gui.utils.Colors;
+import com.drypted.spotlight.client.core.blueprints.common.Color;
+import com.drypted.spotlight.client.core.blueprints.common.Colors;
 
 public final class Styles
 {
