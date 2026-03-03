@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.core.search;
 
 import com.drypted.spotlight.client.core.blueprints.search.Searchable;
+import com.drypted.spotlight.client.core.handlers.SearchHandler;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -143,7 +144,7 @@ public class SmartSearch<T extends Searchable>
             return Stream.empty();
         }
 
-        String sanitizedQuery = unsanitizedQuery.strip().toLowerCase();
+        String sanitizedQuery = SearchHandler.normalizeString(unsanitizedQuery);
 
         // Step 1: Get candidate items that might match
         Set<Integer> candidateItemIndices = findCandidateItemIndices(sanitizedQuery);
@@ -157,12 +158,12 @@ public class SmartSearch<T extends Searchable>
 
                 double nameSimilarity = calculateTrigramSimilarity(
                         sanitizedQuery,
-                        item.getPrimaryQuery().toLowerCase()
+                        SearchHandler.normalizeString(item.getPrimaryQuery())
                 );
 
                 double pathSimilarity = calculateTrigramSimilarity(
                         sanitizedQuery,
-                        item.getSecondaryQuery().toLowerCase()
+                        SearchHandler.normalizeString(item.getSecondaryQuery())
                 );
 
                 double bestSimilarity = Math.max(nameSimilarity, pathSimilarity);
@@ -225,7 +226,7 @@ public class SmartSearch<T extends Searchable>
 
             // Index the identifier path (e.g., "minecraft:diamond_sword")
             // Split on common separators: underscore, hyphen, space, slash, colon, backslash
-            String itemPath = item.getSecondaryQuery().toLowerCase();
+            String itemPath = SearchHandler.normalizeString(item.getSecondaryQuery());
             String[] pathWords = itemPath.split("[_\\-\\s/:\\\\]+");
 
             for (String word : pathWords)
@@ -238,7 +239,7 @@ public class SmartSearch<T extends Searchable>
             }
 
             // Index the display name (e.g., "Diamond Sword")
-            String displayName = item.getPrimaryQuery().toLowerCase();
+            String displayName = SearchHandler.normalizeString(item.getPrimaryQuery());
             String[] nameWords = displayName.split("[_\\-\\s]+");
 
             for (String word : nameWords)
@@ -304,7 +305,7 @@ public class SmartSearch<T extends Searchable>
             T item = searchableItems.get(itemIndex);
 
             // Generate trigrams from the item's path identifier
-            String itemPath = item.getSecondaryQuery().toLowerCase();
+            String itemPath = SearchHandler.normalizeString(item.getSecondaryQuery());
             Set<String> pathTrigrams = generateTrigramsFromText(itemPath);
 
             for (String trigram : pathTrigrams)
@@ -313,7 +314,7 @@ public class SmartSearch<T extends Searchable>
             }
 
             // Generate trigrams from the item's display name
-            String displayName = item.getPrimaryQuery().toLowerCase();
+            String displayName = SearchHandler.normalizeString(item.getPrimaryQuery());
             Set<String> nameTrigrams = generateTrigramsFromText(displayName);
 
             for (String trigram : nameTrigrams)
@@ -612,8 +613,8 @@ public class SmartSearch<T extends Searchable>
      */
     private ItemScoreResult calculateItemScore(T item, String normalizedQuery)
     {
-        String displayName = item.getPrimaryQuery().toLowerCase();
-        String identifierPath = item.getSecondaryQuery().toLowerCase();
+        String displayName = SearchHandler.normalizeString(item.getPrimaryQuery());
+        String identifierPath = SearchHandler.normalizeString(item.getSecondaryQuery());
         String fullIdentifier = identifierPath;
 
         // Remove namespace prefix from identifier if present (e.g., "minecraft:diamond" → "diamond")

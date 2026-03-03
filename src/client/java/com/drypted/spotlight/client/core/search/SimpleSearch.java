@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.core.search;
 
 import com.drypted.spotlight.client.core.blueprints.search.Searchable;
+import com.drypted.spotlight.client.core.handlers.SearchHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,17 +24,23 @@ public final class SimpleSearch<T extends Searchable>
      *
      * @return matched results (up to maxResults)
      */
-    public List<T> search(String unsanitizedQuery, int maxResults)
+    public List<T> search(final String unsanitizedQuery, final int maxResults)
     {
         if (unsanitizedQuery == null || unsanitizedQuery.isBlank() || items == null || items.isEmpty())
         {
             return Collections.emptyList();
         }
 
-        String query = unsanitizedQuery.strip().toLowerCase();
-        return items.stream()
-                .filter(item -> item.getPrimaryQuery().contains(query) || item.getSecondaryQuery().contains(query))
-                .limit(maxResults)
+        return items.stream() //
+                .filter(item -> isMatch(item, unsanitizedQuery)) //
+                .limit(maxResults) //
                 .collect(Collectors.toList());
+    }
+
+    private static <T extends Searchable> boolean isMatch(T item, String unsanitizedQuery)
+    {
+        String query = SearchHandler.normalizeString(unsanitizedQuery);
+        return SearchHandler.normalizeString(item.getPrimaryQuery()).contains(query) //
+                || SearchHandler.normalizeString(item.getSecondaryQuery()).contains(query);
     }
 }

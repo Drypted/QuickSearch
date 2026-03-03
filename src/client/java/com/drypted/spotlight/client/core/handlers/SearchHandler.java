@@ -168,6 +168,27 @@ public class SearchHandler
 
     /* HELPERS CLASSES & ENUMS */
 
+    /**
+     * Normalizes a string for more consistent searching. This includes:
+     *
+     * <li>Trimming leading/trailing whitespace</li>
+     * <li>Converting to lowercase (case-insensitive)</li>
+     * <li>Replacing underscores with spaces (treating them as equivalent)</li>
+     * <li>Collapsing multiple consecutive whitespace characters into a single space</li>
+     *
+     * @param input The string to normalize / Unsanitized string
+     *
+     * @return A normalized version of the input string, or an empty string if the input is null
+     */
+    public static String normalizeString(String input)
+    {
+        if (input == null) return "";
+        return input.strip() // remove leading/trailing whitespace
+                .toLowerCase() // case-insensitive
+                .replace('_', ' ') // treat underscores as spaces
+                .replaceAll("\\s+", " "); // collapse multiple spaces into one
+    }
+
     public enum SearchMode
     {
         SIMPLE,

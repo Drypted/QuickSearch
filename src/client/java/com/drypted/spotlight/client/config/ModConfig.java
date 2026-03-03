@@ -40,7 +40,7 @@ public class ModConfig implements ConfigData
         @ConfigEntry.Gui.Tooltip
         public int maxResults = 50;
         @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        @ConfigEntry.Gui.Tooltip(count = 1)
+        @ConfigEntry.Gui.Tooltip
         public CompletionType completionType = CompletionType.SINGLE_WORD;
     }
 
