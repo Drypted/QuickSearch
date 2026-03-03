@@ -35,7 +35,6 @@ public class ModConfig implements ConfigData
     public static class Search implements ConfigData
     {
         @ConfigEntry.Gui.Tooltip public boolean fuzzySearch = true;
-        @ConfigEntry.Gui.Tooltip public boolean caseSensitiveSearch = false;
         @ConfigEntry.Gui.Tooltip public boolean rememberLastQuery = true;
         @ConfigEntry.BoundedDiscrete(min = 1, max = 200)
         @ConfigEntry.Gui.Tooltip
@@ -47,8 +46,8 @@ public class ModConfig implements ConfigData
 
     public static class Notifications implements ConfigData
     {
-        @ConfigEntry.Gui.Tooltip public boolean showItemMessage = true;
-        @ConfigEntry.Gui.Tooltip public boolean showGiveNotifications = true;
+        @ConfigEntry.Gui.Tooltip public boolean showGive = true;
+        @ConfigEntry.Gui.Tooltip public boolean showReplace = true;
     }
 
     public enum CompletionType

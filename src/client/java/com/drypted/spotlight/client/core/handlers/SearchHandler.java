@@ -1,8 +1,9 @@
 package com.drypted.spotlight.client.core.handlers;
 
+import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.core.search.SimpleSearch;
 import com.drypted.spotlight.client.core.search.SmartSearch;
-import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -14,18 +15,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SearchHandler
 {
-    private static final int MAX_RESULTS = 60;
+    private static final Supplier<Integer> MAX_RESULTS_SUPPLIER = () -> SpotlightEntryClient.getConfig().search.maxResults;
+    private static final Supplier<SearchMode> SEARCH_MODE_SUPPLIER = () -> //
+            SpotlightEntryClient.getConfig().search.fuzzySearch ? SearchMode.SMART : SearchMode.SIMPLE;
 
     private static List<ItemsResultData> GameItems = Collections.emptyList();
 
     private static SimpleSearch<ItemsResultData> simpleSearch = new SimpleSearch<>(GameItems);
-
     private static SmartSearch<ItemsResultData> smartSearch;
-    private static SearchMode searchMode = SearchMode.SMART;
 
     // Keep track of the active search to allow cancellation
     private static CompletableFuture<Void> ActiveSearchTask;
@@ -94,7 +96,7 @@ public class SearchHandler
      */
     public static void searchAsync(String query, Consumer<List<ItemsResultData>> onComplete)
     {
-        searchAsync(query, onComplete, searchMode);
+        searchAsync(query, onComplete, SEARCH_MODE_SUPPLIER.get());
     }
 
     /**
@@ -121,7 +123,7 @@ public class SearchHandler
         }
 
         // 3. Run search in background
-        ActiveSearchTask = CompletableFuture.supplyAsync(() -> switch (searchMode)
+        ActiveSearchTask = CompletableFuture.supplyAsync(() -> switch (SEARCH_MODE_SUPPLIER.get())
         {
             case SMART ->
             {
@@ -132,7 +134,7 @@ public class SearchHandler
                 }
 
                 // SmartSearch.search returns a Stream; collect up to MAX_RESULTS
-                yield smartSearch.search(query, MAX_RESULTS).collect(Collectors.toList());
+                yield smartSearch.search(query, MAX_RESULTS_SUPPLIER.get()).collect(Collectors.toList());
             }
             case null, default ->
             {
@@ -141,7 +143,7 @@ public class SearchHandler
                     simpleSearch = new SimpleSearch<>(GameItems);
                 }
 
-                yield simpleSearch.search(query, MAX_RESULTS);
+                yield simpleSearch.search(query, MAX_RESULTS_SUPPLIER.get());
             }
         }).thenAcceptAsync(results -> {
             // 4. Return results to the Main Thread safely
@@ -162,16 +164,6 @@ public class SearchHandler
     public static SmartSearch<ItemsResultData> getSmartSearchInstance()
     {
         return smartSearch;
-    }
-
-    public static SearchMode getSearchMode()
-    {
-        return searchMode;
-    }
-
-    public static void setSearchMode(SearchMode searchMode)
-    {
-        SearchHandler.searchMode = searchMode;
     }
 
     /* HELPERS CLASSES & ENUMS */

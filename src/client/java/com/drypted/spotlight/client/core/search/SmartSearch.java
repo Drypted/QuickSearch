@@ -131,22 +131,22 @@ public class SmartSearch<T extends Searchable>
      * candidate based on match quality (exact, prefix, fuzzy, etc.) 3. Returns items sorted by score (lower scores =
      * better matches)
      *
-     * @param searchQuery    The text to search for (case-insensitive)
-     * @param maximumResults Maximum number of results to return. Use 0 or negative for unlimited.
+     * @param unsanitizedQuery query text (unsanitized, may contain leading/trailing whitespace, case-insensitive)
+     * @param maximumResults   Maximum number of results to return. Use 0 or negative for unlimited.
      *
      * @return A stream of matching items, sorted by relevance (best matches first)
      */
-    public Stream<T> search(String searchQuery, int maximumResults)
+    public Stream<T> search(String unsanitizedQuery, int maximumResults)
     {
-        if (searchQuery == null)
+        if (unsanitizedQuery == null)
         {
             return Stream.empty();
         }
 
-        String normalizedQuery = searchQuery.toLowerCase();
+        String sanitizedQuery = unsanitizedQuery.strip().toLowerCase();
 
         // Step 1: Get candidate items that might match
-        Set<Integer> candidateItemIndices = findCandidateItemIndices(normalizedQuery);
+        Set<Integer> candidateItemIndices = findCandidateItemIndices(sanitizedQuery);
 
         // If no candidates found through indices, try direct trigram similarity on all items
         if (candidateItemIndices.isEmpty())
@@ -156,12 +156,12 @@ public class SmartSearch<T extends Searchable>
                 T item = searchableItems.get(itemIndex);
 
                 double nameSimilarity = calculateTrigramSimilarity(
-                        normalizedQuery,
+                        sanitizedQuery,
                         item.getPrimaryQuery().toLowerCase()
                 );
 
                 double pathSimilarity = calculateTrigramSimilarity(
-                        normalizedQuery,
+                        sanitizedQuery,
                         item.getSecondaryQuery().toLowerCase()
                 );
 
@@ -176,9 +176,10 @@ public class SmartSearch<T extends Searchable>
         }
 
         // Step 2: Score candidates and filter out poor matches
-        return candidateItemIndices.stream().map(itemIndex -> {
+        return candidateItemIndices.stream()
+                .map(itemIndex -> {
                     T item = searchableItems.get(itemIndex);
-                    ItemScoreResult scoreResult = calculateItemScore(item, normalizedQuery);
+                    ItemScoreResult scoreResult = calculateItemScore(item, sanitizedQuery);
 
                     // Filter out items with no match (score >= 1000)
                     if (scoreResult.totalScore() >= 1000)
@@ -187,11 +188,13 @@ public class SmartSearch<T extends Searchable>
                     }
 
                     return new SearchResultWithScore<>(item, scoreResult.totalScore(), itemIndex);
-                }).filter(Objects::nonNull)
+                })
+                .filter(Objects::nonNull)
                 // Step 3: Sort by score (lower is better), then by original position for stability
                 .sorted(Comparator.comparingInt(SearchResultWithScore<T>::score)
-                        .thenComparingInt(SearchResultWithScore::originalIndex)).limit(
-                        maximumResults > 0 ? maximumResults : Integer.MAX_VALUE).map(SearchResultWithScore::item);
+                        .thenComparingInt(SearchResultWithScore::originalIndex))
+                .limit(maximumResults > 0 ? maximumResults : Integer.MAX_VALUE)
+                .map(SearchResultWithScore::item);
     }
 
     /* INDEX BUILDING */
@@ -875,8 +878,7 @@ public class SmartSearch<T extends Searchable>
      * sorting).
      */
     private record SearchResultWithScore<T>(T item, int score, int originalIndex)
-    {
-    }
+    {}
 
     /**
      * Represents the score assigned to an item along with the type of match that produced it.
@@ -885,8 +887,7 @@ public class SmartSearch<T extends Searchable>
      * telemetry, and understanding search behavior.
      */
     private record ItemScoreResult(int totalScore, ResultMatchType matchType)
-    {
-    }
+    {}
 
     /**
      * Enumeration of all possible match types that can produce a score.

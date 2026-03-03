@@ -66,6 +66,8 @@ public class SpotlightEntryClient implements ClientModInitializer
         KeyBindingHelper.registerKeyBinding(openSpotlightCommandKeyMapping);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (!getConfig().enableSpotlight) return;
+            
             while (openSpotlightKeyMapping.consumeClick())
             {
                 SearchHandler.requestCreativeTabRebuild();

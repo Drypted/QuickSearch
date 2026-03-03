@@ -1,8 +1,9 @@
 package com.drypted.spotlight.client.ui.components;
 
+import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.blueprints.feedback.InputError;
-import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.ui.renderer.RenderCommon;
 import com.drypted.spotlight.client.ui.styling.Styles;
 import net.minecraft.client.Minecraft;
@@ -101,9 +102,9 @@ public class InputWidget extends AbstractWidget
     protected void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
     {
         // Determine outline color based on state
-        Color currentOutlineColor = shouldShowError() ?
-                                    Objects.requireNonNull(this.error).getColor() :
-                                    this.outlineColor;
+        Color currentOutlineColor = shouldShowError()
+                                    ? Objects.requireNonNull(this.error).getColor()
+                                    : this.outlineColor;
 
         // Background
         RenderCommon.drawRectangle(
@@ -171,9 +172,9 @@ public class InputWidget extends AbstractWidget
 
             // Render text
             // Priority: disabled > message > normal
-            Color textColor = isDisabled ?
-                              disabledTextColor :
-                              shouldShowError() ? Objects.requireNonNull(this.error).getColor() : normalTextColor;
+            Color textColor = isDisabled
+                              ? disabledTextColor
+                              : shouldShowError() ? Objects.requireNonNull(this.error).getColor() : normalTextColor;
             guiGraphics.drawString(FONT, beforeSelection, textX - scrollOffset, textY, textColor.asInt(), false);
 
             guiGraphics.drawString(
@@ -309,9 +310,9 @@ public class InputWidget extends AbstractWidget
 
     private int getTextAreaWidth()
     {
-        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ?
-                             (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT) :
-                             0;
+        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING)
+                             ? (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT)
+                             : 0;
         return this.getWidth() - (TEXT_PADDING_X * 2) - indicatorSpace;
     }
 
@@ -349,7 +350,21 @@ public class InputWidget extends AbstractWidget
         // Accept suggestion with Tab (only if cursor is at end and no selection)
         if (keyEvent.key() == GLFW.GLFW_KEY_TAB && shouldShowSuggestion())
         {
-            setText(suggestion);
+            // TODO: TEST
+            switch (SpotlightEntryClient.getConfig().search.completionType)
+            {
+                case SINGLE_WORD ->
+                {
+                    // Complete only the next word
+                    String word = (suggestion.substring(text.length()).split("\\s+"))[0];
+                    insertText(word + " ");
+                }
+                case WHOLE_QUERY ->
+                {
+                    // Complete the entire suggestion
+                    setText(suggestion);
+                }
+            }
             clearSuggestion(); // Clear suggestion after accepting
             return true;
         }

@@ -2,15 +2,15 @@ package com.drypted.spotlight.client.ui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
 import com.drypted.spotlight.client.core.actions.GiveItemAction;
-import com.drypted.spotlight.client.core.blueprints.feedback.errors.InvalidItemError;
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.core.blueprints.commands.Command;
 import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
+import com.drypted.spotlight.client.core.blueprints.feedback.errors.InvalidItemError;
+import com.drypted.spotlight.client.core.blueprints.feedback.errors.SearchNotFoundError;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
-import com.drypted.spotlight.client.core.blueprints.feedback.errors.SearchNotFoundError;
 import com.drypted.spotlight.client.ui.components.*;
-import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
-import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -42,6 +42,9 @@ public class SpotlightScreen extends Screen
 
     private final boolean showCommandOnStartup;
 
+    /// Keep track of the last query
+    private static String lastQuery = "";
+
     public SpotlightScreen(boolean showCommandOnStartup)
     {
         super(Component.literal("Spotlight Menu"));
@@ -51,6 +54,7 @@ public class SpotlightScreen extends Screen
     @Override
     public void onClose()
     {
+        lastQuery = this.inputWidget.getText();
         super.onClose();
     }
 
@@ -105,11 +109,21 @@ public class SpotlightScreen extends Screen
 
         this.setFocused(inputWidget);
 
-        // check if to show command
+        boolean isLastQueryCommand = lastQuery.startsWith("/");
+
         if (showCommandOnStartup)
         {
-            inputWidget.setText("/");
+            if (isLastQueryCommand) inputWidget.setText(lastQuery);
+            else inputWidget.setText("/"); // reset
         }
+        else
+        {
+            if (isLastQueryCommand) inputWidget.setText(""); // reset
+            else inputWidget.setText(lastQuery);
+        }
+
+        // ignore last query if config is set to not remember it
+        if (!SpotlightEntryClient.getConfig().search.rememberLastQuery) lastQuery = "";
     }
 
     /* Input */
@@ -164,7 +178,8 @@ public class SpotlightScreen extends Screen
     {
         if (SpotlightEntryClient.closeSpotlightKeyMapping.matches(kEv))
         {
-            if (inputWidget.hasSuggestion())
+            // remove suggestion on close if config is set to not remember last query
+            if (inputWidget.hasSuggestion() && !SpotlightEntryClient.getConfig().search.rememberLastQuery)
             {
                 inputWidget.clearSuggestion();
                 return true;
@@ -332,20 +347,18 @@ public class SpotlightScreen extends Screen
     }
 
     /**
-     * Display argument suggestions for a recognized command.
-     * Shows suggestions in the dropdown and sets the top suggestion as ghost text.
+     * Display argument suggestions for a recognized command. Shows suggestions in the dropdown and sets the top
+     * suggestion as ghost text.
      */
     private void displayArgSuggestions(Command command, String[] args)
     {
         clearResults();
 
         // always show usage hint at top
-        this.searchResultsWidget.addChildRow(
-                ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
-                        .width(searchResultsWidget.getChildWidth())
-                        .disabled(true)
-                        .build()
-        );
+        this.searchResultsWidget.addChildRow(ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
+                .width(searchResultsWidget.getChildWidth())
+                .disabled(true)
+                .build());
 
         List<String> suggestions = command.getSuggestions(args);
 
@@ -374,14 +387,12 @@ public class SpotlightScreen extends Screen
         // Populate the dropdown with all suggestions
         for (final String suggestion : suggestions)
         {
-            this.searchResultsWidget.addChildRow(
-                    ResultDataWidget.builder(0, 0, null, null, suggestion)
-                            .width(searchResultsWidget.getChildWidth())
-                            .paddingX(7)
-                            .paddingY(4)
-                            .onClick((mBC, dC) -> onArgSuggestionClicked(suggestion))
-                            .build()
-            );
+            this.searchResultsWidget.addChildRow(ResultDataWidget.builder(0, 0, null, null, suggestion)
+                    .width(searchResultsWidget.getChildWidth())
+                    .paddingX(7)
+                    .paddingY(4)
+                    .onClick((mBC, dC) -> onArgSuggestionClicked(suggestion))
+                    .build());
         }
 
         setItemResultsVisible(true);
@@ -390,8 +401,8 @@ public class SpotlightScreen extends Screen
     }
 
     /**
-     * Called when user clicks an argument suggestion in the dropdown.
-     * Replaces the current partial argument with the selected suggestion.
+     * Called when user clicks an argument suggestion in the dropdown. Replaces the current partial argument with the
+     * selected suggestion.
      */
     private void onArgSuggestionClicked(String suggestion)
     {
