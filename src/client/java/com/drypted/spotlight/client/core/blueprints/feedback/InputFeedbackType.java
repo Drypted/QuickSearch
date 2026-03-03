@@ -3,7 +3,7 @@ package com.drypted.spotlight.client.core.blueprints.feedback;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Colors;
 import com.drypted.spotlight.client.ui.components.InputWidget;
-import com.drypted.spotlight.client.styling.Styles;
+import com.drypted.spotlight.client.ui.styling.Styles;
 import net.minecraft.ChatFormatting;
 
 /// Feedback for {@link InputWidget}

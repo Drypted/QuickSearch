@@ -6,7 +6,7 @@ import com.drypted.spotlight.client.core.blueprints.ui.ScrollBoxWidgetEntry;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Colors;
 import com.drypted.spotlight.client.ui.renderer.RenderCommon;
-import com.drypted.spotlight.client.styling.Styles;
+import com.drypted.spotlight.client.ui.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

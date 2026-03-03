@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.styling;
+package com.drypted.spotlight.client.ui.styling;
 
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Colors;

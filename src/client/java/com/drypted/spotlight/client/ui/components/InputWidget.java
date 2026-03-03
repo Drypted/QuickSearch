@@ -4,7 +4,7 @@ import com.drypted.spotlight.client.core.blueprints.feedback.InputError;
 import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.ui.renderer.RenderCommon;
-import com.drypted.spotlight.client.styling.Styles;
+import com.drypted.spotlight.client.ui.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
