@@ -98,7 +98,7 @@ public class GiveItemAction extends Action
         }
 
         // Feedback
-        if (SpotlightEntryClient.getConfig().showItemMessage)
+        if (SpotlightEntryClient.getConfig().notifications.showItemMessage)
             player.displayClientMessage(Component.literal("Gave " + name), true);
 
         final float volume = 0.5f;

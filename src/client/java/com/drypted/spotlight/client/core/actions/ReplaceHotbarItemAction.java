@@ -69,7 +69,7 @@ public class ReplaceHotbarItemAction extends Action
         player.getInventory().setItem(slotIndex, stack);
         player.getInventory().getItem(slotIndex).setPopTime(5); // item pickup animation
 
-        if (SpotlightEntryClient.getConfig().showItemMessage)
+        if (SpotlightEntryClient.getConfig().notifications.showItemMessage)
         {
             String message = "Set slot " + (slotIndex + 1) + " to " + displayName;
             if (displayName.isEmpty()) message = "Cleared slot " + (slotIndex + 1);

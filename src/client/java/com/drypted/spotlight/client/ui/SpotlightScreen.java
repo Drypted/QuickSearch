@@ -57,8 +57,8 @@ public class SpotlightScreen extends Screen
     @Override
     protected void init()
     {
-        final int searchBarWidth = SpotlightEntryClient.getConfig().searchBarWidth;
-        final int resultsHeight = SpotlightEntryClient.getConfig().resultsBoxHeight;
+        final int searchBarWidth = SpotlightEntryClient.getConfig().ui.searchBarWidth;
+        final int resultsHeight = SpotlightEntryClient.getConfig().ui.resultsBoxHeight;
 
         final int searchBarX = (this.width - searchBarWidth) / 2;
         final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FROM_CENTER;
@@ -560,7 +560,7 @@ public class SpotlightScreen extends Screen
 
     private boolean isHotbarEnabledInConfig()
     {
-        return SpotlightEntryClient.getConfig().showHotbarSlots;
+        return SpotlightEntryClient.getConfig().hotbar.showHotbarSlots;
     }
 
     private boolean isUserInputCommand()

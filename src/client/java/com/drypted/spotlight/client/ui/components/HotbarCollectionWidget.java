@@ -96,7 +96,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     {
         hotbarSlotWidgets.forEach(widget -> widget.render(guiGraphics, mouseX, mouseY, partialTick));
 
-        if (SpotlightEntryClient.getConfig().showHotbarHelpText && this.isFocused())
+        if (SpotlightEntryClient.getConfig().hotbar.showHotbarHelpText && this.isFocused())
         {
             RenderCommon.drawLabelWithScale(
                     guiGraphics,
@@ -268,7 +268,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     {
         if (this.isOverCloseButton(mEv.x(), mEv.y()))
         {
-            SpotlightEntryClient.getConfig().showHotbarHelpText = false;
+            SpotlightEntryClient.getConfig().hotbar.showHotbarHelpText = false;
             SpotlightEntryClient.saveConfig();
         }
 
