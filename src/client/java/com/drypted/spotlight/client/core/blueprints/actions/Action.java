@@ -1,6 +1,5 @@
-package com.drypted.spotlight.client.core.blueprints;
+package com.drypted.spotlight.client.core.blueprints.actions;
 
-import com.drypted.spotlight.client.core.actions.ReplaceHotbarItemAction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -39,7 +38,7 @@ public class Action
         return true;
     }
 
-    protected static void handleError(LocalPlayer player, ReplaceHotbarItemAction.ERROR error)
+    protected static void handleError(LocalPlayer player, Action.ERROR error)
     {
         switch (error)
         {

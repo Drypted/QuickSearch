@@ -1,7 +1,10 @@
-package com.drypted.spotlight.client.core.blueprints.gui;
+package com.drypted.spotlight.client.core.blueprints.ui.common;
 
 import net.minecraft.client.input.MouseButtonEvent;
 
+/// Was added in 1.21.1, because of non-existence of {@link MouseButtonClick}
+/// <br>
+/// Kept for backwards compatibility
 public record MouseButtonClick(double x, double y, int button)
 {
     public MouseButtonClick(double x, double y)

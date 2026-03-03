@@ -1,7 +1,4 @@
-package com.drypted.spotlight.client.core.blueprints.commands;
-
-import com.drypted.spotlight.client.core.blueprints.gui.InputError;
-import com.drypted.spotlight.client.core.blueprints.gui.InputFeedbackType;
+package com.drypted.spotlight.client.core.blueprints.feedback;
 
 public record CommandFeedback(String message, InputFeedbackType severity) implements InputError
 {

@@ -1,6 +1,6 @@
-package com.drypted.spotlight.client.core.blueprints.gui;
+package com.drypted.spotlight.client.core.blueprints.feedback;
 
-import com.drypted.spotlight.client.core.blueprints.common.Color;
+import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 
 public interface InputError
 {

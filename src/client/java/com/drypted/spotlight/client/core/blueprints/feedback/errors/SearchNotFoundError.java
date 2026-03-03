@@ -1,7 +1,7 @@
-package com.drypted.spotlight.client.core.blueprints.search;
+package com.drypted.spotlight.client.core.blueprints.feedback.errors;
 
-import com.drypted.spotlight.client.core.blueprints.gui.InputError;
-import com.drypted.spotlight.client.core.blueprints.gui.InputFeedbackType;
+import com.drypted.spotlight.client.core.blueprints.feedback.InputError;
+import com.drypted.spotlight.client.core.blueprints.feedback.InputFeedbackType;
 
 public class SearchNotFoundError implements InputError
 {

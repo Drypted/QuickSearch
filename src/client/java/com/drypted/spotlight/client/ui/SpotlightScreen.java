@@ -1,15 +1,15 @@
-package com.drypted.spotlight.client.gui;
+package com.drypted.spotlight.client.ui;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
-import com.drypted.spotlight.client.core.actions.Actions;
-import com.drypted.spotlight.client.core.actions.InvalidItemError;
+import com.drypted.spotlight.client.core.actions.GiveItemAction;
+import com.drypted.spotlight.client.core.blueprints.feedback.errors.InvalidItemError;
 import com.drypted.spotlight.client.core.blueprints.commands.Command;
-import com.drypted.spotlight.client.core.blueprints.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
 import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
-import com.drypted.spotlight.client.core.blueprints.search.SearchNotFoundError;
-import com.drypted.spotlight.client.gui.components.*;
-import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.feedback.errors.SearchNotFoundError;
+import com.drypted.spotlight.client.ui.components.*;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -285,7 +285,7 @@ public class SpotlightScreen extends Screen
     private void onItemsResultClicked(ItemsResultData data)
     {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null) Actions.giveItem(player, data);
+        if (player != null) GiveItemAction.run(player, data);
     }
 
     /* Commands */
@@ -455,7 +455,7 @@ public class SpotlightScreen extends Screen
 
         if (this.submitItemResult != null)
         {
-            Actions.giveItem(player, this.submitItemResult);
+            GiveItemAction.run(player, this.submitItemResult);
         }
         else
         {

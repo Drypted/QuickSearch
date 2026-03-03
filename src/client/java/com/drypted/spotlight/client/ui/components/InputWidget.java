@@ -1,9 +1,9 @@
-package com.drypted.spotlight.client.gui.components;
+package com.drypted.spotlight.client.ui.components;
 
-import com.drypted.spotlight.client.core.blueprints.gui.InputError;
-import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
-import com.drypted.spotlight.client.core.blueprints.common.Color;
-import com.drypted.spotlight.client.gui.renderer.RenderCommon;
+import com.drypted.spotlight.client.core.blueprints.feedback.InputError;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
+import com.drypted.spotlight.client.ui.renderer.RenderCommon;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

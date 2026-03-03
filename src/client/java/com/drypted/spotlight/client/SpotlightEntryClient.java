@@ -2,7 +2,7 @@ package com.drypted.spotlight.client;
 
 import com.drypted.spotlight.client.config.ModConfig;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
-import com.drypted.spotlight.client.gui.SpotlightScreen;
+import com.drypted.spotlight.client.ui.SpotlightScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;

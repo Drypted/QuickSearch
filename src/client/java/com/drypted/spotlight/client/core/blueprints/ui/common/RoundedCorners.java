@@ -1,4 +1,4 @@
-package com.drypted.spotlight.client.core.blueprints.gui;
+package com.drypted.spotlight.client.core.blueprints.ui.common;
 
 public record RoundedCorners(boolean topLeft, boolean topRight, boolean bottomLeft,
                              boolean bottomRight)

@@ -1,10 +1,10 @@
-package com.drypted.spotlight.client.gui.components;
+package com.drypted.spotlight.client.ui.components;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
-import com.drypted.spotlight.client.core.actions.Actions;
-import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
-import com.drypted.spotlight.client.core.blueprints.common.Color;
-import com.drypted.spotlight.client.gui.renderer.RenderCommon;
+import com.drypted.spotlight.client.core.actions.ReplaceHotbarItemAction;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
+import com.drypted.spotlight.client.ui.renderer.RenderCommon;
 import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.styling.Styles;
 import net.minecraft.client.Minecraft;
@@ -221,7 +221,7 @@ public class HotbarCollectionWidget extends AbstractWidget
             // if a slot is already selected, use that slot
             if (selectedHotbarWidget != null)
             {
-                Actions.replaceHotbarItem(player, selectedHotbarWidget.getSearchResultData(), widget.getHotbarIndex());
+                ReplaceHotbarItemAction.run(player, selectedHotbarWidget.getSearchResultData(), widget.getHotbarIndex());
 
                 // used this one
                 selectedHotbarWidget = null;
@@ -229,7 +229,7 @@ public class HotbarCollectionWidget extends AbstractWidget
                 return;
             }
 
-            Actions.replaceHotbarItem(player, widget.getSearchResultData(), widget.getHotbarIndex());
+            ReplaceHotbarItemAction.run(player, widget.getSearchResultData(), widget.getHotbarIndex());
         }
     }
 

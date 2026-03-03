@@ -1,7 +1,8 @@
 package com.drypted.spotlight.client.core.actions;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
-import com.drypted.spotlight.client.core.blueprints.Action;
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
+import com.drypted.spotlight.client.core.blueprints.actions.Action;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -14,8 +15,17 @@ import net.minecraft.world.item.ItemStack;
 
 public class GiveItemAction extends Action
 {
+    public static void run(LocalPlayer player, ItemsResultData item)
+    {
+        if (player == null || item == null || item.getDefinition() == null) return;
+
+        GiveItemAction.run(player, item.getDefinition(), item.getName(), item.getMaxStackSize());
+    }
+
     public static void run(LocalPlayer player, ItemInput item, String name, int maxStackSize)
     {
+        if (player == null || item == null) return;
+
         ItemStack stack;
         try
         {
@@ -39,6 +49,8 @@ public class GiveItemAction extends Action
 
     public static void run(LocalPlayer player, ItemStack stack, String name)
     {
+        if (player == null || stack == null) return;
+
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.gameMode == null)

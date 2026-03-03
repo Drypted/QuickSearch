@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.core.commands.args;
 
 import com.drypted.spotlight.client.core.blueprints.commands.ArgumentedCommand;
-import com.drypted.spotlight.client.core.blueprints.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
 import com.drypted.spotlight.client.core.blueprints.commands.argument.types.StringArgumentType;
 import com.drypted.spotlight.client.core.blueprints.commands.argument.types.WordArgumentType;
 import net.minecraft.client.player.LocalPlayer;

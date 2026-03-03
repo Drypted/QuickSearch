@@ -1,6 +1,7 @@
 package com.drypted.spotlight.client.core.blueprints.commands;
 
 import com.drypted.spotlight.client.core.blueprints.commands.argument.ArgumentType;
+import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
 
 import java.util.ArrayList;
 import java.util.Collections;

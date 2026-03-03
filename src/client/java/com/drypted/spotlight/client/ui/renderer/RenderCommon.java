@@ -1,8 +1,8 @@
-package com.drypted.spotlight.client.gui.renderer;
+package com.drypted.spotlight.client.ui.renderer;
 
-import com.drypted.spotlight.client.core.blueprints.gui.RoundedCorners;
-import com.drypted.spotlight.client.core.blueprints.common.Color;
-import com.drypted.spotlight.client.core.blueprints.common.Colors;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
+import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
+import com.drypted.spotlight.client.core.blueprints.ui.common.Colors;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;

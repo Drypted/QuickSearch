@@ -1,5 +1,6 @@
 package com.drypted.spotlight.client.core.blueprints.commands;
 
+import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
 import com.drypted.spotlight.client.core.blueprints.search.Searchable;
 import net.minecraft.client.player.LocalPlayer;
 

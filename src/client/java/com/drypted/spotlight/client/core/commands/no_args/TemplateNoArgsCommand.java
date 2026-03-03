@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.core.commands.no_args;
 
 import com.drypted.spotlight.client.core.blueprints.commands.Command;
-import com.drypted.spotlight.client.core.blueprints.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 

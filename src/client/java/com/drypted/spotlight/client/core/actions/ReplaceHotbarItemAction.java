@@ -1,7 +1,8 @@
 package com.drypted.spotlight.client.core.actions;
 
 import com.drypted.spotlight.client.SpotlightEntryClient;
-import com.drypted.spotlight.client.core.blueprints.Action;
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
+import com.drypted.spotlight.client.core.blueprints.actions.Action;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.arguments.item.ItemInput;
@@ -14,6 +15,14 @@ import org.jetbrains.annotations.Nullable;
 
 public class ReplaceHotbarItemAction extends Action
 {
+    public static void run(LocalPlayer player, @org.jspecify.annotations.Nullable ItemsResultData item, int slot)
+    {
+        if (player == null) return;
+        if (item == null || item.getDefinition() == null) item = ItemsResultData.EMPTY;
+
+        ReplaceHotbarItemAction.run(player, item.getDefinition(), item.getName(), item.getMaxStackSize(), slot);
+    }
+
     public static void run(LocalPlayer player, @Nullable ItemInput item, String displayName, int maxStackSize, int slotIndex)
     {
         ItemStack stack = null;

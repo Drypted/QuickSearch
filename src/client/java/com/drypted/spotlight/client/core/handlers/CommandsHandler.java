@@ -1,7 +1,7 @@
 package com.drypted.spotlight.client.core.handlers;
 
 import com.drypted.spotlight.client.core.blueprints.commands.Command;
-import com.drypted.spotlight.client.core.blueprints.commands.CommandFeedback;
+import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
 import com.drypted.spotlight.client.core.commands.args.DeleteHotbarCommand;
 import com.drypted.spotlight.client.core.commands.args.GetPlayerHeadCommand;
 import com.drypted.spotlight.client.core.commands.args.LoadHotbarCommand;
