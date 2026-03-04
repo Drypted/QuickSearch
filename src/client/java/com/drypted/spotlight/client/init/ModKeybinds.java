@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.init;
 
-import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.SpotlightClient;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.ui.SpotlightScreen;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -10,7 +10,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-import static com.drypted.spotlight.client.SpotlightEntryClient.MOD_ID;
+import static com.drypted.spotlight.client.SpotlightClient.MOD_ID;
 
 public class ModKeybinds
 {
@@ -50,7 +50,7 @@ public class ModKeybinds
     public static void registerClientCallback()
     {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!SpotlightEntryClient.getConfig().enableSpotlight) return;
+            if (!SpotlightClient.getConfig().enableSpotlight) return;
 
             while (openSpotlightKey.consumeClick())
             {

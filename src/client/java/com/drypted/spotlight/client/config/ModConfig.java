@@ -1,11 +1,11 @@
 package com.drypted.spotlight.client.config;
 
-import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.SpotlightClient;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
-@Config(name = SpotlightEntryClient.MOD_ID)
+@Config(name = SpotlightClient.MOD_ID)
 public class ModConfig implements ConfigData
 {
     @ConfigEntry.Gui.Tooltip public boolean enableSpotlight = true;

@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.ui.components;
 
-import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.SpotlightClient;
 import com.drypted.spotlight.client.core.actions.ReplaceHotbarItemAction;
 import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
@@ -96,7 +96,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     {
         hotbarSlotWidgets.forEach(widget -> widget.render(guiGraphics, mouseX, mouseY, partialTick));
 
-        if (SpotlightEntryClient.getConfig().hotbar.showHotbarHelpText && this.isFocused())
+        if (SpotlightClient.getConfig().hotbar.showHotbarHelpText && this.isFocused())
         {
             RenderCommon.drawLabelWithScale(
                     guiGraphics,
@@ -268,8 +268,8 @@ public class HotbarCollectionWidget extends AbstractWidget
     {
         if (this.isOverCloseButton(mEv.x(), mEv.y()))
         {
-            SpotlightEntryClient.getConfig().hotbar.showHotbarHelpText = false;
-            SpotlightEntryClient.saveConfig();
+            SpotlightClient.getConfig().hotbar.showHotbarHelpText = false;
+            SpotlightClient.saveConfig();
         }
 
         return super.mouseReleased(mEv);

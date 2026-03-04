@@ -11,7 +11,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.drypted.spotlight.client.SpotlightEntryClient"
+      "com.drypted.spotlight.client.SpotlightClient"
     ],
     "main": [
       "com.drypted.spotlight.SpotlightEntry"

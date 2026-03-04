@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.ui;
 
-import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.SpotlightClient;
 import com.drypted.spotlight.client.core.actions.GiveItemAction;
 import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.core.blueprints.commands.Command;
@@ -62,8 +62,8 @@ public class SpotlightScreen extends Screen
     @Override
     protected void init()
     {
-        final int searchBarWidth = SpotlightEntryClient.getConfig().ui.searchBarWidth;
-        final int resultsHeight = SpotlightEntryClient.getConfig().ui.resultsBoxHeight;
+        final int searchBarWidth = SpotlightClient.getConfig().ui.searchBarWidth;
+        final int resultsHeight = SpotlightClient.getConfig().ui.resultsBoxHeight;
 
         final int searchBarX = (this.width - searchBarWidth) / 2;
         final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FROM_CENTER;
@@ -124,7 +124,7 @@ public class SpotlightScreen extends Screen
         }
 
         // ignore last query if config is set to not remember it
-        if (!SpotlightEntryClient.getConfig().search.rememberLastQuery) lastQuery = "";
+        if (!SpotlightClient.getConfig().search.rememberLastQuery) lastQuery = "";
     }
 
     /* Input */
@@ -180,7 +180,7 @@ public class SpotlightScreen extends Screen
         if (ModKeybinds.getCloseSpotlightKey().matches(kEv))
         {
             // remove suggestion on close if config is set to not remember last query
-            if (inputWidget.hasSuggestion() && !SpotlightEntryClient.getConfig().search.rememberLastQuery)
+            if (inputWidget.hasSuggestion() && !SpotlightClient.getConfig().search.rememberLastQuery)
             {
                 inputWidget.clearSuggestion();
                 return true;
@@ -572,7 +572,7 @@ public class SpotlightScreen extends Screen
 
     private boolean isHotbarEnabledInConfig()
     {
-        return SpotlightEntryClient.getConfig().hotbar.showHotbarSlots;
+        return SpotlightClient.getConfig().hotbar.showHotbarSlots;
     }
 
     private boolean isUserInputCommand()

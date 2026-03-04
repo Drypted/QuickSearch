@@ -8,7 +8,7 @@ import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SpotlightEntryClient implements ClientModInitializer
+public class SpotlightClient implements ClientModInitializer
 {
     public static final String MOD_ID = "spotlight";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);

@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.core.actions;
 
-import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.SpotlightClient;
 import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.core.blueprints.actions.Action;
 import net.minecraft.client.Minecraft;
@@ -69,7 +69,7 @@ public class ReplaceHotbarItemAction extends Action
         player.getInventory().setItem(slotIndex, stack);
         player.getInventory().getItem(slotIndex).setPopTime(5); // item pickup animation
 
-        if (SpotlightEntryClient.getConfig().notifications.showReplace)
+        if (SpotlightClient.getConfig().notifications.showReplace)
         {
             String message = "Set slot " + (slotIndex + 1) + " to " + displayName;
             if (displayName.isEmpty()) message = "Cleared slot " + (slotIndex + 1);

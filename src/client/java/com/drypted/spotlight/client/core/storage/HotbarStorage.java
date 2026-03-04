@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.core.storage;
 
-import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.SpotlightClient;
 import com.google.gson.*;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class HotbarStorage
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpotlightEntryClient.MOD_ID);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpotlightClient.MOD_ID);
     private static final String FILE_NAME = "spotlight_hotbars.json";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 

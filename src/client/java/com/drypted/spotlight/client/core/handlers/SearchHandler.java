@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.core.handlers;
 
-import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.SpotlightClient;
 import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.core.search.SimpleSearch;
 import com.drypted.spotlight.client.core.search.SmartSearch;
@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 
 public class SearchHandler
 {
-    private static final Supplier<Integer> MAX_RESULTS_SUPPLIER = () -> SpotlightEntryClient.getConfig().search.maxResults;
+    private static final Supplier<Integer> MAX_RESULTS_SUPPLIER = () -> SpotlightClient.getConfig().search.maxResults;
     private static final Supplier<SearchMode> SEARCH_MODE_SUPPLIER = () -> //
-            SpotlightEntryClient.getConfig().search.fuzzySearch ? SearchMode.SMART : SearchMode.SIMPLE;
+            SpotlightClient.getConfig().search.fuzzySearch ? SearchMode.SMART : SearchMode.SIMPLE;
 
     private static List<ItemsResultData> GameItems = Collections.emptyList();
 

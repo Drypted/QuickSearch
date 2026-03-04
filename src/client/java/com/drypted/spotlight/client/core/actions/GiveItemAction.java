@@ -1,6 +1,6 @@
 package com.drypted.spotlight.client.core.actions;
 
-import com.drypted.spotlight.client.SpotlightEntryClient;
+import com.drypted.spotlight.client.SpotlightClient;
 import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.core.blueprints.actions.Action;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -98,7 +98,7 @@ public class GiveItemAction extends Action
         }
 
         // Feedback
-        if (SpotlightEntryClient.getConfig().notifications.showGive)
+        if (SpotlightClient.getConfig().notifications.showGive)
             player.displayClientMessage(Component.literal("Gave " + name), true);
 
         final float volume = 0.5f;
