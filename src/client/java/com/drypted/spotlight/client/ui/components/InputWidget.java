@@ -5,6 +5,7 @@ import com.drypted.spotlight.client.config.ModConfig;
 import com.drypted.spotlight.client.core.blueprints.feedback.InputError;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
+import com.drypted.spotlight.client.init.ModKeybinds;
 import com.drypted.spotlight.client.ui.renderer.RenderCommon;
 import com.drypted.spotlight.client.ui.styling.Styles;
 import net.minecraft.client.Minecraft;
@@ -402,6 +403,12 @@ public class InputWidget extends AbstractWidget
         if (isReadOnly && (keyEvent.key() == GLFW.GLFW_KEY_BACKSPACE || keyEvent.key() == GLFW.GLFW_KEY_DELETE))
             return false;
 
+        if (ModKeybinds.getInputSubmitKey().matches(keyEvent))
+        {
+            submit();
+            return true;
+        }
+
         // Movement and editing
         return switch (keyEvent.key())
         {
@@ -433,11 +440,6 @@ public class InputWidget extends AbstractWidget
             case GLFW.GLFW_KEY_DELETE ->
             {
                 handleDelete(ctrl);
-                yield true;
-            }
-            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER ->
-            {
-                submit();
                 yield true;
             }
             default -> false;

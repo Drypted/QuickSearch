@@ -51,5 +51,6 @@
   "key.categories.spotlight": "Spotlight",
   "key.spotlight.open": "Open Spotlight",
   "key.spotlight.close": "Close Spotlight",
-  "key.spotlight.open_command": "Open Spotlight (Command)"
+  "key.spotlight.open_command": "Open Spotlight (Command)",
+  "key.spotlight.input_submit": "Submit search"
 }
