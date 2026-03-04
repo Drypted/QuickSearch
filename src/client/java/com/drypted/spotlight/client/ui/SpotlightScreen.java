@@ -10,6 +10,7 @@ import com.drypted.spotlight.client.core.blueprints.feedback.errors.SearchNotFou
 import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
+import com.drypted.spotlight.client.init.ModKeybinds;
 import com.drypted.spotlight.client.ui.components.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -176,7 +177,7 @@ public class SpotlightScreen extends Screen
     @Override
     public boolean keyPressed(@NonNull KeyEvent kEv)
     {
-        if (SpotlightEntryClient.closeSpotlightKeyMapping.matches(kEv))
+        if (ModKeybinds.getCloseSpotlightKey().matches(kEv))
         {
             // remove suggestion on close if config is set to not remember last query
             if (inputWidget.hasSuggestion() && !SpotlightEntryClient.getConfig().search.rememberLastQuery)
