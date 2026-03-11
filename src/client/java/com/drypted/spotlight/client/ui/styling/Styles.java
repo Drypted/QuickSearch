@@ -24,13 +24,13 @@ public final class Styles
     private static final Color TEXT = PRIMARY_COLOR.getReadableTextColor(4.5f);
     private static final Color DISABLED_TEXT = PRIMARY_COLOR.getReadableTextColor(3.0f).withHalfOpacity();
 
-    public static final float THICK = 1.5f;
+    public static final float THICK = 2.f;
     public static final float THIN = 1.f;
 
     public static final class Hotbar
     {
-        public static final float OUTLINE_THICKNESS = THIN;
-        public static final float HELP_TEXT_OUTLINE_THICKNESS = THIN;
+        public static final float OUTLINE_THICKNESS = Styles.THIN;
+        public static final float HELP_TEXT_OUTLINE_THICKNESS = Styles.THIN;
         // hotbar slot outline
         public static final Color FOCUSED_COLOR = Styles.OUTLINE;
         public static final Color SLOT_PRESSED_COLOR = Styles.SECONDARY_COLOR;
@@ -46,7 +46,7 @@ public final class Styles
 
     public static final class Input
     {
-        public static final float OUTLINE_THICKNESS = THICK;
+        public static final float OUTLINE_THICKNESS = Styles.THICK;
         // box
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND;
         public static final Color OUTLINE_COLOR = Styles.OUTLINE;
@@ -68,7 +68,7 @@ public final class Styles
 
     public static final class ResultData
     {
-        public static final float OUTLINE_THICKNESS = THIN;
+        public static final float OUTLINE_THICKNESS = Styles.THIN;
         // box
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND.withOpacity(128);
         public static final Color TEXT_COLOR = Styles.TEXT;
@@ -80,12 +80,12 @@ public final class Styles
 
     public static final class ScrollBox
     {
-        public static final float OUTLINE_THICKNESS = THICK;
+        public static final float OUTLINE_THICKNESS = Styles.THICK;
         // box
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND;
         public static final Color OUTLINE_COLOR = Styles.OUTLINE;
         // scrollbar
-        public static final Color SCROLLBAR_COLOR = Colors.CLEAR;
+        public static final Color SCROLLBAR_COLOR = Styles.BACKGROUND;
         public static final Color SCROLLER_COLOR = Styles.OUTLINE;
     }
 }
