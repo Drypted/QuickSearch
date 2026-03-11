@@ -22,7 +22,6 @@ import org.jspecify.annotations.NonNull;
 public final class RenderCommon
 {
     private static final int VANILLA_ITEM_SIZE = 16;
-    private static final float BACKGROUND_PIXEL_SIZE = 8f;
 
     /**
      * Fills a rectangle with optional rounded corners and outline.
@@ -44,7 +43,14 @@ public final class RenderCommon
 
         if (insetThickness == 0f)
         {
-            drawQuad(g, startPosX, startPosY, endPosX, endPosY, backgroundColor);
+            if (MosaicBackgroundRenderer.drawMosaic(g, startPosX, startPosY, endPosX, endPosY))
+            {
+                drawQuad(g, startPosX, startPosY, endPosX, endPosY, backgroundColor);
+            }
+            else
+            {
+                drawQuad(g, startPosX, startPosY, endPosX, endPosY, backgroundColor);
+            }
             return;
         }
 
@@ -54,7 +60,14 @@ public final class RenderCommon
         float innerBottom = endPosY - insetThickness;
 
         // Inner body
-        drawQuad(g, innerLeft, innerTop, innerRight, innerBottom, backgroundColor);
+        if (MosaicBackgroundRenderer.drawMosaic(g, innerLeft, innerTop, innerRight, innerBottom))
+        {
+            drawQuad(g, innerLeft, innerTop, innerRight, innerBottom, backgroundColor);
+        }
+        else
+        {
+            drawQuad(g, innerLeft, innerTop, innerRight, innerBottom, backgroundColor);
+        }
 
         Color outerLineColor = renderOutline ? outlineColor : backgroundColor;
 

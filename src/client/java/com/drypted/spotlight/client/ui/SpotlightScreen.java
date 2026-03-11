@@ -12,6 +12,7 @@ import com.drypted.spotlight.client.core.handlers.CommandsHandler;
 import com.drypted.spotlight.client.core.handlers.SearchHandler;
 import com.drypted.spotlight.client.init.ModKeybinds;
 import com.drypted.spotlight.client.ui.components.*;
+import com.drypted.spotlight.client.ui.renderer.MosaicBackgroundRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -57,6 +58,13 @@ public class SpotlightScreen extends Screen
     {
         lastQuery = this.inputWidget.getText();
         super.onClose();
+    }
+
+    @Override
+    public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+    {
+        MosaicBackgroundRenderer.captureFramebuffer();
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override

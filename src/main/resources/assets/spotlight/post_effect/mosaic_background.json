@@ -1,0 +1,16 @@
+{
+  "passes": [
+    {
+      "vertex_shader": "minecraft:core/screenquad",
+      "fragment_shader": "spotlight:core/mosaic_background",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "target": "minecraft:main",
+          "bilinear": true
+        }
+      ],
+      "output": "spotlight:mosaic_output"
+    }
+  ]
+}

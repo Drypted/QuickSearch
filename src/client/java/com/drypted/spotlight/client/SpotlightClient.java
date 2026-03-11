@@ -2,9 +2,11 @@ package com.drypted.spotlight.client;
 
 import com.drypted.spotlight.client.config.ModConfig;
 import com.drypted.spotlight.client.init.ModKeybinds;
+import com.drypted.spotlight.client.ui.renderer.MosaicBackgroundRenderer;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,8 @@ public class SpotlightClient implements ClientModInitializer
 
         ModKeybinds.register();
         ModKeybinds.registerClientCallback();
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> MosaicBackgroundRenderer.free());
     }
 
     public static ModConfig getConfig()
