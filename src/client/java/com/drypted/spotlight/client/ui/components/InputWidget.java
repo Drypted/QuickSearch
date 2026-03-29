@@ -369,18 +369,20 @@ public class InputWidget extends AbstractWidget
                 case NONE -> { }
                 case SINGLE_WORD ->
                 {
-                    String remaining;
-
-                    if (suggestionIsCompletion()) remaining = suggestion.substring(text.length());
-                    else remaining = suggestion;
-
-                    if (!remaining.isEmpty())
+                    if (suggestionIsCompletion()) // suggestion text
                     {
-                        // insert the next word + space (if any word after this one)
-                        insertText(remaining.contains(" ")
-                                   ? remaining.substring(0, remaining.indexOf(" ") + 1)
-                                   : remaining);
-
+                        String remaining = suggestion.substring(text.length());
+                        if (!remaining.isEmpty())
+                        {
+                            // insert the next word + space (if any word after this one)
+                            insertText(remaining.contains(" ")
+                                       ? remaining.substring(0, remaining.indexOf(" ") + 1)
+                                       : remaining);
+                        }
+                    }
+                    else // this is ghost text
+                    {
+                        insertText(suggestion);
                     }
                 }
                 case WHOLE_QUERY ->
@@ -465,12 +467,11 @@ public class InputWidget extends AbstractWidget
             }
             default -> false;
         };
-
     }
 
     private boolean suggestionIsCompletion()
     {
-        return suggestion.toLowerCase().startsWith(text.toLowerCase()) && !suggestion.equalsIgnoreCase(text);
+        return !text.isEmpty() && suggestion.toLowerCase().startsWith(text.toLowerCase()) && !suggestion.equalsIgnoreCase(text);
     }
 
     /* Cursor Movement */
