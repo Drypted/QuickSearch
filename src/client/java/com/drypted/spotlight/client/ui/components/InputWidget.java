@@ -171,12 +171,12 @@ public class InputWidget extends AbstractWidget
 
                 if (suggestionIsCompletion())
                 {
-                    // old behavior (completion)
-                    ghostText = suggestion.substring(text.length());
+                    // completion
+                    ghostText = suggestion.substring(text.trim().toLowerCase().length());
                 }
                 else
                 {
-                    // new behavior (independent ghost text)
+                    // independent ghost text
                     ghostText = suggestion;
                 }
 
@@ -230,7 +230,7 @@ public class InputWidget extends AbstractWidget
                 break;
         }
 
-        // Render message message
+        // Render message
         if (shouldShowError())
         {
             assert this.error != null;
@@ -366,6 +366,7 @@ public class InputWidget extends AbstractWidget
         {
             switch (SpotlightClient.getConfig().search.completionType)
             {
+                case NONE -> { }
                 case SINGLE_WORD ->
                 {
                     String remaining;
@@ -375,15 +376,16 @@ public class InputWidget extends AbstractWidget
 
                     if (!remaining.isEmpty())
                     {
-                        insertText(remaining.split("\\s+")[0] + (remaining.length() > 1 ? " " : ""));
-                        // insert the next word + space (if multiple words)
+                        // insert the next word + space (if any word after this one)
+                        insertText(remaining.contains(" ")
+                                   ? remaining.substring(0, remaining.indexOf(" ") + 1)
+                                   : remaining);
+
                     }
                 }
                 case WHOLE_QUERY ->
-                {
                     // Complete the entire suggestion
-                    setText(suggestion);
-                }
+                        setText(suggestion);
                 case null, default ->
                 {
                     // pass
@@ -506,7 +508,7 @@ public class InputWidget extends AbstractWidget
 
     private void moveCursorByWord(int direction, boolean selecting)
     {
-        int newPos = cursorPos;
+        int newPos;
 
         if (direction < 0)
         {
