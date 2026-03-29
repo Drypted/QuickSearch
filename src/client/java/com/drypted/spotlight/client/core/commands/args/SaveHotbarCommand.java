@@ -28,7 +28,6 @@ public class SaveHotbarCommand extends ArgumentedCommand
         return "Save the current hotbar combination";
     }
 
-
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)
     {
@@ -40,7 +39,7 @@ public class SaveHotbarCommand extends ArgumentedCommand
 
         try
         {
-            HotbarStorage.save(name, player.getInventory(), registryAccess);
+            HotbarStorage.INSTANCE.saveFrom(name, player.getInventory(), registryAccess);
             return CommandFeedback.withSuccess("Saved hotbar as \"" + name + "\"");
         }
         catch (IOException e)

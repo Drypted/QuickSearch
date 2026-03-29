@@ -16,7 +16,7 @@ public class DeleteHotbarCommand extends ArgumentedCommand
         super(new StringOptionArgumentType(() -> {
             try
             {
-                return HotbarStorage.getStoredNames();
+                return HotbarStorage.INSTANCE.getStoredNames();
             }
             catch (IOException e)
             {
@@ -48,7 +48,7 @@ public class DeleteHotbarCommand extends ArgumentedCommand
         String name = args[0].toLowerCase();
         try
         {
-            HotbarStorage.remove(name);
+            HotbarStorage.INSTANCE.remove(name);
         }
         catch (IOException e)
         {

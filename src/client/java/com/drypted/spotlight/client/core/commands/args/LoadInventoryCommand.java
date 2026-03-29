@@ -5,9 +5,11 @@ import com.drypted.spotlight.client.core.blueprints.commands.ArgumentedCommand;
 import com.drypted.spotlight.client.core.blueprints.commands.argument.types.StringOptionArgumentType;
 import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
 import com.drypted.spotlight.client.core.storage.HotbarStorage;
+import com.drypted.spotlight.client.core.storage.InventoryStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -16,14 +18,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class LoadHotbarCommand extends ArgumentedCommand
+public class LoadInventoryCommand extends ArgumentedCommand
 {
-    public LoadHotbarCommand() throws IOException
+    public LoadInventoryCommand() throws IOException
     {
         super(new StringOptionArgumentType(() -> {
             try
             {
-                return HotbarStorage.INSTANCE.getStoredNames();
+                return InventoryStorage.INSTANCE.getStoredNames();
             }
             catch (IOException e)
             {
@@ -35,13 +37,13 @@ public class LoadHotbarCommand extends ArgumentedCommand
     @Override
     public String getName()
     {
-        return "loadh";
+        return "loadi";
     }
 
     @Override
     public String getDescription()
     {
-        return "Load a saved hotbar combination";
+        return "Load a saved inventory";
     }
 
     @Override
@@ -53,17 +55,17 @@ public class LoadHotbarCommand extends ArgumentedCommand
         String name = args[0].toLowerCase();
         HolderLookup.Provider provider = player.level().registryAccess();
 
-        Optional<List<ItemStack>> result;
+        Optional<NonNullList<ItemStack>> result;
         try
         {
-            result = HotbarStorage.INSTANCE.loadStacks(name, provider);
+            result = InventoryStorage.INSTANCE.loadStacks(name);
         }
         catch (IOException e)
         {
-            return CommandFeedback.withError("Failed to load hotbar: " + e.getMessage());
+            return CommandFeedback.withError("Failed to load inventory: " + e.getMessage());
         }
 
-        if (result.isEmpty()) return CommandFeedback.withError("No hotbar preset found with name \"" + name + "\"");
+        if (result.isEmpty()) return CommandFeedback.withError("No inventory preset found with name \"" + name + "\"");
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.gameMode == null) return CommandFeedback.withError("Game mode not available");
