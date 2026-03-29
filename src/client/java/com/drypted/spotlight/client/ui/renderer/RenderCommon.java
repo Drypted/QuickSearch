@@ -43,14 +43,7 @@ public final class RenderCommon
 
         if (insetThickness == 0f)
         {
-            if (MosaicBackgroundRenderer.drawMosaic(g, startPosX, startPosY, endPosX, endPosY))
-            {
-                drawQuad(g, startPosX, startPosY, endPosX, endPosY, backgroundColor);
-            }
-            else
-            {
-                drawQuad(g, startPosX, startPosY, endPosX, endPosY, backgroundColor);
-            }
+            drawQuad(g, startPosX, startPosY, endPosX, endPosY, backgroundColor);
             return;
         }
 
@@ -60,14 +53,7 @@ public final class RenderCommon
         float innerBottom = endPosY - insetThickness;
 
         // Inner body
-        if (MosaicBackgroundRenderer.drawMosaic(g, innerLeft, innerTop, innerRight, innerBottom))
-        {
-            drawQuad(g, innerLeft, innerTop, innerRight, innerBottom, backgroundColor);
-        }
-        else
-        {
-            drawQuad(g, innerLeft, innerTop, innerRight, innerBottom, backgroundColor);
-        }
+        drawQuad(g, innerLeft, innerTop, innerRight, innerBottom, backgroundColor);
 
         Color outerLineColor = renderOutline ? outlineColor : backgroundColor;
 
@@ -171,16 +157,16 @@ public final class RenderCommon
             }
 
             @Override
-            public @NonNull RenderPipeline pipeline() {return RenderPipelines.GUI;}
+            public @NonNull RenderPipeline pipeline() { return RenderPipelines.GUI; }
 
             @Override
-            public @NonNull TextureSetup textureSetup() {return TextureSetup.noTexture();}
+            public @NonNull TextureSetup textureSetup() { return TextureSetup.noTexture(); }
 
             @Override
-            public ScreenRectangle scissorArea() {return scissor;}
+            public ScreenRectangle scissorArea() { return scissor; }
 
             @Override
-            public ScreenRectangle bounds() {return bounds;}
+            public ScreenRectangle bounds() { return bounds; }
         });
     }
 
