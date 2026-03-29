@@ -364,30 +364,39 @@ public class InputWidget extends AbstractWidget
         // Accept suggestion with Tab (only if cursor is at end and no selection)
         if (keyEvent.key() == GLFW.GLFW_KEY_TAB && shouldShowSuggestion())
         {
+            if (!suggestionIsCompletion())
+            {
+                // if ghost text, one press completes entire suggestion
+                setText(suggestion);
+                return true;
+            }
+
+            // shift to complete whole query
+            if (shift)
+            {
+                setText(suggestion);
+                return true;
+            }
+
             switch (SpotlightClient.getConfig().search.completionType)
             {
                 case NONE -> { }
                 case SINGLE_WORD ->
                 {
-                    if (suggestionIsCompletion()) // suggestion text
+                    String remaining = suggestion.substring(text.length());
+                    if (!remaining.isEmpty())
                     {
-                        String remaining = suggestion.substring(text.length());
-                        if (!remaining.isEmpty())
-                        {
-                            // insert the next word + space (if any word after this one)
-                            insertText(remaining.contains(" ")
-                                       ? remaining.substring(0, remaining.indexOf(" ") + 1)
-                                       : remaining);
-                        }
-                    }
-                    else // this is ghost text
-                    {
-                        insertText(suggestion);
+                        // insert the next word + space (if any word after this one)
+                        insertText(remaining.contains(" ")
+                                   ? remaining.substring(0, remaining.indexOf(" ") + 1)
+                                   : remaining);
                     }
                 }
                 case WHOLE_QUERY ->
+                {
                     // Complete the entire suggestion
-                        setText(suggestion);
+                    setText(suggestion);
+                }
                 case null, default ->
                 {
                     // pass
@@ -471,7 +480,8 @@ public class InputWidget extends AbstractWidget
 
     private boolean suggestionIsCompletion()
     {
-        return !text.isEmpty() && suggestion.toLowerCase().startsWith(text.toLowerCase()) && !suggestion.equalsIgnoreCase(text);
+        return !text.isEmpty() && suggestion.toLowerCase()
+                .startsWith(text.toLowerCase()) && !suggestion.equalsIgnoreCase(text);
     }
 
     /* Cursor Movement */

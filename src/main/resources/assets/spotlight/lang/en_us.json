@@ -34,7 +34,7 @@
   "text.autoconfig.spotlight.option.search.maxResults.@Tooltip": "Maximum number of results displayed",
   "11": "----------------------------------------------------------------------------------------------------------------------------",
   "text.autoconfig.spotlight.option.search.completionType": "Completion type",
-  "text.autoconfig.spotlight.option.search.completionType.@Tooltip": "Type of auto-completion for the search box",
+  "text.autoconfig.spotlight.option.search.completionType.@Tooltip": "Type of auto-completion for the search box, shift to complete whole query (Regardless)",
   "12": "----------------------------------------------------------------------------------------------------------------------------",
   "text.autoconfig.spotlight.option.notifications.showItemMessage": "Show item message",
   "text.autoconfig.spotlight.option.notifications.showItemMessage.@Tooltip": "Shows a message when an item is given or replaced",
