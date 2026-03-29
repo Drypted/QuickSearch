@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * Accepts a saved hotbar preset name. Provides live suggestions from stored hotbar names.
+ * Accepts a saved preset name. Provides live suggestions from stored preset names.
  */
 public class StringOptionArgumentType implements ArgumentType<String>
 {
@@ -25,7 +25,7 @@ public class StringOptionArgumentType implements ArgumentType<String>
     @Override
     public String parse(String raw) throws ArgumentParseException
     {
-        if (raw == null || raw.isBlank()) throw new ArgumentParseException("Please enter a hotbar name");
+        if (raw == null || raw.isBlank()) throw new ArgumentParseException("Please enter a preset name");
         String trimmed = raw.trim();
         if (!trimmed.matches(PATTERN)) throw new ArgumentParseException("Please input only alphabets");
         return trimmed.toLowerCase();
@@ -34,7 +34,7 @@ public class StringOptionArgumentType implements ArgumentType<String>
     @Override
     public CommandFeedback validate(String raw)
     {
-        if (raw == null || raw.isBlank()) return CommandFeedback.withError("Please enter a hotbar name");
+        if (raw == null || raw.isBlank()) return CommandFeedback.withError("Please enter a preset name");
         if (!raw.trim().matches(PATTERN)) return CommandFeedback.withError("Please input only alphabets");
         return CommandFeedback.NO_ERROR;
     }
@@ -62,7 +62,7 @@ public class StringOptionArgumentType implements ArgumentType<String>
     @Override
     public String getUsageHint()
     {
-        return "<hotbar_name>";
+        return "<name>";
     }
 }
 

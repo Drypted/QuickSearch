@@ -1,14 +1,12 @@
 package com.drypted.spotlight.client.core.commands.args;
 
-import com.drypted.spotlight.client.core.actions.ReplaceHotbarItemAction;
+import com.drypted.spotlight.client.core.actions.ReplaceInventoryItemAction;
 import com.drypted.spotlight.client.core.blueprints.commands.ArgumentedCommand;
 import com.drypted.spotlight.client.core.blueprints.commands.argument.types.StringOptionArgumentType;
 import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
-import com.drypted.spotlight.client.core.storage.HotbarStorage;
 import com.drypted.spotlight.client.core.storage.InventoryStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -53,7 +51,6 @@ public class LoadInventoryCommand extends ArgumentedCommand
         if (argsError.isNotNone()) return argsError;
 
         String name = args[0].toLowerCase();
-        HolderLookup.Provider provider = player.level().registryAccess();
 
         Optional<NonNullList<ItemStack>> result;
         try
@@ -81,9 +78,9 @@ public class LoadInventoryCommand extends ArgumentedCommand
                 itemName = stack.getHoverName().getString();
             }
 
-            ReplaceHotbarItemAction.run(player, stack, itemName, i);
+            ReplaceInventoryItemAction.run(player, stack, itemName, i);
         }
 
-        return CommandFeedback.withSuccess("Loaded hotbar \"" + name + "\"");
+        return CommandFeedback.withSuccess("Loaded inventory \"" + name + "\"");
     }
 }
