@@ -122,13 +122,13 @@ public class SpotlightScreen extends Screen
 
         if (showCommandOnStartup)
         {
-            if (isLastQueryCommand) inputWidget.setText(lastQuery);
+            if (isLastQueryCommand) inputWidget.setSuggestion(lastQuery);
             else inputWidget.setText("/"); // reset
         }
         else
         {
             if (isLastQueryCommand) inputWidget.setText(""); // reset
-            else inputWidget.setText(lastQuery);
+            else inputWidget.setSuggestion(lastQuery);
         }
 
         // ignore last query if config is set to not remember it
@@ -269,7 +269,7 @@ public class SpotlightScreen extends Screen
         {
             ItemsResultData topResult = results.getFirst();
             String itemName = topResult.getName();
-            if (itemName.toLowerCase().startsWith(currentText.toLowerCase()))
+            if (itemName.toLowerCase().startsWith(currentText.toLowerCase()) && !itemName.equalsIgnoreCase(currentText))
             {
                 inputWidget.setSuggestion(itemName);
             }
@@ -332,7 +332,7 @@ public class SpotlightScreen extends Screen
         {
             Command topResult = results.getFirst();
             String commandWithSlash = "/" + topResult.getName();
-            if (commandWithSlash.toLowerCase().startsWith(currentText.toLowerCase()))
+            if (commandWithSlash.toLowerCase().startsWith(currentText.toLowerCase()) && !commandWithSlash.equalsIgnoreCase(currentText))
             {
                 inputWidget.setSuggestion(commandWithSlash);
             }
@@ -385,7 +385,7 @@ public class SpotlightScreen extends Screen
         if (!suggestions.isEmpty())
         {
             String topSuggestion = suggestions.getFirst();
-            if (topSuggestion.toLowerCase().startsWith(currentPartial.toLowerCase()))
+            if (topSuggestion.toLowerCase().startsWith(currentPartial.toLowerCase()) && !topSuggestion.equalsIgnoreCase(currentPartial))
             {
                 // Build the full suggestion: current text up to the partial, then the full suggestion
                 String prefix = currentText.substring(0, currentText.length() - currentPartial.length());

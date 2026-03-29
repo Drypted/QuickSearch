@@ -132,7 +132,7 @@ public class InputWidget extends AbstractWidget
         guiGraphics.enableScissor(textX, this.getY(), textX + textAreaWidth, this.getY() + textAreaHeight);
 
         // Render text or placeholder
-        if (this.text.isEmpty() && !this.placeholder.isEmpty())
+        if (this.text.isEmpty() && this.suggestion.isEmpty() && !this.placeholder.isEmpty())
         {
             // Render placeholder
             guiGraphics.drawString(FONT, this.placeholder, textX, textY, placeholderColor.asInt(), false);
@@ -167,7 +167,19 @@ public class InputWidget extends AbstractWidget
 
             if (shouldShowSuggestion())
             {
-                String ghostText = suggestion.substring(text.length());
+                String ghostText;
+
+                if (suggestionIsCompletion())
+                {
+                    // old behavior (completion)
+                    ghostText = suggestion.substring(text.length());
+                }
+                else
+                {
+                    // new behavior (independent ghost text)
+                    ghostText = suggestion;
+                }
+
                 int ghostX = textX + FONT.width(this.text) - scrollOffset;
                 guiGraphics.drawString(FONT, ghostText, ghostX, textY, placeholderColor.asInt(), false);
             }
@@ -356,9 +368,16 @@ public class InputWidget extends AbstractWidget
             {
                 case SINGLE_WORD ->
                 {
-                    // Complete only the next word
-                    String word = (suggestion.substring(text.length()).split("\\s+"))[0];
-                    insertText(word + " ");
+                    String remaining;
+
+                    if (suggestionIsCompletion()) remaining = suggestion.substring(text.length());
+                    else remaining = suggestion;
+
+                    if (!remaining.isEmpty())
+                    {
+                        insertText(remaining.split("\\s+")[0] + (remaining.length() > 1 ? " " : ""));
+                        // insert the next word + space (if multiple words)
+                    }
                 }
                 case WHOLE_QUERY ->
                 {
@@ -445,6 +464,11 @@ public class InputWidget extends AbstractWidget
             default -> false;
         };
 
+    }
+
+    private boolean suggestionIsCompletion()
+    {
+        return suggestion.toLowerCase().startsWith(text.toLowerCase()) && !suggestion.equalsIgnoreCase(text);
     }
 
     /* Cursor Movement */
@@ -998,6 +1022,11 @@ public class InputWidget extends AbstractWidget
         notifyTextChanged();
     }
 
+    public String getSuggestion()
+    {
+        return suggestion;
+    }
+
     public boolean hasSuggestion()
     {
         return this.shouldShowSuggestion();
@@ -1151,8 +1180,7 @@ public class InputWidget extends AbstractWidget
                 && !suggestion.isEmpty() // not empty
                 && cursorPos == text.length() // cursor at end
                 && !hasSelection()  // not selecting
-                && suggestion.length() > text.length() // suggestion is an extension of current text
-                && suggestion.toLowerCase().startsWith(text.toLowerCase());
+                ;
     }
 
     /* Callbacks */
