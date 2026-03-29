@@ -172,7 +172,7 @@ public class InputWidget extends AbstractWidget
                 if (suggestionIsCompletion())
                 {
                     // completion
-                    ghostText = suggestion.substring(text.trim().toLowerCase().length());
+                    ghostText = suggestion.substring(text.toLowerCase().length());
                 }
                 else
                 {
