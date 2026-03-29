@@ -378,7 +378,7 @@ public class InputWidget extends AbstractWidget
                 return true;
             }
 
-            switch (SpotlightClient.getConfig().search.completionType)
+            switch (SpotlightClient.getConfig().search.defaultCompletionType)
             {
                 case NONE -> { }
                 case SINGLE_WORD ->
@@ -1189,7 +1189,7 @@ public class InputWidget extends AbstractWidget
 
     private boolean shouldShowSuggestion()
     {
-        return SpotlightClient.getConfig().search.completionType != ModConfig.CompletionType.NONE // not disabled
+        return SpotlightClient.getConfig().search.defaultCompletionType != ModConfig.DefaultCompletionType.NONE // not disabled
                 && !suggestion.isEmpty() // not empty
                 && cursorPos == text.length() // cursor at end
                 && !hasSelection()  // not selecting
