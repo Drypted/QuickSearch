@@ -35,7 +35,7 @@ public class LoadHotbarCommand extends ArgumentedCommand
     @Override
     public String getName()
     {
-        return "loadh";
+        return "hload";
     }
 
     @Override

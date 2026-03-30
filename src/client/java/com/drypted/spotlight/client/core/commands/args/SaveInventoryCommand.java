@@ -18,7 +18,7 @@ public class SaveInventoryCommand extends ArgumentedCommand
 	@Override
 	public String getName()
 	{
-		return "savei";
+		return "isave";
 	}
 
 	@Override

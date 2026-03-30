@@ -35,7 +35,7 @@ public class LoadInventoryCommand extends ArgumentedCommand
     @Override
     public String getName()
     {
-        return "loadi";
+        return "iload";
     }
 
     @Override

@@ -28,7 +28,7 @@ public class DeleteHotbarCommand extends ArgumentedCommand
     @Override
     public String getName()
     {
-        return "delh";
+        return "hdel";
     }
 
     @Override

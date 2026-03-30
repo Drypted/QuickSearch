@@ -19,7 +19,7 @@ public class SaveHotbarCommand extends ArgumentedCommand
     @Override
     public String getName()
     {
-        return "saveh";
+        return "hsave";
     }
 
     @Override

@@ -28,7 +28,7 @@ public class DeleteInventoryCommand extends ArgumentedCommand
     @Override
     public String getName()
     {
-        return "deli";
+        return "idel";
     }
 
     @Override
