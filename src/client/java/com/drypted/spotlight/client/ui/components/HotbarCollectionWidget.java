@@ -2,10 +2,10 @@ package com.drypted.spotlight.client.ui.components;
 
 import com.drypted.spotlight.client.SpotlightClient;
 import com.drypted.spotlight.client.core.actions.ReplaceHotbarItemAction;
-import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
-import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
-import com.drypted.spotlight.client.ui.renderer.RenderCommon;
 import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
+import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
+import com.drypted.spotlight.client.ui.renderer.RenderCommon;
 import com.drypted.spotlight.client.ui.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -145,9 +145,6 @@ public class HotbarCollectionWidget extends AbstractWidget
         final int posX = (int) (mouseX - (textWidth - CLOSE_BUTTON_TOOLTIP_PADDING_X) / 2.0f);
         final int posY = this.getY() - (int) textHeight - CLOSE_BUTTON_TOOLTIP_PADDING_Y - CLOSE_BUTTON_TOOLTIP_OFFSET_Y;
 
-        guiGraphics.pose().pushMatrix();
-        guiGraphics.pose().translate(0.0F, 0.0F, guiGraphics.pose());
-
         RenderCommon.drawLabel(
                 guiGraphics,
                 CLOSE_BUTTON_TOOLTIP_TEXT,
@@ -161,8 +158,6 @@ public class HotbarCollectionWidget extends AbstractWidget
                 TooltipOutlineColor,
                 TooltipTextColor
         );
-
-        guiGraphics.pose().popMatrix();
     }
 
     private boolean isOverCloseButton(double mouseX, double mouseY)
@@ -221,7 +216,11 @@ public class HotbarCollectionWidget extends AbstractWidget
             // if a slot is already selected, use that slot
             if (selectedHotbarWidget != null)
             {
-                ReplaceHotbarItemAction.run(player, selectedHotbarWidget.getSearchResultData(), widget.getHotbarIndex());
+                ReplaceHotbarItemAction.run(
+                        player,
+                        selectedHotbarWidget.getSearchResultData(),
+                        widget.getHotbarIndex()
+                );
 
                 // used this one
                 selectedHotbarWidget = null;

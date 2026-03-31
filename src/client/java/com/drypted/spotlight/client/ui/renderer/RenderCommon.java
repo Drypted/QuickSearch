@@ -333,14 +333,14 @@ public final class RenderCommon
             guiGraphics.pose().pushMatrix();
             guiGraphics.pose().translate(thickness * shadowOffset, thickness * shadowOffset);
 
-            drawThickLine(guiGraphics, startX, startY, endX, endY, thickness, Colors.SHADOW);
-            drawThickLine(guiGraphics, startX, endY, endX, startY, thickness, Colors.SHADOW);
+            drawRasterLine(guiGraphics, startX, startY, endX, endY, thickness, Colors.SHADOW);
+            drawRasterLine(guiGraphics, startX, endY, endX, startY, thickness, Colors.SHADOW);
 
             guiGraphics.pose().popMatrix();
         }
 
-        drawThickLine(guiGraphics, startX, startY, endX, endY, thickness, color);
-        drawThickLine(guiGraphics, startX, endY, endX, startY, thickness, color);
+        drawRasterLine(guiGraphics, startX, startY, endX, endY, thickness, color);
+        drawRasterLine(guiGraphics, startX, endY, endX, startY, thickness, color);
     }
 
     /* LABEL */
@@ -572,6 +572,49 @@ public final class RenderCommon
         while (true)
         {
             guiGraphics.fill(x1, y1, x1 + 1, y1 + 1, color);
+
+            if (x1 == x2 && y1 == y2) break;
+
+            int e2 = 2 * err;
+            if (e2 > -dy)
+            {
+                err -= dy;
+                x1 += sx;
+            }
+            if (e2 < dx)
+            {
+                err += dx;
+                y1 += sy;
+            }
+        }
+    }
+
+    /**
+     * Draws a thick line using Bresenham sampling and a square brush.
+     */
+    private static void drawRasterLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness, Color color)
+    {
+        if (thickness <= 0) return;
+
+        final int brushStart = -((thickness - 1) / 2);
+        final int brushEnd = brushStart + thickness;
+        final int argb = color.asInt();
+
+        int dx = Math.abs(x2 - x1);
+        int dy = Math.abs(y2 - y1);
+        int sx = x1 < x2 ? 1 : -1;
+        int sy = y1 < y2 ? 1 : -1;
+        int err = dx - dy;
+
+        while (true)
+        {
+            for (int offsetX = brushStart; offsetX < brushEnd; offsetX++)
+            {
+                for (int offsetY = brushStart; offsetY < brushEnd; offsetY++)
+                {
+                    guiGraphics.fill(x1 + offsetX, y1 + offsetY, x1 + offsetX + 1, y1 + offsetY + 1, argb);
+                }
+            }
 
             if (x1 == x2 && y1 == y2) break;
 

@@ -77,7 +77,7 @@ public class SpotlightScreen extends Screen
         final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FROM_CENTER;
 
         this.inputWidget = InputWidget.builder(searchBarX, searchBarY, searchBarWidth, SEARCH_BAR_HEIGHT).build();
-        this.inputWidget.setPlaceholder("Search items for blocks ...");
+        this.inputWidget.setPlaceholder("Search items or blocks ...");
         // set validator for no symbols
         this.inputWidget.setValidator(text -> text.matches("[/a-zA-Z0-9 -_\"]*"));
 
@@ -328,11 +328,12 @@ public class SpotlightScreen extends Screen
 
         // Set suggestion to first result if user is still typing the command name
         String currentText = inputWidget.getText().trim();
-        if (!currentText.isEmpty() && !currentText.contains(" ") && !results.isEmpty())
+        if (!currentText.isEmpty() && !currentText.contains(" "))
         {
             Command topResult = results.getFirst();
             String commandWithSlash = "/" + topResult.getName();
-            if (commandWithSlash.toLowerCase().startsWith(currentText.toLowerCase()) && !commandWithSlash.equalsIgnoreCase(currentText))
+            if (commandWithSlash.toLowerCase()
+                    .startsWith(currentText.toLowerCase()) && !commandWithSlash.equalsIgnoreCase(currentText))
             {
                 inputWidget.setSuggestion(commandWithSlash);
             }
@@ -382,15 +383,13 @@ public class SpotlightScreen extends Screen
         // Set ghost-text suggestion: build the full input text with the top suggestion completing the current arg
         String currentText = inputWidget.getText();
         String currentPartial = args.length > 0 ? args[args.length - 1] : "";
-        if (!suggestions.isEmpty())
+        String topSuggestion = suggestions.getFirst();
+        if (topSuggestion.toLowerCase().startsWith(currentPartial.toLowerCase()) && !topSuggestion.equalsIgnoreCase(
+                currentPartial))
         {
-            String topSuggestion = suggestions.getFirst();
-            if (topSuggestion.toLowerCase().startsWith(currentPartial.toLowerCase()) && !topSuggestion.equalsIgnoreCase(currentPartial))
-            {
-                // Build the full suggestion: current text up to the partial, then the full suggestion
-                String prefix = currentText.substring(0, currentText.length() - currentPartial.length());
-                inputWidget.setSuggestion(prefix + topSuggestion);
-            }
+            // Build the full suggestion: current text up to the partial, then the full suggestion
+            String prefix = currentText.substring(0, currentText.length() - currentPartial.length());
+            inputWidget.setSuggestion(prefix + topSuggestion);
         }
 
         // Populate the dropdown with all suggestions
