@@ -192,7 +192,7 @@ public class Color
      *
      * @return a new Color instance
      */
-    public Color withOpacity(int alpha)
+    public Color withAlpha(int alpha)
     {
         return fromRGBA(this.getRed(), this.getGreen(), this.getBlue(), alpha);
     }
@@ -204,7 +204,7 @@ public class Color
      */
     public Color withHalfOpacity()
     {
-        return this.withOpacity(this.getAlpha() / 2);
+        return this.withAlpha(this.getAlpha() / 2);
     }
 
     /**

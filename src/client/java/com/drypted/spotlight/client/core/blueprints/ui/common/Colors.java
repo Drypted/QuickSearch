@@ -22,7 +22,7 @@ public class Colors
     public static final int iGRAY = Colors.GRAY.asInt();
 
     // Shadow
-    public static final Color SHADOW = BLACK.withOpacity(64);
+    public static final Color SHADOW = BLACK.withAlpha(64);
 
     // More refined colors for UI indicators
     public static final Color SUCCESS_GREEN = Color.fromRGBA(34, 197, 94, 255);     // Modern green
@@ -37,5 +37,5 @@ public class Colors
     // DEBUG
     public static final Color DEBUG_RECT_OUTLINE = Color.fromRGBA(168, 85, 247, 255);
     // ^ Modern purple
-    public static final Color DEBUG_RECT_FILL = DEBUG_RECT_OUTLINE.withOpacity(64);
+    public static final Color DEBUG_RECT_FILL = DEBUG_RECT_OUTLINE.withAlpha(64);
 }

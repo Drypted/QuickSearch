@@ -19,7 +19,7 @@ public final class Styles
     private static final Color WARNING_COLOR = Color.fromInt(0xFF_FFBA00);
     private static final Color ERROR_COLOR = Colors.RED;
 
-    private static final Color BACKGROUND = PRIMARY_COLOR.withOpacity(128);
+    private static final Color BACKGROUND = PRIMARY_COLOR.withAlpha(128);
     private static final Color OUTLINE = PRIMARY_COLOR;
     private static final Color TEXT = PRIMARY_COLOR.getReadableTextColor(4.5f);
     private static final Color DISABLED_TEXT = PRIMARY_COLOR.getReadableTextColor(3.0f).withHalfOpacity();
@@ -70,7 +70,7 @@ public final class Styles
     {
         public static final float OUTLINE_THICKNESS = Styles.THIN;
         // box
-        public static final Color BACKGROUND_COLOR = Styles.BACKGROUND.withOpacity(128);
+        public static final Color BACKGROUND_COLOR = Styles.BACKGROUND.withAlpha(128);
         public static final Color TEXT_COLOR = Styles.TEXT;
         // indicators
         public static final Color SELECTED_OUTLINE_COLOR = Styles.TERTIARY_COLOR;

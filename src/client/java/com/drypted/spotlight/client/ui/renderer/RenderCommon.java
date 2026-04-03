@@ -1,8 +1,8 @@
 package com.drypted.spotlight.client.ui.renderer;
 
-import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Colors;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -14,6 +14,7 @@ import net.minecraft.client.gui.render.state.GuiElementRenderState;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Range;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
 import org.joml.Vector2f;
@@ -22,6 +23,17 @@ import org.jspecify.annotations.NonNull;
 public final class RenderCommon
 {
     private static final int VANILLA_ITEM_SIZE = 16;
+    @Range(from = 0, to = 1) private static double GlobalAlphaModifier = 1.0;
+
+    public static void setGlobalAlphaModifier(@Range(from = 0, to = 1) double globalAlphaModifier)
+    {
+        GlobalAlphaModifier = Mth.clamp(globalAlphaModifier, 0.0, 1.0);
+    }
+
+    public static double getGlobalAlphaModifier()
+    {
+        return GlobalAlphaModifier;
+    }
 
     /**
      * Fills a rectangle with optional rounded corners and outline.
@@ -40,6 +52,9 @@ public final class RenderCommon
     public static void drawRectangle(GuiGraphics g, float startPosX, float startPosY, float endPosX, float endPosY, RoundedCorners corners, float insetThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
     {
         insetThickness = Math.max(0f, insetThickness);
+
+        outlineColor = outlineColor.withAlpha((int) (outlineColor.getAlpha() * GlobalAlphaModifier));
+        backgroundColor = backgroundColor.withAlpha((int) (backgroundColor.getAlpha() * GlobalAlphaModifier));
 
         if (insetThickness == 0f)
         {
@@ -207,6 +222,8 @@ public final class RenderCommon
     {
         thickness = Math.max(1, thickness);
 
+        color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
+
         // Calculate tick geometry (proportional to size)
         // Short arm: bottom-left to middle
         int shortArmStartX = posX + (int) (size * 0.2f);
@@ -243,6 +260,8 @@ public final class RenderCommon
         final int dotSize = Math.max(2, size / 5); // Size of each dot
         final int spacing = size / 4; // Spacing between dots
 
+        color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
+
         // Calculate total width of all dots
         int totalWidth = (dotCount - 1) * spacing + dotSize;
         int startX = posX + (size - totalWidth) / 2;
@@ -257,7 +276,7 @@ public final class RenderCommon
 
             // Calculate opacity using sine wave (0.3 to 1.0)
             float alpha = 0.3f + 0.7f * (float) Math.abs(Math.sin(progress * Math.PI * 2));
-            Color dotColor = color.withOpacity((int) (255 * alpha));
+            Color dotColor = color.withAlpha((int) (255 * alpha));
 
             // Draw dot
             int dotX = startX + (i * spacing);
@@ -287,6 +306,8 @@ public final class RenderCommon
         int startX = posX + (size - totalWidth) / 2;
         int centerY = posY + size / 2;
 
+        color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
+
         for (int i = 0; i < dotCount; i++)
         {
             int dotDelay = i * (animationCycle / dotCount);
@@ -303,7 +324,7 @@ public final class RenderCommon
 
             // Opacity effect
             float alpha = 0.5f + 0.5f * Math.abs(waveValue);
-            Color dotColor = color.withOpacity((int) (255 * alpha));
+            Color dotColor = color.withAlpha((int) (255 * alpha));
 
             // Draw dot
             int dotX = startX + (i * spacing) - (dotSize - baseDotSize) / 2;
@@ -328,6 +349,8 @@ public final class RenderCommon
      */
     public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color, int thickness, boolean drawShadow, float shadowOffset)
     {
+        color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
+
         if (drawShadow)
         {
             guiGraphics.pose().pushMatrix();
@@ -362,6 +385,8 @@ public final class RenderCommon
                 outlineColor
         );
 
+        textColor = textColor.withAlpha((int) (textColor.getAlpha() * GlobalAlphaModifier));
+
         RenderCommon.drawScaledText(g, text, scale, posX, posY, textColor);
     }
 
@@ -387,6 +412,8 @@ public final class RenderCommon
 
         int textPosX = startX + ((endX - startX) / 2) - (textWidth / 2);
         int textPosY = startY + (endY - startY) / 2 - (textHeight / 2);
+
+        textColor = textColor.withAlpha((int) (textColor.getAlpha() * GlobalAlphaModifier));
 
         RenderCommon.drawScaledText(g, text, scale, textPosX, textPosY, textColor);
     }
@@ -458,6 +485,8 @@ public final class RenderCommon
      */
     public static void drawHorizontalLine(GuiGraphics g, int startPosX, int endPosX, int posY, int thickness, Color color)
     {
+        color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
+
         g.fill(startPosX, posY, endPosX, posY + thickness, color.asInt());
     }
 
@@ -473,6 +502,8 @@ public final class RenderCommon
      */
     public static void drawVerticalLine(GuiGraphics g, int posX, int startPosY, int endPosY, int thickness, Color color)
     {
+        color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
+
         g.fill(posX, startPosY, posX + thickness, endPosY, color.asInt());
     }
 
@@ -503,6 +534,8 @@ public final class RenderCommon
 
     public static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color, boolean drawShadow)
     {
+        color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
+
         g.pose().pushMatrix();
         g.pose().translate(x, y);
         g.pose().scale(scale, scale);
