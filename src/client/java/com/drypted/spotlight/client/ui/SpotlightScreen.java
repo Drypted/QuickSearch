@@ -133,6 +133,9 @@ public class SpotlightScreen extends Screen
 
         // ignore last query if config is set to not remember it
         if (!SpotlightClient.getConfig().search.rememberLastQuery) lastQuery = "";
+
+        // focus on input widget
+        this.inputWidget.setFocused(true);
     }
 
     /* Input */
