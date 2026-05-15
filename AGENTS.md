@@ -8,24 +8,25 @@
 - Entrypoints are in `src/main/resources/fabric.mod.json`; environment is client-only.
 - Real initializer is `src/client/java/com/drypted/spotlight/client/SpotlightClient.java` (AutoConfig, keybinds, lifecycle cleanup).
 - `src/main/java/com/drypted/spotlight/SpotlightEntry.java` is intentionally empty.
-- Screen orchestration and input routing live in `src/client/java/com/drypted/spotlight/client/ui/SpotlightScreen.java`.
+- `SpotlightScreen` composes specialized collaborators in `src/client/java/com/drypted/spotlight/client/ui/spotlight/**` (`SpotlightQueryRouter`, `SpotlightResultPresenter`, `SpotlightSubmitHandler`, `SpotlightVisibilityController`) for routing, presentation, submit handling, and visibility state.
 ## Core feature flow
 - Open flow: `ModKeybinds` -> `SearchHandler.requestCreativeTabRebuild()` -> `new SpotlightScreen(...)`.
 - Item index flow: `CreativeModeTabsMixin` (`buildAllTabContents` tail inject) -> `SearchHandler.rebuildGameItems()`.
-- Search flow: `SpotlightScreen.onTextChanged(...)` dispatches to item search (`SearchHandler.searchAsync` with `SimpleSearch`/`SmartSearch`) or command search (`CommandsHandler.getCommands` + arg suggestions).
-- Item actions stay in `GiveItemAction` and `ReplaceHotbarItemAction` (creative-mode checks and inventory slot mapping are centralized there).
-- Hotbar presets are persisted by `HotbarStorage` to game-dir `spotlight_hotbars.json` using vanilla `Hotbar.CODEC`.
+- Search flow: `SpotlightScreen.onTextChanged(...)` -> `SpotlightQueryRouter` -> item path (`SpotlightItemQueryRouter` -> `SearchHandler.searchAsync`) or command path (`SpotlightCommandQueryRouter` -> `CommandsHandler` + arg suggestions).
+- Item actions stay in `GiveItemAction`, `ReplaceHotbarItemAction`, and `ReplaceInventoryItemAction` (creative-mode checks and slot mapping are centralized in action classes).
+- Presets use `PresetStorage` under game-dir `spotlight-storage/`: `HotbarStorage` (`hotbars.json`, vanilla `Hotbar.CODEC`) and `InventoryStorage` (`inventories.json`, `ItemStack.OPTIONAL_CODEC.listOf()`).
 ## UI Widget Components
 - All screen widgets use builder factories: `InputWidget.builder(...)`, `ScrollBoxWidget.builder(...)`, `ResultDataWidget.builder(...)`.
 - Builder patterns support fluent configuration: color, size, padding, rounding, callbacks, disabled states.
 - Hotbar UI: `HotbarCollectionWidget` renders 9 slots; `HotbarSlotWidget` represents individual slots with item icons and keyboard labels.
 - Hotbar widget focus/selection: shift-click for source slot selection, normal click for target slot replacements.
-- Hotbar persistence: `HotbarStorage` uses Gson + vanilla `Hotbar.CODEC` for save/load/delete to game directory.
+- Hotbar persistence: `HotbarStorage` uses `PresetStorage` (Gson + `Hotbar.CODEC`) and stores presets in `spotlight-storage/hotbars.json` under the game directory.
 ## Command conventions
 - Implement new commands under `src/client/java/com/drypted/spotlight/client/core/commands/**`.
 - Prefer `ArgumentedCommand` + typed `ArgumentType` classes from `core/blueprints/commands/argument/types/**`.
 - Register commands only in `CommandsHandler` static block; then rebuild the command index.
 - UI-visible command outcomes should return `CommandFeedback`, not thrown exceptions.
+- Keep command parsing in `CommandInputParser` (`isCommandInput`, `getCommandName`, `getArgs`, `hasStartedArguments`) instead of re-implementing parsing in screens/widgets.
 ## Rendering and mixin integration
 - Mosaic pipeline spans `MosaicBackgroundRenderer`, `RenderCommon`, `assets/spotlight/post_effect/mosaic_background.json`, `assets/spotlight/shaders/core/mosaic_background.fsh`.
 - `SpotlightScreen.render(...)` must call `MosaicBackgroundRenderer.captureFramebuffer()` before widget rendering.
@@ -47,7 +48,7 @@
 - `ReplaceHotbarItemAction` enforces creative mode; hotbar slot mapping uses indexed inventory access to player hotbar.
 - `HotbarCollectionWidget` can be disabled globally via config `hotbar.showHotbarSlots` flag.
 - If changing indexing, verify both the mixin trigger and keybind-triggered manual rebuild path.
-- If changing command parsing, keep quoted argument parsing behavior in `SpotlightScreen.getArgs()`.
+- If changing command parsing, keep quoted argument parsing behavior in `CommandInputParser.getArgs()`.
 - If changing render code, keep framebuffer resize handling and `ClientLifecycleEvents.CLIENT_STOPPING` cleanup intact.
 - Qodana linter config excludes `SmartSearch.java` (complex algorithm); all other code subject to standard checks.
 
