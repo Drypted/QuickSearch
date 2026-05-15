@@ -70,28 +70,13 @@ public class ModKeybinds
 
     /* GETTERS & SETTERS */
 
-    public static KeyMapping.Category getQuickSearchKeyCategory()
-    {
-        return QUICK_SEARCH_KEY_CATEGORY;
-    }
+    public static KeyMapping.Category getQuickSearchKeyCategory() { return QUICK_SEARCH_KEY_CATEGORY; }
 
-    public static KeyMapping getCloseKey()
-    {
-        return closeKey;
-    }
+    public static KeyMapping getCloseKey() { return closeKey; }
 
-    public static KeyMapping getOpenKey()
-    {
-        return openKey;
-    }
+    public static KeyMapping getOpenKey() { return openKey; }
 
-    public static KeyMapping getOpenCommandKey()
-    {
-        return openCommandKey;
-    }
+    public static KeyMapping getOpenCommandKey() { return openCommandKey; }
 
-    public static KeyMapping getInputSubmitKey()
-    {
-        return inputSubmitKey;
-    }
+    public static KeyMapping getInputSubmitKey() { return inputSubmitKey; }
 }

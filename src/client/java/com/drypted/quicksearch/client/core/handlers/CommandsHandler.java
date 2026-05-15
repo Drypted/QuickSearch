@@ -14,10 +14,7 @@ public class CommandsHandler
 {
     private static final CommandRegistry REGISTRY = new CommandRegistry();
 
-    private static void register(Command cmd)
-    {
-        REGISTRY.register(cmd);
-    }
+    private static void register(Command cmd) { REGISTRY.register(cmd); }
 
     static
     {
@@ -31,6 +28,8 @@ public class CommandsHandler
         try { register(new DeleteInventoryCommand()); } catch (IOException ignored) { }
         // no args
 
+
+        // rebuild index
         rebuildCommandIndex();
     }
 

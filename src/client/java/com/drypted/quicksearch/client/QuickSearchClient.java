@@ -5,7 +5,6 @@ import com.drypted.quicksearch.client.init.ModKeybinds;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +25,7 @@ public class QuickSearchClient implements ClientModInitializer
         ModKeybinds.registerClientCallback();
     }
 
-    public static ModConfig getConfig()
-    {
-        return Config;
-    }
+    public static ModConfig getConfig() { return Config; }
 
-    public static void saveConfig()
-    {
-        AutoConfig.getConfigHolder(ModConfig.class).save();
-    }
+    public static void saveConfig() { AutoConfig.getConfigHolder(ModConfig.class).save(); }
 }

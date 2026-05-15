@@ -1,15 +1,13 @@
-package com.drypted.quicksearch.client.core.result;
+package com.drypted.quicksearch.client.ui.state;
 
 import com.drypted.quicksearch.client.core.blueprints.ItemsResultData;
 import com.drypted.quicksearch.client.core.blueprints.commands.Command;
 import com.drypted.quicksearch.client.core.blueprints.feedback.errors.SearchNotFoundError;
 import com.drypted.quicksearch.client.ui.components.*;
-import com.drypted.quicksearch.client.ui.state.ViewState;
-import com.drypted.quicksearch.client.ui.state.VisibilityController;
+import com.drypted.quicksearch.client.ui.handlers.ClickHandlers;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 public final class ResultPresenter
 {
@@ -18,20 +16,25 @@ public final class ResultPresenter
     private final InputWidget inputWidget;
     private final ScrollBoxWidget searchResultsWidget;
     private final VisibilityController visibilityController;
-    private final ViewState viewState;
-    private final Consumer<ItemsResultData> onItemClicked;
-    private final Consumer<Command> onCommandClicked;
-    private final Consumer<String> onArgSuggestionClicked;
+    private final ClickHandlers clickHandlers;
+    private @Nullable ItemsResultData submitItemResult;
 
-    public ResultPresenter(InputWidget inputWidget, ScrollBoxWidget searchResultsWidget, VisibilityController visibilityController, ViewState viewState, Consumer<ItemsResultData> onItemClicked, Consumer<Command> onCommandClicked, Consumer<String> onArgSuggestionClicked)
+    public ResultPresenter(InputWidget inputWidget, ScrollBoxWidget searchResultsWidget, VisibilityController visibilityController)
     {
         this.inputWidget = inputWidget;
         this.searchResultsWidget = searchResultsWidget;
         this.visibilityController = visibilityController;
-        this.viewState = viewState;
-        this.onItemClicked = onItemClicked;
-        this.onCommandClicked = onCommandClicked;
-        this.onArgSuggestionClicked = onArgSuggestionClicked;
+        this.clickHandlers = new ClickHandlers(inputWidget);
+    }
+
+    public @Nullable ItemsResultData getSubmitItemResult()
+    {
+        return submitItemResult;
+    }
+
+    private void setSubmitItemResult(@Nullable ItemsResultData submitItemResult)
+    {
+        this.submitItemResult = submitItemResult;
     }
 
     public void hideAndClearResults()
@@ -46,8 +49,8 @@ public final class ResultPresenter
         this.inputWidget.clearError();
         this.inputWidget.clearSuggestion();
         this.searchResultsWidget.removeAllChildren();
-        this.viewState.setSubmitItemResult(null);
-        visibilityController.clearHotbarResults();
+        this.setSubmitItemResult(null);
+        this.visibilityController.clearHotbarResults();
     }
 
     public void displayItems(List<ItemsResultData> results)
@@ -62,7 +65,7 @@ public final class ResultPresenter
             return;
         }
 
-        viewState.setSubmitItemResult(results.getFirst());
+        setSubmitItemResult(results.getFirst());
         inputWidget.clearError();
 
         String currentText = inputWidget.getText().trim();
@@ -88,18 +91,24 @@ public final class ResultPresenter
                 {
                     widget.setSearchResultData(result);
                     widget.onClick(mouseButtonClick -> {
-                        onItemClicked.accept(result);
+                        clickHandlers.onItemClicked(result);
                         widget.setFocused(true);
                     });
                 }
             }
 
-            this.searchResultsWidget.addChildRow(
-                    ResultDataWidget.builder(0, 0, result.getIcon(), result.getName(), result.getSerializedDefinition())
-                            .width(searchResultsWidget.getChildWidth())
-                            .onClick((mBC, dC) -> onItemClicked.accept(result))
-                            .build()
-            );
+            ResultDataWidget widget = ResultDataWidget.builder(
+                            0,
+                            0,
+                            result.getIcon(),
+                            result.getName(),
+                            result.getSerializedDefinition()
+                    )
+                    .width(searchResultsWidget.getChildWidth())
+                    .onClick((mBC, dC) -> clickHandlers.onItemClicked(result))
+                    .build();
+
+            this.searchResultsWidget.addChildRow(widget);
 
             matchCount++;
         }
@@ -133,14 +142,14 @@ public final class ResultPresenter
 
         for (Command result : results)
         {
-            this.searchResultsWidget.addChildRow(
-                    ResultDataWidget.builder(0, 0, null, result.getName(), result.getDescription())
-                            .width(searchResultsWidget.getChildWidth())
-                            .disabled(true)
-                            .paddingX(10)
-                            .onClick((mBC, dC) -> onCommandClicked.accept(result))
-                            .build()
-            );
+            ResultDataWidget widget = ResultDataWidget.builder(0, 0, null, result.getName(), result.getDescription())
+                    .width(searchResultsWidget.getChildWidth())
+                    .disabled(true)
+                    .paddingX(10)
+                    .onClick((mBC, dC) -> clickHandlers.onCommandClicked(result))
+                    .build();
+
+            this.searchResultsWidget.addChildRow(widget);
         }
 
         visibilityController.setItemResultsVisible(true);
@@ -152,10 +161,12 @@ public final class ResultPresenter
     {
         clearResults();
 
-        this.searchResultsWidget.addChildRow(ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
-                                                     .width(searchResultsWidget.getChildWidth())
-                                                     .disabled(true)
-                                                     .build());
+        ResultDataWidget usageWidget = ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
+                .width(searchResultsWidget.getChildWidth())
+                .disabled(true)
+                .build();
+
+        this.searchResultsWidget.addChildRow(usageWidget);
 
         List<String> suggestions = command.getSuggestions(args);
 
@@ -170,8 +181,8 @@ public final class ResultPresenter
         String currentText = inputWidget.getText();
         String currentPartial = args.length > 0 ? args[args.length - 1] : "";
         String topSuggestion = suggestions.getFirst();
-        if (topSuggestion.toLowerCase().startsWith(currentPartial.toLowerCase())
-                && !topSuggestion.equalsIgnoreCase(currentPartial))
+        if (topSuggestion.toLowerCase().startsWith(currentPartial.toLowerCase()) && !topSuggestion.equalsIgnoreCase(
+                currentPartial))
         {
             String prefix = currentText.substring(0, currentText.length() - currentPartial.length());
             inputWidget.setSuggestion(prefix + topSuggestion);
@@ -179,12 +190,14 @@ public final class ResultPresenter
 
         for (final String suggestion : suggestions)
         {
-            this.searchResultsWidget.addChildRow(ResultDataWidget.builder(0, 0, null, null, suggestion)
-                                                         .width(searchResultsWidget.getChildWidth())
-                                                         .paddingX(7)
-                                                         .paddingY(4)
-                                                         .onClick((mBC, dC) -> onArgSuggestionClicked.accept(suggestion))
-                                                         .build());
+            ResultDataWidget suggestionWidget = ResultDataWidget.builder(0, 0, null, null, suggestion)
+                    .width(searchResultsWidget.getChildWidth())
+                    .paddingX(7)
+                    .paddingY(4)
+                    .onClick((mBC, dC) -> clickHandlers.onCommandSuggestionClick(suggestion))
+                    .build();
+
+            this.searchResultsWidget.addChildRow(suggestionWidget);
         }
 
         visibilityController.setItemResultsVisible(true);

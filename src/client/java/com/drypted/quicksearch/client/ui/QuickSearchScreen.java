@@ -2,22 +2,16 @@ package com.drypted.quicksearch.client.ui;
 
 import com.drypted.quicksearch.client.QuickSearchClient;
 import com.drypted.quicksearch.client.core.input.CommandInputParser;
-import com.drypted.quicksearch.client.core.query.CommandQueryRouter;
-import com.drypted.quicksearch.client.core.query.ItemQueryRouter;
-import com.drypted.quicksearch.client.core.result.CommandResultClickHandler;
-import com.drypted.quicksearch.client.core.result.ItemResultClickHandler;
-import com.drypted.quicksearch.client.core.result.SuggestionApplyHandler;
-import com.drypted.quicksearch.client.core.submit.CommandSubmitHandler;
-import com.drypted.quicksearch.client.core.submit.ItemSubmitHandler;
+import com.drypted.quicksearch.client.ui.handlers.mode.CommandsModeHandler;
+import com.drypted.quicksearch.client.ui.handlers.mode.ItemModeHandler;
+import com.drypted.quicksearch.client.ui.handlers.mode.ModeSelector;
+import com.drypted.quicksearch.client.ui.state.ResultPresenter;
+import com.drypted.quicksearch.client.ui.handlers.SubmitHandler;
 import com.drypted.quicksearch.client.init.ModKeybinds;
 import com.drypted.quicksearch.client.ui.components.HotbarCollectionWidget;
 import com.drypted.quicksearch.client.ui.components.HotbarSlotWidget;
 import com.drypted.quicksearch.client.ui.components.InputWidget;
 import com.drypted.quicksearch.client.ui.components.ScrollBoxWidget;
-import com.drypted.quicksearch.client.core.query.QueryRouter;
-import com.drypted.quicksearch.client.core.result.ResultPresenter;
-import com.drypted.quicksearch.client.core.submit.SubmitHandler;
-import com.drypted.quicksearch.client.ui.state.ViewState;
 import com.drypted.quicksearch.client.ui.state.VisibilityController;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -33,13 +27,14 @@ public class QuickSearchScreen extends Screen
     private static final int DISTANCE_FROM_CENTER = 20;
     private static final int HOTBAR_SLOTS = 9;
 
+    // widgets
     private InputWidget inputWidget;
     private ScrollBoxWidget searchResultsWidget;
     private @Nullable HotbarCollectionWidget hotbarCollectionWidget;
-    private ViewState viewState;
+
     private VisibilityController visibilityController;
     private ResultPresenter resultPresenter;
-    private QueryRouter queryRouter;
+    private ModeSelector modeSelector;
     private SubmitHandler submitHandler;
 
     private final boolean showCommandOnStartup;
@@ -97,7 +92,7 @@ public class QuickSearchScreen extends Screen
             this.addRenderableWidget(hotbarCollectionWidget);
         }
 
-        this.viewState = new ViewState();
+        // state and controllers
         this.visibilityController = new VisibilityController(
                 inputWidget,
                 searchResultsWidget,
@@ -105,35 +100,14 @@ public class QuickSearchScreen extends Screen
                 this::isHotbarEnabledInConfig
         );
 
-        ItemResultClickHandler itemResultClickHandler = new ItemResultClickHandler();
-        CommandResultClickHandler commandResultClickHandler = new CommandResultClickHandler(
-                inputWidget);
-        SuggestionApplyHandler suggestionApplyHandler = new SuggestionApplyHandler(inputWidget);
+        this.resultPresenter = new ResultPresenter(inputWidget, searchResultsWidget, visibilityController);
 
-        this.resultPresenter = new ResultPresenter(
-                inputWidget,
-                searchResultsWidget,
-                visibilityController,
-                viewState,
-                itemResultClickHandler::onItemClicked,
-                commandResultClickHandler::onCommandClicked,
-                suggestionApplyHandler::applySuggestion
-        );
+        CommandsModeHandler commandsModeHandler = new CommandsModeHandler(inputWidget, resultPresenter);
+        ItemModeHandler itemModeHandler = new ItemModeHandler(resultPresenter);
 
-        CommandQueryRouter commandQueryRouter = new CommandQueryRouter(inputWidget, resultPresenter);
-        ItemQueryRouter itemQueryRouter = new ItemQueryRouter(resultPresenter);
+        this.modeSelector = new ModeSelector(inputWidget, resultPresenter, commandsModeHandler, itemModeHandler);
 
-        this.queryRouter = new QueryRouter(
-                inputWidget,
-                resultPresenter,
-                commandQueryRouter,
-                itemQueryRouter
-        );
-
-        this.submitHandler = new SubmitHandler(
-                new CommandSubmitHandler(inputWidget, this::onClose),
-                new ItemSubmitHandler(inputWidget, viewState, this::onClose)
-        );
+        this.submitHandler = new SubmitHandler(inputWidget, resultPresenter, this::onClose);
 
         this.inputWidget.addTextChangeListener(this::onTextChanged);
         this.inputWidget.addSubmitListener((text) -> submitHandler.submit(text, isUserInputCommand()));
@@ -170,7 +144,7 @@ public class QuickSearchScreen extends Screen
 
     private void onTextChanged(String text)
     {
-        queryRouter.onTextChanged(text);
+        modeSelector.onTextChanged(text);
     }
 
     @Override

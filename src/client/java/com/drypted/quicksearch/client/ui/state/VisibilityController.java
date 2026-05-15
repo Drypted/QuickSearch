@@ -48,10 +48,7 @@ public final class VisibilityController
         this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
     }
 
-    public @Nullable HotbarCollectionWidget getHotbarCollectionWidget()
-    {
-        return hotbarCollectionWidget;
-    }
+    public @Nullable HotbarCollectionWidget getHotbarCollectionWidget() { return hotbarCollectionWidget; }
 
     private static void setVisible(@Nullable AbstractWidget widget, boolean visible)
     {
