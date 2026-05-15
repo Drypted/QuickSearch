@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.drypted.quicksearch.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "CreativeModeTabsMixin",
+    "GameRendererAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

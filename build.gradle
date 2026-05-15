@@ -14,7 +14,7 @@ loom {
     splitEnvironmentSourceSets()
 
     mods {
-        "spotlight" {
+        "quicksearch" {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }
