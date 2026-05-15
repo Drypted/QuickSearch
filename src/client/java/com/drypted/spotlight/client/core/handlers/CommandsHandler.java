@@ -9,31 +9,21 @@ import com.drypted.spotlight.client.core.commands.args.LoadInventoryCommand;
 import com.drypted.spotlight.client.core.commands.args.LoadHotbarCommand;
 import com.drypted.spotlight.client.core.commands.args.SaveInventoryCommand;
 import com.drypted.spotlight.client.core.commands.args.SaveHotbarCommand;
-import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class CommandsHandler
 {
-    /* REGISTRY BEGIN */
-    private static final Map<String, Command> REGISTRY = new HashMap<>();
+    private static final CommandRegistry REGISTRY = new CommandRegistry();
 
     private static void register(Command cmd)
     {
-        REGISTRY.put(cmd.getName().toLowerCase(), cmd);
+        REGISTRY.register(cmd);
     }
-
-    /* REGISTRY END */
-
-    private static SmartSearch<Command> commandSearch;
 
     static
     {
@@ -58,18 +48,7 @@ public class CommandsHandler
      */
     public static void getCommands(String userInput, Consumer<List<Command>> onComplete)
     {
-        if (userInput == null || userInput.length() <= 1)
-        {
-            onComplete.accept(new ArrayList<>(REGISTRY.values())); // Show all commands if input is empty or just "/"
-            return;
-        }
-
-        // Split by one or more whitespace characters
-        String commandName = userInput.substring(1).split("\\s+")[0];
-
-        List<Command> results = commandSearch.search(commandName, 10).collect(Collectors.toList());
-
-        onComplete.accept(results);
+        onComplete.accept(REGISTRY.searchByUserInput(userInput));
     }
 
     /**
@@ -77,7 +56,7 @@ public class CommandsHandler
      */
     public static void rebuildCommandIndex()
     {
-        commandSearch = new SmartSearch<>(new ArrayList<>(REGISTRY.values()));
+        REGISTRY.rebuildIndex();
     }
 
 
@@ -85,18 +64,12 @@ public class CommandsHandler
 
     public static @Nullable Command getRawCommand(String name)
     {
-        return REGISTRY.get(name.toLowerCase());
+        return REGISTRY.getRawCommand(name);
     }
 
     public static CommandFeedback execute(String name, String[] args, LocalPlayer player)
     {
-        Command cmd = REGISTRY.get(name.toLowerCase());
-        if (cmd != null)
-        {
-            return cmd.execute(args, player);
-        }
-
-        return CommandFeedback.withError("Please enter a valid command name!");
+        return REGISTRY.execute(name, args, player);
     }
 
     /**
@@ -109,8 +82,6 @@ public class CommandsHandler
      */
     public static List<String> getArgSuggestions(String commandName, String[] args)
     {
-        Command cmd = REGISTRY.get(commandName.toLowerCase());
-        if (cmd == null) return List.of();
-        return cmd.getSuggestions(args);
+        return REGISTRY.getArgSuggestions(commandName, args);
     }
 }

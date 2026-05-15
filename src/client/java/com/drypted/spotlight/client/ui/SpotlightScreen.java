@@ -1,34 +1,33 @@
 package com.drypted.spotlight.client.ui;
 
 import com.drypted.spotlight.client.SpotlightClient;
-import com.drypted.spotlight.client.core.actions.GiveItemAction;
-import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
-import com.drypted.spotlight.client.core.blueprints.commands.Command;
-import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
-import com.drypted.spotlight.client.core.blueprints.feedback.errors.InvalidItemError;
-import com.drypted.spotlight.client.core.blueprints.feedback.errors.SearchNotFoundError;
-import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
-import com.drypted.spotlight.client.core.handlers.CommandsHandler;
-import com.drypted.spotlight.client.core.handlers.SearchHandler;
+import com.drypted.spotlight.client.core.input.CommandInputParser;
 import com.drypted.spotlight.client.init.ModKeybinds;
-import com.drypted.spotlight.client.ui.components.*;
+import com.drypted.spotlight.client.ui.components.HotbarCollectionWidget;
+import com.drypted.spotlight.client.ui.components.HotbarSlotWidget;
+import com.drypted.spotlight.client.ui.components.InputWidget;
+import com.drypted.spotlight.client.ui.components.ScrollBoxWidget;
 import com.drypted.spotlight.client.ui.renderer.MosaicBackgroundRenderer;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightCommandQueryRouter;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightCommandResultClickHandler;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightItemQueryRouter;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightItemResultClickHandler;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightQueryRouter;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightResultPresenter;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightSubmitCommandHandler;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightSubmitHandler;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightSubmitItemHandler;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightSuggestionApplyHandler;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightViewState;
+import com.drypted.spotlight.client.ui.spotlight.SpotlightVisibilityController;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class SpotlightScreen extends Screen
 {
@@ -39,8 +38,11 @@ public class SpotlightScreen extends Screen
     private InputWidget inputWidget;
     private ScrollBoxWidget searchResultsWidget;
     private @Nullable HotbarCollectionWidget hotbarCollectionWidget;
-    /// What item to give user on input submit
-    private @Nullable ItemsResultData submitItemResult;
+    private SpotlightViewState viewState;
+    private SpotlightVisibilityController visibilityController;
+    private SpotlightResultPresenter resultPresenter;
+    private SpotlightQueryRouter queryRouter;
+    private SpotlightSubmitHandler submitHandler;
 
     private final boolean showCommandOnStartup;
 
@@ -88,18 +90,6 @@ public class SpotlightScreen extends Screen
                 resultsHeight
         ).showScrollerAlways(true).build();
 
-        this.inputWidget.addTextChangeListener(this::onTextChanged);
-        this.inputWidget.addSubmitListener((text) -> {
-            if (isUserInputCommand())
-            {
-                onSubmitCommand(text);
-            }
-            else
-            {
-                onSubmitItem();
-            }
-        });
-
         if (isHotbarEnabledInConfig())
         {
             this.hotbarCollectionWidget = HotbarCollectionWidget.create(
@@ -110,11 +100,52 @@ public class SpotlightScreen extends Screen
             this.addRenderableWidget(hotbarCollectionWidget);
         }
 
+                this.viewState = new SpotlightViewState();
+                this.visibilityController = new SpotlightVisibilityController(
+                    inputWidget,
+                    searchResultsWidget,
+                    hotbarCollectionWidget,
+                    this::isHotbarEnabledInConfig
+                );
+
+                SpotlightItemResultClickHandler itemResultClickHandler = new SpotlightItemResultClickHandler();
+                SpotlightCommandResultClickHandler commandResultClickHandler = new SpotlightCommandResultClickHandler(
+                    inputWidget);
+                SpotlightSuggestionApplyHandler suggestionApplyHandler = new SpotlightSuggestionApplyHandler(inputWidget);
+
+                this.resultPresenter = new SpotlightResultPresenter(
+                    inputWidget,
+                    searchResultsWidget,
+                    visibilityController,
+                    viewState,
+                    itemResultClickHandler::onItemClicked,
+                    commandResultClickHandler::onCommandClicked,
+                    suggestionApplyHandler::applySuggestion
+                );
+
+                SpotlightCommandQueryRouter commandQueryRouter = new SpotlightCommandQueryRouter(inputWidget, resultPresenter);
+                SpotlightItemQueryRouter itemQueryRouter = new SpotlightItemQueryRouter(resultPresenter);
+
+                this.queryRouter = new SpotlightQueryRouter(
+                    inputWidget,
+                    resultPresenter,
+                    commandQueryRouter,
+                    itemQueryRouter
+                );
+
+                this.submitHandler = new SpotlightSubmitHandler(
+                    new SpotlightSubmitCommandHandler(inputWidget, this::onClose),
+                    new SpotlightSubmitItemHandler(inputWidget, viewState, this::onClose)
+                );
+
+                this.inputWidget.addTextChangeListener(this::onTextChanged);
+                this.inputWidget.addSubmitListener((text) -> submitHandler.submit(text, isUserInputCommand()));
+
         this.addRenderableWidget(searchResultsWidget);
         this.addRenderableWidget(inputWidget);
 
         // show search on open
-        setItemResultsVisible(false);
+                visibilityController.setItemResultsVisible(false);
 
         this.setFocused(inputWidget);
 
@@ -142,47 +173,7 @@ public class SpotlightScreen extends Screen
 
     private void onTextChanged(String text)
     {
-        if (text == null || text.isEmpty())
-        {
-            setItemResultsVisible(false);
-            clearResults();
-            return;
-        }
-
-        // Set visual state to searching
-        inputWidget.setSearchStatus(InputWidget.SearchStatus.SEARCHING);
-
-        // Delegate logic to appropriate handler
-        if (text.startsWith("/"))
-        {
-            String afterSlash = text.substring(1);
-            String commandName = afterSlash.split("\\s+")[0];
-            boolean hasSpaceAfterCommand = afterSlash.length() > commandName.length();
-
-            Command command = CommandsHandler.getRawCommand(commandName);
-
-            if (command != null && hasSpaceAfterCommand)
-            {
-                // User has typed a valid command name + space → show argument suggestions
-                String[] args = getArgs();
-                displayArgSuggestions(command, args);
-                inputWidget.showError(command.validateArgs(args));
-            }
-            else
-            {
-                // Still typing the command name → show command list
-                CommandsHandler.getCommands(text, this::displayCommands);
-
-                if (command != null)
-                {
-                    inputWidget.showError(command.validateArgs(getArgs()));
-                }
-            }
-        }
-        else
-        {
-            SearchHandler.searchAsync(text, this::displayItems);
-        }
+        queryRouter.onTextChanged(text);
     }
 
     @Override
@@ -200,8 +191,8 @@ public class SpotlightScreen extends Screen
             if (inputWidget.isFocused() && inputWidget.hasText())
             {
                 inputWidget.clearText();
-                clearResults();
-                setItemResultsVisible(false);
+                resultPresenter.clearResults();
+                visibilityController.setItemResultsVisible(false);
                 return true;
             }
             this.onClose();
@@ -247,288 +238,6 @@ public class SpotlightScreen extends Screen
         return super.mouseClicked(mEv, doubleClick);
     }
 
-    /* Results */
-
-    private void displayItems(List<ItemsResultData> results)
-    {
-        clearResults();
-
-        // If results came back empty (or query was canceled/cleared mid-flight), stop here.
-        if (results.isEmpty())
-        {
-            inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-            setItemResultsVisible(false);
-            inputWidget.showError(new SearchNotFoundError());
-            return;
-        }
-
-        submitItemResult = results.getFirst();
-
-        inputWidget.clearError();
-
-        // Set suggestion to first result if user is still typing the command name
-        String currentText = inputWidget.getText().trim();
-        if (!currentText.isEmpty() && !results.isEmpty())
-        {
-            ItemsResultData topResult = results.getFirst();
-            String itemName = topResult.getName();
-            if (itemName.toLowerCase().startsWith(currentText.toLowerCase()) && !itemName.equalsIgnoreCase(currentText))
-            {
-                inputWidget.setSuggestion(itemName);
-            }
-        }
-
-        int matchCount = 0;
-        for (ItemsResultData result : results)
-        {
-            // fill hotbar for first 9
-            if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null && matchCount < HOTBAR_SLOTS)
-            {
-                HotbarSlotWidget widget = this.hotbarCollectionWidget.getWidgets().get(matchCount);
-                if (widget != null)
-                {
-                    widget.setSearchResultData(result);
-                    widget.onClick(mouseButtonClick -> {
-                        onItemsResultClicked(result);
-                        widget.setFocused(true);
-                    });
-                }
-            }
-
-            this.searchResultsWidget.addChildRow( //
-                    ResultDataWidget.builder(0, 0, result.getIcon(), result.getName(), result.getSerializedDefinition())
-                            .width(searchResultsWidget.getChildWidth())
-                            .onClick((mBC, dC) -> onItemsResultClicked(result))
-                            .build() //
-            );
-
-            matchCount++;
-        }
-
-        setItemResultsVisible(true);
-        inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-    }
-
-    private void onItemsResultClicked(ItemsResultData data)
-    {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null) GiveItemAction.run(player, data);
-    }
-
-    /* Commands */
-
-    private void displayCommands(List<Command> results)
-    {
-        clearResults();
-
-        // If results came back empty (or query was canceled/cleared mid-flight), stop here.
-        if (results.isEmpty())
-        {
-            inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-            setItemResultsVisible(false);
-            return;
-        }
-
-        // Set suggestion to first result if user is still typing the command name
-        String currentText = inputWidget.getText().trim();
-        if (!currentText.isEmpty() && !currentText.contains(" "))
-        {
-            Command topResult = results.getFirst();
-            String commandWithSlash = "/" + topResult.getName();
-            if (commandWithSlash.toLowerCase()
-                    .startsWith(currentText.toLowerCase()) && !commandWithSlash.equalsIgnoreCase(currentText))
-            {
-                inputWidget.setSuggestion(commandWithSlash);
-            }
-        }
-
-        for (Command result : results)
-        {
-            this.searchResultsWidget.addChildRow( //
-                    ResultDataWidget.builder(0, 0, null, result.getName(), result.getDescription())
-                            .width(searchResultsWidget.getChildWidth())
-                            .disabled(true)
-                            .paddingX(10)
-                            .onClick((mBC, dC) -> onCommandsResultMouseClick(result))
-                            .build() //
-            );
-        }
-
-        setItemResultsVisible(true);
-        setHotbarWidgetVisible(false);
-        inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-    }
-
-    /**
-     * Display argument suggestions for a recognized command. Shows suggestions in the dropdown and sets the top
-     * suggestion as ghost text.
-     */
-    private void displayArgSuggestions(Command command, String[] args)
-    {
-        clearResults();
-
-        // always show usage hint at top
-        this.searchResultsWidget.addChildRow(ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
-                .width(searchResultsWidget.getChildWidth())
-                .disabled(true)
-                .build());
-
-        List<String> suggestions = command.getSuggestions(args);
-
-        if (suggestions.isEmpty())
-        {
-            setItemResultsVisible(true);
-            setHotbarWidgetVisible(false);
-            inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-            return;
-        }
-
-        // Set ghost-text suggestion: build the full input text with the top suggestion completing the current arg
-        String currentText = inputWidget.getText();
-        String currentPartial = args.length > 0 ? args[args.length - 1] : "";
-        String topSuggestion = suggestions.getFirst();
-        if (topSuggestion.toLowerCase().startsWith(currentPartial.toLowerCase()) && !topSuggestion.equalsIgnoreCase(
-                currentPartial))
-        {
-            // Build the full suggestion: current text up to the partial, then the full suggestion
-            String prefix = currentText.substring(0, currentText.length() - currentPartial.length());
-            inputWidget.setSuggestion(prefix + topSuggestion);
-        }
-
-        // Populate the dropdown with all suggestions
-        for (final String suggestion : suggestions)
-        {
-            this.searchResultsWidget.addChildRow(ResultDataWidget.builder(0, 0, null, null, suggestion)
-                    .width(searchResultsWidget.getChildWidth())
-                    .paddingX(7)
-                    .paddingY(4)
-                    .onClick((mBC, dC) -> onArgSuggestionClicked(suggestion))
-                    .build());
-        }
-
-        setItemResultsVisible(true);
-        setHotbarWidgetVisible(false);
-        inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-    }
-
-    /**
-     * Called when user clicks an argument suggestion in the dropdown. Replaces the current partial argument with the
-     * selected suggestion.
-     */
-    private void onArgSuggestionClicked(String suggestion)
-    {
-        String currentText = inputWidget.getText();
-        String[] args = getArgs();
-        String currentPartial = args.length > 0 ? args[args.length - 1] : "";
-
-        // Replace the current partial with the full suggestion
-        String newText;
-        if (!currentPartial.isEmpty())
-        {
-            newText = currentText.substring(0, currentText.length() - currentPartial.length()) + suggestion;
-        }
-        else
-        {
-            // No partial yet — append suggestion after the trailing space
-            newText = currentText + suggestion;
-        }
-
-        inputWidget.setText(newText);
-    }
-
-    private void onCommandsResultMouseClick(Command data)
-    {
-        if (data.validateArgs(getArgs()).haltsExecution()) return;
-
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null) data.execute(new String[]{}, player);
-    }
-
-    private void onSubmitCommand(String text)
-    {
-        String commandName = text.split(" ")[0].substring(1); // Remove leading "/"
-
-        String[] args = getArgs();
-
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) return;
-        CommandFeedback error = CommandsHandler.execute(commandName, args, player);
-        if (error.haltsExecution())
-        {
-            this.inputWidget.showError(error);
-            return;
-        }
-
-        if (!error.getMessage().isEmpty()) //
-            player.displayClientMessage(
-                    Component.literal(error.getSeverity().getName() + ": " + error.getMessage()) //
-                            .withStyle(error.getSeverity().getChatColor()), false
-            );
-
-        this.onClose();
-    }
-
-    private void onSubmitItem()
-    {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) return;
-
-        boolean invalidItem = false;
-
-        if (this.submitItemResult != null)
-        {
-            GiveItemAction.run(player, this.submitItemResult);
-        }
-        else
-        {
-            invalidItem = true;
-        }
-
-        if (invalidItem)
-        {
-            this.inputWidget.showError(new InvalidItemError());
-            return;
-        }
-
-        this.onClose();
-    }
-
-    private String @NotNull [] getArgs()
-    {
-        String text = this.inputWidget.getText().trim();
-        int spaceIndex = text.indexOf(' ');
-
-        // no space -> no arguments
-        if (spaceIndex == -1) return new String[0];
-
-        // separate command name from args
-        String args = text.substring(spaceIndex + 1).trim();
-        if (args.isEmpty()) return new String[0];
-
-        List<String> matches = new ArrayList<>();
-
-        // text inside double quotes: "([^"]*)"
-        // words separated by spaces: ([^\s"]+)
-        Pattern regex = Pattern.compile("\"([^\"]*)\"|([^\\s\"]+)");
-        Matcher matcher = regex.matcher(args);
-
-        while (matcher.find())
-        {
-            if (matcher.group(1) != null)
-            {
-                // Found a quoted string, add it without the quotes
-                matches.add(matcher.group(1));
-            }
-            else if (matcher.group(2) != null)
-            {
-                // Found a normal word
-                matches.add(matcher.group(2));
-            }
-        }
-
-        return matches.toArray(new String[0]);
-    }
-
     /* Overrides for settings */
 
     @Override
@@ -544,42 +253,6 @@ public class SpotlightScreen extends Screen
 
     /* Helpers */
 
-    public void setVisible(AbstractWidget widget, boolean visible)
-    {
-        if (widget == null) return;
-
-        widget.visible = visible;
-        widget.active = visible;
-    }
-
-    private void setItemResultsVisible(boolean visible)
-    {
-        setHotbarWidgetVisible(visible);
-        setVisible(this.searchResultsWidget, visible);
-
-        if (visible) this.inputWidget.setRounded(RoundedCorners.fromVerticalSides(true, false));
-        else this.inputWidget.setRounded(RoundedCorners.all());
-    }
-
-    private void setHotbarWidgetVisible(boolean visible)
-    {
-        if (!isHotbarEnabledInConfig() || this.hotbarCollectionWidget == null) return;
-
-        this.hotbarCollectionWidget.getWidgets().forEach(widget -> setVisible(widget, visible));
-        setVisible(this.hotbarCollectionWidget, visible);
-    }
-
-    private void clearResults()
-    {
-        this.inputWidget.setSearchStatus(InputWidget.SearchStatus.IDLE);
-        this.inputWidget.clearError();
-        this.inputWidget.clearSuggestion();
-        this.searchResultsWidget.removeAllChildren();
-        this.submitItemResult = null;
-        if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
-            this.hotbarCollectionWidget.getWidgets().forEach(widget -> widget.setSearchResultData(null));
-    }
-
     private boolean isHotbarEnabledInConfig()
     {
         return SpotlightClient.getConfig().hotbar.showHotbarSlots;
@@ -587,7 +260,6 @@ public class SpotlightScreen extends Screen
 
     private boolean isUserInputCommand()
     {
-        String text = inputWidget.getText();
-        return text != null && text.startsWith("/");
+        return CommandInputParser.isCommandInput(inputWidget.getText());
     }
 }

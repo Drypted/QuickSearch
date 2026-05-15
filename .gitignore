@@ -118,7 +118,9 @@ runs/
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
-# decompilations
-mc_decompiled/
-fabric_decompiled/
+# temporary files
 temp/
+
+# decompilations
+mc_decompiled/src/
+!mc_decompiled/cfr.jar

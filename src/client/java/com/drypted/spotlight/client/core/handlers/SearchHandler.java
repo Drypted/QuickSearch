@@ -7,11 +7,9 @@ import com.drypted.spotlight.client.core.search.SmartSearch;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTabs;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -34,37 +32,7 @@ public class SearchHandler
 
     public static void rebuildGameItems()
     {
-        Minecraft minecraft = Minecraft.getInstance();
-
-        if (minecraft.level == null)
-        {
-            GameItems = Collections.emptyList();
-            smartSearch = new SmartSearch<ItemsResultData>(GameItems);
-            return;
-        }
-
-        LinkedHashMap<String, ItemsResultData> combined = new LinkedHashMap<>();
-
-        // 1. Creative-mode items (sorted, visible)
-        CreativeModeTabs.allTabs().stream().flatMap(tab -> tab.getDisplayItems().stream()).forEach(stack -> {
-            ItemsResultData data = ItemsResultData.fromItemStack(stack);
-            combined.putIfAbsent(data.getSerializedDefinition(), data);
-        });
-
-        // 2. Registry fallback (includes hidden mod items)
-        BuiltInRegistries.ITEM.stream().forEach(item -> {
-            try
-            {
-                ItemsResultData data = ItemsResultData.fromItem(item);
-                combined.putIfAbsent(data.getSerializedDefinition(), data);
-            }
-            catch (Exception ignored)
-            {
-                // Some items are not safe to instantiate
-            }
-        });
-
-        GameItems = List.copyOf(combined.values());
+        GameItems = ItemIndexBuilder.buildGameItems();
 
         // Rebuild/replace smart search instance with the new items
         simpleSearch = new SimpleSearch<ItemsResultData>(GameItems);
@@ -123,7 +91,9 @@ public class SearchHandler
         }
 
         // 3. Run search in background
-        ActiveSearchTask = CompletableFuture.supplyAsync(() -> switch (SEARCH_MODE_SUPPLIER.get())
+        SearchMode effectiveMode = mode != null ? mode : SEARCH_MODE_SUPPLIER.get();
+
+        ActiveSearchTask = CompletableFuture.supplyAsync(() -> switch (effectiveMode)
         {
             case SMART ->
             {

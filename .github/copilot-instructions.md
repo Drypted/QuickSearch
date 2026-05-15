@@ -8,8 +8,8 @@ The full decompiled source code for both Minecraft and Fabric has already been p
 
 Use these directories as the authoritative source of truth:
 
-* `mc_decompiled/` → Decompiled Minecraft 1.21.11 source (Mojang mappings)
-* `fabric_decompiled/` → Decompiled Fabric API and Fabric Loader source
+* `mc_decompiled/src/` → Decompiled Minecraft 1.21.11 source (Mojang mappings)
+* `fabric_decompiled/src/` → Decompiled Fabric API and Fabric Loader source
 
 ## Critical Instruction
 
@@ -23,8 +23,8 @@ Do **not**:
 
 Instead:
 
-* Always inspect `mc_decompiled/` for vanilla Minecraft classes and behavior
-* Always inspect `fabric_decompiled/` for Fabric internals and API behavior
+* Always inspect `mc_decompiled/src` for vanilla Minecraft classes and behavior
+* Always inspect `fabric_decompiled/src/` for Fabric internals and API behavior
 * Follow Mojang-mapped names exactly as they exist in the provided decompiled sources
 
 If implementation details are unclear, search within the provided decompiled directories before making assumptions.
