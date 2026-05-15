@@ -3,11 +3,7 @@ package com.drypted.spotlight.client.ui.spotlight;
 import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.core.blueprints.commands.Command;
 import com.drypted.spotlight.client.core.blueprints.feedback.errors.SearchNotFoundError;
-import com.drypted.spotlight.client.ui.components.HotbarCollectionWidget;
-import com.drypted.spotlight.client.ui.components.HotbarSlotWidget;
-import com.drypted.spotlight.client.ui.components.InputWidget;
-import com.drypted.spotlight.client.ui.components.ResultDataWidget;
-import com.drypted.spotlight.client.ui.components.ScrollBoxWidget;
+import com.drypted.spotlight.client.ui.components.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -126,7 +122,8 @@ public final class SpotlightResultPresenter
         {
             Command topResult = results.getFirst();
             String commandWithSlash = "/" + topResult.getName();
-            if (commandWithSlash.toLowerCase().startsWith(currentText.toLowerCase()) && !commandWithSlash.equalsIgnoreCase(currentText))
+            if (commandWithSlash.toLowerCase()
+                    .startsWith(currentText.toLowerCase()) && !commandWithSlash.equalsIgnoreCase(currentText))
             {
                 inputWidget.setSuggestion(commandWithSlash);
             }
@@ -154,9 +151,9 @@ public final class SpotlightResultPresenter
         clearResults();
 
         this.searchResultsWidget.addChildRow(ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
-                .width(searchResultsWidget.getChildWidth())
-                .disabled(true)
-                .build());
+                                                     .width(searchResultsWidget.getChildWidth())
+                                                     .disabled(true)
+                                                     .build());
 
         List<String> suggestions = command.getSuggestions(args);
 
@@ -181,11 +178,11 @@ public final class SpotlightResultPresenter
         for (final String suggestion : suggestions)
         {
             this.searchResultsWidget.addChildRow(ResultDataWidget.builder(0, 0, null, null, suggestion)
-                    .width(searchResultsWidget.getChildWidth())
-                    .paddingX(7)
-                    .paddingY(4)
-                    .onClick((mBC, dC) -> onArgSuggestionClicked.accept(suggestion))
-                    .build());
+                                                         .width(searchResultsWidget.getChildWidth())
+                                                         .paddingX(7)
+                                                         .paddingY(4)
+                                                         .onClick((mBC, dC) -> onArgSuggestionClicked.accept(suggestion))
+                                                         .build());
         }
 
         visibilityController.setItemResultsVisible(true);

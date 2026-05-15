@@ -25,8 +25,14 @@ import java.util.Set;
 
 public final class MosaicBackgroundRenderer
 {
-    private static final Identifier POST_CHAIN_ID = Identifier.fromNamespaceAndPath(SpotlightClient.MOD_ID, "mosaic_background");
-    private static final Identifier MOSAIC_TARGET_ID = Identifier.fromNamespaceAndPath(SpotlightClient.MOD_ID, "mosaic_output");
+    private static final Identifier POST_CHAIN_ID = Identifier.fromNamespaceAndPath(
+            SpotlightClient.MOD_ID,
+            "mosaic_background"
+    );
+    private static final Identifier MOSAIC_TARGET_ID = Identifier.fromNamespaceAndPath(
+            SpotlightClient.MOD_ID,
+            "mosaic_output"
+    );
     private static final Set<Identifier> POST_CHAIN_TARGETS = Set.of(PostChain.MAIN_TARGET_ID, MOSAIC_TARGET_ID);
 
     private static TextureTarget mosaicTarget;
@@ -34,7 +40,7 @@ public final class MosaicBackgroundRenderer
     private static int mosaicHeight = -1;
     private static boolean capturedThisFrame = false;
 
-    private MosaicBackgroundRenderer() {}
+    private MosaicBackgroundRenderer() { }
 
     public static void captureFramebuffer()
     {

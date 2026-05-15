@@ -40,8 +40,8 @@ public class ReplaceInventoryItemAction extends Action
         }
 
         int containerSlot = slotIndex < 9
-                ? InventoryMenu.USE_ROW_SLOT_START + slotIndex
-                : InventoryMenu.INV_SLOT_START + (slotIndex - 9);
+                            ? InventoryMenu.USE_ROW_SLOT_START + slotIndex
+                            : InventoryMenu.INV_SLOT_START + (slotIndex - 9);
 
         mc.gameMode.handleCreativeModeItemAdd(stack, containerSlot);
 

@@ -193,7 +193,7 @@ public class SmartSearch<T extends Searchable>
                 .filter(Objects::nonNull)
                 // Step 3: Sort by score (lower is better), then by original position for stability
                 .sorted(Comparator.comparingInt(SearchResultWithScore<T>::score)
-                        .thenComparingInt(SearchResultWithScore::originalIndex))
+                                .thenComparingInt(SearchResultWithScore::originalIndex))
                 .limit(maximumResults > 0 ? maximumResults : Integer.MAX_VALUE)
                 .map(SearchResultWithScore::item);
     }
@@ -879,7 +879,7 @@ public class SmartSearch<T extends Searchable>
      * sorting).
      */
     private record SearchResultWithScore<T>(T item, int score, int originalIndex)
-    {}
+    { }
 
     /**
      * Represents the score assigned to an item along with the type of match that produced it.
@@ -888,7 +888,7 @@ public class SmartSearch<T extends Searchable>
      * telemetry, and understanding search behavior.
      */
     private record ItemScoreResult(int totalScore, ResultMatchType matchType)
-    {}
+    { }
 
     /**
      * Enumeration of all possible match types that can produce a score.

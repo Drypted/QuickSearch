@@ -2,13 +2,7 @@ package com.drypted.spotlight.client.core.handlers;
 
 import com.drypted.spotlight.client.core.blueprints.commands.Command;
 import com.drypted.spotlight.client.core.blueprints.feedback.CommandFeedback;
-import com.drypted.spotlight.client.core.commands.args.DeleteInventoryCommand;
-import com.drypted.spotlight.client.core.commands.args.DeleteHotbarCommand;
-import com.drypted.spotlight.client.core.commands.args.GetPlayerHeadCommand;
-import com.drypted.spotlight.client.core.commands.args.LoadInventoryCommand;
-import com.drypted.spotlight.client.core.commands.args.LoadHotbarCommand;
-import com.drypted.spotlight.client.core.commands.args.SaveInventoryCommand;
-import com.drypted.spotlight.client.core.commands.args.SaveHotbarCommand;
+import com.drypted.spotlight.client.core.commands.args.*;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,10 +25,10 @@ public class CommandsHandler
         register(new GetPlayerHeadCommand());
         register(new SaveHotbarCommand());
         register(new SaveInventoryCommand());
-        try {register(new LoadHotbarCommand());} catch (IOException ignored) {}
-        try {register(new LoadInventoryCommand());} catch (IOException ignored) {}
-        try {register(new DeleteHotbarCommand());} catch (IOException ignored) {}
-        try {register(new DeleteInventoryCommand());} catch (IOException ignored) {}
+        try { register(new LoadHotbarCommand()); } catch (IOException ignored) { }
+        try { register(new LoadInventoryCommand()); } catch (IOException ignored) { }
+        try { register(new DeleteHotbarCommand()); } catch (IOException ignored) { }
+        try { register(new DeleteInventoryCommand()); } catch (IOException ignored) { }
         // no args
 
         rebuildCommandIndex();

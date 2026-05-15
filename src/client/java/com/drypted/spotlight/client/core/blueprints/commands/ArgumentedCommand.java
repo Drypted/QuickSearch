@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Abstract base for commands that declare typed arguments via {@link ArgumentType}.
- * Provides automatic validation, suggestion generation, and usage string building.
+ * Abstract base for commands that declare typed arguments via {@link ArgumentType}. Provides automatic validation,
+ * suggestion generation, and usage string building.
  */
 public abstract class ArgumentedCommand implements Command
 {

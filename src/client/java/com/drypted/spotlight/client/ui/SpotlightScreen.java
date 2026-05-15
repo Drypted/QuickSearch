@@ -8,19 +8,7 @@ import com.drypted.spotlight.client.ui.components.HotbarSlotWidget;
 import com.drypted.spotlight.client.ui.components.InputWidget;
 import com.drypted.spotlight.client.ui.components.ScrollBoxWidget;
 import com.drypted.spotlight.client.ui.renderer.MosaicBackgroundRenderer;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightCommandQueryRouter;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightCommandResultClickHandler;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightItemQueryRouter;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightItemResultClickHandler;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightQueryRouter;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightResultPresenter;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightSubmitCommandHandler;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightSubmitHandler;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightSubmitItemHandler;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightSuggestionApplyHandler;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightViewState;
-import com.drypted.spotlight.client.ui.spotlight.SpotlightVisibilityController;
-import net.minecraft.client.Minecraft;
+import com.drypted.spotlight.client.ui.spotlight.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -100,52 +88,52 @@ public class SpotlightScreen extends Screen
             this.addRenderableWidget(hotbarCollectionWidget);
         }
 
-                this.viewState = new SpotlightViewState();
-                this.visibilityController = new SpotlightVisibilityController(
-                    inputWidget,
-                    searchResultsWidget,
-                    hotbarCollectionWidget,
-                    this::isHotbarEnabledInConfig
-                );
+        this.viewState = new SpotlightViewState();
+        this.visibilityController = new SpotlightVisibilityController(
+                inputWidget,
+                searchResultsWidget,
+                hotbarCollectionWidget,
+                this::isHotbarEnabledInConfig
+        );
 
-                SpotlightItemResultClickHandler itemResultClickHandler = new SpotlightItemResultClickHandler();
-                SpotlightCommandResultClickHandler commandResultClickHandler = new SpotlightCommandResultClickHandler(
-                    inputWidget);
-                SpotlightSuggestionApplyHandler suggestionApplyHandler = new SpotlightSuggestionApplyHandler(inputWidget);
+        SpotlightItemResultClickHandler itemResultClickHandler = new SpotlightItemResultClickHandler();
+        SpotlightCommandResultClickHandler commandResultClickHandler = new SpotlightCommandResultClickHandler(
+                inputWidget);
+        SpotlightSuggestionApplyHandler suggestionApplyHandler = new SpotlightSuggestionApplyHandler(inputWidget);
 
-                this.resultPresenter = new SpotlightResultPresenter(
-                    inputWidget,
-                    searchResultsWidget,
-                    visibilityController,
-                    viewState,
-                    itemResultClickHandler::onItemClicked,
-                    commandResultClickHandler::onCommandClicked,
-                    suggestionApplyHandler::applySuggestion
-                );
+        this.resultPresenter = new SpotlightResultPresenter(
+                inputWidget,
+                searchResultsWidget,
+                visibilityController,
+                viewState,
+                itemResultClickHandler::onItemClicked,
+                commandResultClickHandler::onCommandClicked,
+                suggestionApplyHandler::applySuggestion
+        );
 
-                SpotlightCommandQueryRouter commandQueryRouter = new SpotlightCommandQueryRouter(inputWidget, resultPresenter);
-                SpotlightItemQueryRouter itemQueryRouter = new SpotlightItemQueryRouter(resultPresenter);
+        SpotlightCommandQueryRouter commandQueryRouter = new SpotlightCommandQueryRouter(inputWidget, resultPresenter);
+        SpotlightItemQueryRouter itemQueryRouter = new SpotlightItemQueryRouter(resultPresenter);
 
-                this.queryRouter = new SpotlightQueryRouter(
-                    inputWidget,
-                    resultPresenter,
-                    commandQueryRouter,
-                    itemQueryRouter
-                );
+        this.queryRouter = new SpotlightQueryRouter(
+                inputWidget,
+                resultPresenter,
+                commandQueryRouter,
+                itemQueryRouter
+        );
 
-                this.submitHandler = new SpotlightSubmitHandler(
-                    new SpotlightSubmitCommandHandler(inputWidget, this::onClose),
-                    new SpotlightSubmitItemHandler(inputWidget, viewState, this::onClose)
-                );
+        this.submitHandler = new SpotlightSubmitHandler(
+                new SpotlightSubmitCommandHandler(inputWidget, this::onClose),
+                new SpotlightSubmitItemHandler(inputWidget, viewState, this::onClose)
+        );
 
-                this.inputWidget.addTextChangeListener(this::onTextChanged);
-                this.inputWidget.addSubmitListener((text) -> submitHandler.submit(text, isUserInputCommand()));
+        this.inputWidget.addTextChangeListener(this::onTextChanged);
+        this.inputWidget.addSubmitListener((text) -> submitHandler.submit(text, isUserInputCommand()));
 
         this.addRenderableWidget(searchResultsWidget);
         this.addRenderableWidget(inputWidget);
 
         // show search on open
-                visibilityController.setItemResultsVisible(false);
+        visibilityController.setItemResultsVisible(false);
 
         this.setFocused(inputWidget);
 

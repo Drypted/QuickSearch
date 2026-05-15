@@ -28,6 +28,7 @@ public interface Command extends Searchable
      * Provide argument suggestions based on the currently typed arguments.
      *
      * @param args The arguments the user has typed so far (may be empty)
+     *
      * @return A list of suggestion strings for the current argument slot
      */
     default List<String> getSuggestions(String[] args)

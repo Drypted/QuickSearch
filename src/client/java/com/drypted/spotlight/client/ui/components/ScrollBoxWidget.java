@@ -1,9 +1,9 @@
 package com.drypted.spotlight.client.ui.components;
 
-import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.core.blueprints.ui.ScrollBoxWidgetEntry;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.core.blueprints.ui.common.Colors;
+import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.spotlight.client.ui.renderer.RenderCommon;
 import com.drypted.spotlight.client.ui.styling.Styles;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;

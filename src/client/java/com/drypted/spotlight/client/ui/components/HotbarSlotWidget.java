@@ -1,10 +1,10 @@
 package com.drypted.spotlight.client.ui.components;
 
+import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
+import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.core.blueprints.ui.common.MouseButtonClick;
 import com.drypted.spotlight.client.core.blueprints.ui.common.RoundedCorners;
-import com.drypted.spotlight.client.core.blueprints.ui.common.Color;
 import com.drypted.spotlight.client.ui.renderer.RenderCommon;
-import com.drypted.spotlight.client.core.blueprints.ItemsResultData;
 import com.drypted.spotlight.client.ui.styling.Styles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
