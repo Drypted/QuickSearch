@@ -3,6 +3,7 @@ package com.drypted.quicksearch.client.ui.components;
 import com.drypted.quicksearch.client.core.blueprints.ItemsResultData;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.Color;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.MouseButtonClick;
+import com.drypted.quicksearch.client.core.blueprints.ui.common.OutlinedSides;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.quicksearch.client.ui.renderer.RenderCommon;
 import com.drypted.quicksearch.client.ui.styling.Styles;
@@ -74,11 +75,7 @@ public class HotbarSlotWidget extends AbstractWidget
                 this.outlineThickness,
                 true,
                 this.backgroundColor,
-                this.pressed
-                ? this.clickedColor
-                : this.highlighted
-                  ? this.highlightedColor
-                  : this.shouldShowBind() ? this.focusedColor : this.outlineColor
+                this.outlineColor
         );
 
         // show icon if search result data is available
@@ -109,10 +106,10 @@ public class HotbarSlotWidget extends AbstractWidget
                     this.getY(),
                     RoundedCorners.fromVerticalSides(true, false),
                     this.outlineThickness,
-                    this.pressed
-                    ? this.clickedColor
-                    : this.highlighted ? highlightedColor : focusedColor,
-                    textColor,
+                    OutlinedSides.from(true, true, true, false),
+                    this.pressed ? this.clickedColor : this.highlighted ? highlightedColor : focusedColor,
+                    this.outlineColor,
+                    this.textColor,
                     false
             );
         }

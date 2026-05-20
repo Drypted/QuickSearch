@@ -245,6 +245,7 @@ public class InputWidget extends AbstractWidget
                     RoundedCorners.all(),
                     1,
                     this.error.getColor(),
+                    this.error.getColor(),
                     normalTextColor
             );
         }

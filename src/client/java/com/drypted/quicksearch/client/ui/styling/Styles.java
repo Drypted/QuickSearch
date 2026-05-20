@@ -6,12 +6,6 @@ import com.drypted.quicksearch.client.core.blueprints.ui.common.RoundedCorners;
 
 public final class Styles
 {
-    // palette
-    private static final Color PRIMARY_COLOR = Color.fromInt(0xFF_0D1B2A);
-    private static final Color SECONDARY_COLOR = PRIMARY_COLOR.brighten(0.275f).saturate(0.4f);
-    private static final Color TERTIARY_COLOR = SECONDARY_COLOR.brighten(0.15f).saturate(0.4f);
-    private static final Color QUATERNARY_COLOR = TERTIARY_COLOR.brighten(0.075f).saturate(0.4f);
-
     // semantic
     private static final Color INFO_COLOR = Color.fromInt(0xFF_0084D1);
     private static final Color SUCCESS_COLOR = Color.fromInt(0xFF_00C853);
@@ -34,11 +28,12 @@ public final class Styles
         public static final float OUTLINE_THICKNESS = Styles.THIN;
         public static final float HELP_TEXT_OUTLINE_THICKNESS = Styles.THIN;
         // slot outline colors
-        public static final Color FOCUSED_COLOR = Styles.OUTLINE;
-        public static final Color SLOT_PRESSED_COLOR = Styles.SECONDARY_COLOR;
-        public static final Color SLOT_HIGHLIGHTED_COLOR = Styles.TERTIARY_COLOR;
+        public static final Color FOCUSED_COLOR = Styles.BACKGROUND;
+        public static final Color SLOT_PRESSED_COLOR = Styles.BACKGROUND.withAlpha(192);
+        public static final Color SLOT_HIGHLIGHTED_COLOR = Styles.BACKGROUND.withAlpha(128);
         // help text colors
-        public static final Color HELP_TEXT_COLOR = Styles.OUTLINE.getReadableTextColor(7f);
+        public static final Color HELP_TEXT_OUTLINE = Styles.OUTLINE;
+        public static final Color HELP_TEXT_COLOR = Styles.BACKGROUND.getReadableTextColor(7f);
         public static final Color HELP_TEXT_CLOSE_BUTTON_COLOR = Styles.ERROR_COLOR;
         // tooltip colors
         public static final Color TOOLTIP_BACKGROUND_COLOR = Styles.BACKGROUND;

@@ -26,9 +26,9 @@ public class HotbarCollectionWidget extends AbstractWidget
     public static final int HOTBAR_SLOTS = 9;
 
     private static final int HELP_TEXT_MARGIN = 16;
-    private static final int HELP_TEXT_HEIGHT = 12;
+    private static final int  HELP_TEXT_HEIGHT = 14;
 
-    private static final int CLOSE_BUTTON_PADDING = 3;
+    private static final int CLOSE_BUTTON_PADDING = 4;
     private static final int CLOSE_BUTTON_SIZE = HELP_TEXT_HEIGHT - (CLOSE_BUTTON_PADDING * 2) - 1;
     // (- 1) because drawX draws 1 pixel extra in vertical direction
 
@@ -46,9 +46,10 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     private final float outlineThickness = Styles.Hotbar.HELP_TEXT_OUTLINE_THICKNESS;
 
-    private final Color SlotHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
-    private final Color SlotFocusedColor = Styles.Hotbar.FOCUSED_COLOR;
+    private final Color HotarInstructionSlotHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
+    private final Color HotbarInstructionSlotFocusedColor = Styles.Hotbar.FOCUSED_COLOR;
     private final Color HotbarInstructionTextColor = Styles.Hotbar.HELP_TEXT_COLOR;
+    private final Color HotbarInstructionOutlineColor = Styles.Hotbar.HELP_TEXT_OUTLINE;
     private final Color CloseButtonColor = Styles.Hotbar.HELP_TEXT_CLOSE_BUTTON_COLOR;
     private final Color TooltipBackgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
     private final Color TooltipOutlineColor = Styles.Hotbar.TOOLTIP_OUTLINE_COLOR;
@@ -108,9 +109,9 @@ public class HotbarCollectionWidget extends AbstractWidget
                     this.getY() + HELP_TEXT_HEIGHT,
                     RoundedCorners.all(),
                     this.outlineThickness,
-                    this.anySlotHighlighted ? SlotHighlightedColor : SlotFocusedColor,
-                    HotbarInstructionTextColor,
-                    false
+                    this.anySlotHighlighted ? HotarInstructionSlotHighlightedColor : HotbarInstructionSlotFocusedColor,
+                    HotbarInstructionOutlineColor,
+                    HotbarInstructionTextColor
             );
 
             drawCloseButton(guiGraphics);

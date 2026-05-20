@@ -2,6 +2,7 @@ package com.drypted.quicksearch.client.ui.renderer;
 
 import com.drypted.quicksearch.client.core.blueprints.ui.common.Color;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.Colors;
+import com.drypted.quicksearch.client.core.blueprints.ui.common.OutlinedSides;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.RoundedCorners;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -51,6 +52,28 @@ public final class RenderCommon
      */
     public static void drawRectangle(GuiGraphics g, float startPosX, float startPosY, float endPosX, float endPosY, RoundedCorners corners, float insetThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
     {
+        drawRectangle(
+                g,
+                startPosX,
+                startPosY,
+                endPosX,
+                endPosY,
+                corners,
+                insetThickness,
+                OutlinedSides.all(),
+                renderOutline,
+                backgroundColor,
+                outlineColor
+        );
+    }
+
+    /**
+     * Fills a rectangle with optional rounded corners and per-side outline control.
+     *
+     * @param outlineSides `OutlinedSides` specifying which sides reserve outline thickness
+     */
+    public static void drawRectangle(GuiGraphics g, float startPosX, float startPosY, float endPosX, float endPosY, RoundedCorners corners, float insetThickness, OutlinedSides outlineSides, boolean renderOutline, Color backgroundColor, Color outlineColor)
+    {
         insetThickness = Math.max(0f, insetThickness);
 
         outlineColor = outlineColor.withAlpha((int) (outlineColor.getAlpha() * GlobalAlphaModifier));
@@ -62,125 +85,115 @@ public final class RenderCommon
             return;
         }
 
-        float innerLeft = startPosX + insetThickness;
-        float innerTop = startPosY + insetThickness;
-        float innerRight = endPosX - insetThickness;
-        float innerBottom = endPosY - insetThickness;
+        float leftInset = outlineSides.left() ? insetThickness : 0f;
+        float topInset = outlineSides.top() ? insetThickness : 0f;
+        float rightInset = outlineSides.right() ? insetThickness : 0f;
+        float bottomInset = outlineSides.bottom() ? insetThickness : 0f;
+
+        float innerLeft = startPosX + leftInset;
+        float innerTop = startPosY + topInset;
+        float innerRight = endPosX - rightInset;
+        float innerBottom = endPosY - bottomInset;
 
         // Inner body
         drawQuad(g, innerLeft, innerTop, innerRight, innerBottom, backgroundColor);
 
         Color outerLineColor = renderOutline ? outlineColor : backgroundColor;
 
-        // LEFT - always stops short of corners to avoid overlap
-        drawQuad(
-                g,
-                startPosX,
-                startPosY + insetThickness,
-                startPosX + insetThickness,
-                endPosY - insetThickness,
-                outerLineColor
-        );
+        if (leftInset > 0f)
+        {
+            drawQuad(g, startPosX, startPosY + topInset, startPosX + leftInset, endPosY - bottomInset, outerLineColor);
+        }
 
-        // RIGHT
-        drawQuad(
-                g,
-                endPosX - insetThickness,
-                startPosY + insetThickness,
-                endPosX,
-                endPosY - insetThickness,
-                outerLineColor
-        );
+        if (rightInset > 0f)
+        {
+            drawQuad(g, endPosX - rightInset, startPosY + topInset, endPosX, endPosY - bottomInset, outerLineColor);
+        }
 
-        // TOP
-        drawQuad(
-                g,
-                startPosX + insetThickness,
-                startPosY,
-                endPosX - insetThickness,
-                startPosY + insetThickness,
-                outerLineColor
-        );
+        if (topInset > 0f)
+        {
+            drawQuad(g, startPosX + leftInset, startPosY, endPosX - rightInset, startPosY + topInset, outerLineColor);
+        }
 
-        // BOTTOM
-        drawQuad(
-                g,
-                startPosX + insetThickness,
-                endPosY - insetThickness,
-                endPosX - insetThickness,
-                endPosY,
-                outerLineColor
-        );
+        if (bottomInset > 0f)
+        {
+            drawQuad(g, startPosX + leftInset, endPosY - bottomInset, endPosX - rightInset, endPosY, outerLineColor);
+        }
 
         // CORNERS - handle both rounded and non-rounded cases
-        if (corners.topLeft())
+        if (leftInset > 0f && topInset > 0f)
         {
-            if (renderOutline)
+            if (corners.topLeft())
             {
-                drawQuad(g, innerLeft, innerTop, innerLeft + insetThickness, innerTop + insetThickness, outerLineColor);
+                if (renderOutline)
+                {
+                    drawQuad(g, innerLeft, innerTop, innerLeft + leftInset, innerTop + topInset, outerLineColor);
+                }
             }
-        }
-        else
-        {
-            // Non-rounded corner - single quad, no overlap
-            drawQuad(g, startPosX, startPosY, startPosX + insetThickness, startPosY + insetThickness, outerLineColor);
+            else
+            {
+                // Non-rounded corner - single quad, no overlap
+                drawQuad(g, startPosX, startPosY, startPosX + leftInset, startPosY + topInset, outerLineColor);
+            }
         }
 
-        if (corners.topRight())
+        if (rightInset > 0f && topInset > 0f)
         {
-            if (renderOutline)
+            if (corners.topRight())
             {
-                drawQuad(
-                        g,
-                        innerRight - insetThickness,
-                        innerTop,
-                        innerRight,
-                        innerTop + insetThickness,
-                        outerLineColor
-                );
+                if (renderOutline)
+                {
+                    drawQuad(g, innerRight - rightInset, innerTop, innerRight, innerTop + topInset, outerLineColor);
+                }
             }
-        }
-        else
-        {
-            drawQuad(g, endPosX - insetThickness, startPosY, endPosX, startPosY + insetThickness, outerLineColor);
+            else
+            {
+                drawQuad(g, endPosX - rightInset, startPosY, endPosX, startPosY + topInset, outerLineColor);
+            }
         }
 
-        if (corners.bottomLeft())
+        if (leftInset > 0f && bottomInset > 0f)
         {
-            if (renderOutline)
+            if (corners.bottomLeft())
             {
-                drawQuad(
-                        g,
-                        innerLeft,
-                        innerBottom - insetThickness,
-                        innerLeft + insetThickness,
-                        innerBottom,
-                        outerLineColor
-                );
+                if (renderOutline)
+                {
+                    drawQuad(
+                            g,
+                            innerLeft,
+                            innerBottom - bottomInset,
+                            innerLeft + leftInset,
+                            innerBottom,
+                            outerLineColor
+                    );
+                }
             }
-        }
-        else
-        {
-            drawQuad(g, startPosX, endPosY - insetThickness, startPosX + insetThickness, endPosY, outerLineColor);
+            else
+            {
+                drawQuad(g, startPosX, endPosY - bottomInset, startPosX + leftInset, endPosY, outerLineColor);
+            }
         }
 
-        if (corners.bottomRight())
+        if (rightInset > 0f && bottomInset > 0f)
         {
-            if (renderOutline)
+            if (corners.bottomRight())
             {
-                drawQuad(
-                        g,
-                        innerRight - insetThickness,
-                        innerBottom - insetThickness,
-                        innerRight,
-                        innerBottom,
-                        outerLineColor
-                );
+                if (renderOutline)
+                {
+                    drawQuad(
+                            g,
+                            innerRight - rightInset,
+                            innerBottom - bottomInset,
+                            innerRight,
+                            innerBottom,
+                            outerLineColor
+                    );
+                }
             }
-        }
-        else
-        {
-            drawQuad(g, endPosX - insetThickness, endPosY - insetThickness, endPosX, endPosY, outerLineColor);
+            else
+            {
+                drawQuad(g, endPosX - rightInset, endPosY - bottomInset, endPosX, endPosY, outerLineColor);
+            }
         }
     }
 
@@ -409,6 +422,24 @@ public final class RenderCommon
 
     public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int paddingX, int paddingY, RoundedCorners rounded, Color backgroundColor, Color outlineColor, Color textColor)
     {
+        drawLabel(
+                g,
+                text,
+                posX,
+                posY,
+                scale,
+                paddingX,
+                paddingY,
+                rounded,
+                OutlinedSides.all(),
+                backgroundColor,
+                outlineColor,
+                textColor
+        );
+    }
+
+    public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int paddingX, int paddingY, RoundedCorners rounded, OutlinedSides outlineSides, Color backgroundColor, Color outlineColor, Color textColor)
+    {
         final int fontWidth = (int) ((float) Minecraft.getInstance().font.width(text) * scale);
         final int fontHeight = (int) ((float) Minecraft.getInstance().font.lineHeight * scale);
         RenderCommon.drawRectangle(
@@ -419,6 +450,7 @@ public final class RenderCommon
                 posY + fontHeight + paddingY,
                 rounded,
                 1,
+                outlineSides,
                 !outlineColor.equals(Colors.CLEAR), // draw outline if its not clear
                 backgroundColor,
                 outlineColor
@@ -429,7 +461,7 @@ public final class RenderCommon
         RenderCommon.drawScaledText(g, text, scale, posX, posY, textColor);
     }
 
-    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color textColor)
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color outlineColor, Color textColor)
     {
         drawLabelWithScale(
                 g,
@@ -441,13 +473,55 @@ public final class RenderCommon
                 endY,
                 corners,
                 insetThickness,
+                OutlinedSides.all(),
                 backgroundColor,
+                outlineColor,
                 textColor,
                 true
         );
     }
 
-    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color textColor, boolean drawShadow)
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, OutlinedSides outlineSides, Color backgroundColor, Color outlineColor, Color textColor)
+    {
+        drawLabelWithScale(
+                g,
+                text,
+                scale,
+                startX,
+                startY,
+                endX,
+                endY,
+                corners,
+                insetThickness,
+                outlineSides,
+                backgroundColor,
+                outlineColor,
+                textColor,
+                true
+        );
+    }
+
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color outlineColor, Color textColor, boolean drawShadow)
+    {
+        drawLabelWithScale(
+                g,
+                text,
+                scale,
+                startX,
+                startY,
+                endX,
+                endY,
+                corners,
+                insetThickness,
+                OutlinedSides.all(),
+                backgroundColor,
+                outlineColor,
+                textColor,
+                drawShadow
+        );
+    }
+
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, OutlinedSides outlineSides, Color backgroundColor, Color outlineColor, Color textColor, boolean drawShadow)
     {
         // background
         RenderCommon.drawRectangle(
@@ -458,9 +532,10 @@ public final class RenderCommon
                 endY,
                 corners,
                 insetThickness,
+                outlineSides,
                 true,
                 backgroundColor,
-                backgroundColor
+                outlineColor
         );
 
         // text
