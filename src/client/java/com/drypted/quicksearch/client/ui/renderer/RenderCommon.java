@@ -431,6 +431,24 @@ public final class RenderCommon
 
     public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color textColor)
     {
+        drawLabelWithScale(
+                g,
+                text,
+                scale,
+                startX,
+                startY,
+                endX,
+                endY,
+                corners,
+                insetThickness,
+                backgroundColor,
+                textColor,
+                true
+        );
+    }
+
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color textColor, boolean drawShadow)
+    {
         // background
         RenderCommon.drawRectangle(
                 g,
@@ -454,7 +472,7 @@ public final class RenderCommon
 
         textColor = textColor.withAlpha((int) (textColor.getAlpha() * GlobalAlphaModifier));
 
-        RenderCommon.drawScaledText(g, text, scale, textPosX, textPosY, textColor);
+        RenderCommon.drawScaledText(g, text, scale, textPosX, textPosY, textColor, drawShadow);
     }
 
     public static void drawLabelInBox(GuiGraphics g, String text, int padding, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)

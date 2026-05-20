@@ -38,7 +38,7 @@ public final class Styles
         public static final Color SLOT_PRESSED_COLOR = Styles.SECONDARY_COLOR;
         public static final Color SLOT_HIGHLIGHTED_COLOR = Styles.TERTIARY_COLOR;
         // help text colors
-        public static final Color HELP_TEXT_COLOR = Styles.BACKGROUND.getReadableTextColor(4.5f);
+        public static final Color HELP_TEXT_COLOR = Styles.OUTLINE.getReadableTextColor(7f);
         public static final Color HELP_TEXT_CLOSE_BUTTON_COLOR = Styles.ERROR_COLOR;
         // tooltip colors
         public static final Color TOOLTIP_BACKGROUND_COLOR = Styles.BACKGROUND;

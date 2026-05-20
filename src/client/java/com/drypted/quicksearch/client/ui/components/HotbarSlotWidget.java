@@ -112,7 +112,8 @@ public class HotbarSlotWidget extends AbstractWidget
                     this.pressed
                     ? this.clickedColor
                     : this.highlighted ? highlightedColor : focusedColor,
-                    textColor
+                    textColor,
+                    false
             );
         }
     }

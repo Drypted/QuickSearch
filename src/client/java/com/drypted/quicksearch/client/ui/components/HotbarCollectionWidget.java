@@ -109,7 +109,8 @@ public class HotbarCollectionWidget extends AbstractWidget
                     RoundedCorners.all(),
                     this.outlineThickness,
                     this.anySlotHighlighted ? SlotHighlightedColor : SlotFocusedColor,
-                    HotbarInstructionTextColor
+                    HotbarInstructionTextColor,
+                    false
             );
 
             drawCloseButton(guiGraphics);
