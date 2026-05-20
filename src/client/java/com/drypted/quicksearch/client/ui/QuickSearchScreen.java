@@ -70,17 +70,18 @@ public class QuickSearchScreen extends Screen
         final int searchBarX = (this.width - searchBarWidth) / 2;
         final int searchBarY = (this.height - SEARCH_BAR_HEIGHT) / 2 - DISTANCE_FROM_CENTER;
 
-        this.inputWidget = InputWidget.builder(searchBarX, searchBarY, searchBarWidth, SEARCH_BAR_HEIGHT).build();
+        this.inputWidget = new InputWidget(searchBarX, searchBarY, searchBarWidth, SEARCH_BAR_HEIGHT);
         this.inputWidget.setPlaceholder("Search items or blocks ...");
         // set validator for no symbols
         this.inputWidget.setValidator(text -> text.matches("[/a-zA-Z0-9 -_\"]*"));
 
-        this.searchResultsWidget = ScrollBoxWidget.builder(
+        this.searchResultsWidget = new ScrollBoxWidget(
                 searchBarX,
                 (int) (inputWidget.getY() + SEARCH_BAR_HEIGHT - inputWidget.getOutlineThickness()),
                 inputWidget.getWidth(),
                 resultsHeight
-        ).showScrollerAlways(true).build();
+        );
+        this.searchResultsWidget.setShowScrollerAlways(true);
 
         if (isHotbarEnabledInConfig())
         {

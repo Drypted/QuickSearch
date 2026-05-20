@@ -72,13 +72,13 @@ public final class RenderCommon
 
         Color outerLineColor = renderOutline ? outlineColor : backgroundColor;
 
-        // LEFT
+        // LEFT - always stops short of corners to avoid overlap
         drawQuad(
                 g,
                 startPosX,
-                startPosY + (corners.topLeft() ? insetThickness : 0f),
+                startPosY + insetThickness,
                 startPosX + insetThickness,
-                endPosY - (corners.bottomLeft() ? insetThickness : 0f),
+                endPosY - insetThickness,
                 outerLineColor
         );
 
@@ -86,18 +86,18 @@ public final class RenderCommon
         drawQuad(
                 g,
                 endPosX - insetThickness,
-                startPosY + (corners.topRight() ? insetThickness : 0f),
+                startPosY + insetThickness,
                 endPosX,
-                endPosY - (corners.bottomRight() ? insetThickness : 0f),
+                endPosY - insetThickness,
                 outerLineColor
         );
 
         // TOP
         drawQuad(
                 g,
-                startPosX + (corners.topLeft() ? insetThickness : 0f),
+                startPosX + insetThickness,
                 startPosY,
-                endPosX - (corners.topRight() ? insetThickness : 0f),
+                endPosX - insetThickness,
                 startPosY + insetThickness,
                 outerLineColor
         );
@@ -105,43 +105,82 @@ public final class RenderCommon
         // BOTTOM
         drawQuad(
                 g,
-                startPosX + (corners.bottomLeft() ? insetThickness : 0f),
+                startPosX + insetThickness,
                 endPosY - insetThickness,
-                endPosX - (corners.bottomRight() ? insetThickness : 0f),
+                endPosX - insetThickness,
                 endPosY,
                 outerLineColor
         );
 
-        // CORNER INNER PIXELS (when outline shown)
-        if (renderOutline && corners.topLeft())
+        // CORNERS - handle both rounded and non-rounded cases
+        if (corners.topLeft())
         {
-            drawQuad(g, innerLeft, innerTop, innerLeft + insetThickness, innerTop + insetThickness, outerLineColor);
+            if (renderOutline)
+            {
+                drawQuad(g, innerLeft, innerTop, innerLeft + insetThickness, innerTop + insetThickness, outerLineColor);
+            }
         }
-        if (renderOutline && corners.topRight())
+        else
         {
-            drawQuad(g, innerRight - insetThickness, innerTop, innerRight, innerTop + insetThickness, outerLineColor);
+            // Non-rounded corner - single quad, no overlap
+            drawQuad(g, startPosX, startPosY, startPosX + insetThickness, startPosY + insetThickness, outerLineColor);
         }
-        if (renderOutline && corners.bottomLeft())
+
+        if (corners.topRight())
         {
-            drawQuad(
-                    g,
-                    innerLeft,
-                    innerBottom - insetThickness,
-                    innerLeft + insetThickness,
-                    innerBottom,
-                    outerLineColor
-            );
+            if (renderOutline)
+            {
+                drawQuad(
+                        g,
+                        innerRight - insetThickness,
+                        innerTop,
+                        innerRight,
+                        innerTop + insetThickness,
+                        outerLineColor
+                );
+            }
         }
-        if (renderOutline && corners.bottomRight())
+        else
         {
-            drawQuad(
-                    g,
-                    innerRight - insetThickness,
-                    innerBottom - insetThickness,
-                    innerRight,
-                    innerBottom,
-                    outerLineColor
-            );
+            drawQuad(g, endPosX - insetThickness, startPosY, endPosX, startPosY + insetThickness, outerLineColor);
+        }
+
+        if (corners.bottomLeft())
+        {
+            if (renderOutline)
+            {
+                drawQuad(
+                        g,
+                        innerLeft,
+                        innerBottom - insetThickness,
+                        innerLeft + insetThickness,
+                        innerBottom,
+                        outerLineColor
+                );
+            }
+        }
+        else
+        {
+            drawQuad(g, startPosX, endPosY - insetThickness, startPosX + insetThickness, endPosY, outerLineColor);
+        }
+
+        if (corners.bottomRight())
+        {
+            if (renderOutline)
+            {
+                drawQuad(
+                        g,
+                        innerRight - insetThickness,
+                        innerBottom - insetThickness,
+                        innerRight,
+                        innerBottom,
+                        outerLineColor
+                );
+            }
+        }
+        else
+        {
+            drawQuad(g, endPosX - insetThickness, endPosY - insetThickness, endPosX, endPosY, outerLineColor);
         }
     }
 
@@ -199,9 +238,9 @@ public final class RenderCommon
 
         ScreenRectangle rect = new ScreenRectangle(
                 Mth.floor(minX),
-                Mth.floor(minY),
-                Mth.ceil(maxX - minX),
-                Mth.ceil(maxY - minY)
+                                                   Mth.floor(minY),
+                                                   Mth.ceil(maxX - minX),
+                                                   Mth.ceil(maxY - minY)
         );
         return scissor != null ? scissor.intersection(rect) : rect;
     }

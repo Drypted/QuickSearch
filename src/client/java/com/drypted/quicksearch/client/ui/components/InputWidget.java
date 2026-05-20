@@ -85,19 +85,19 @@ public class InputWidget extends AbstractWidget
 
     private final Color LoaderColor = Styles.Input.LOADER_COLOR;
 
-    public InputWidget(int x, int y, int width, int height, RoundedCorners rounded, float outlineThickness, Color backgroundColor, Color outlineColor, Color caretColor, Color normalTextColor, Color disabledTextColor, Color selectionBackgroundColor, Color selectionTextColor, Color placeholderColor)
+    public InputWidget(int x, int y, int width, int height)
     {
         super(x, y, width, height, Component.empty());
-        this.rounded = rounded;
-        this.outlineThickness = outlineThickness;
-        this.backgroundColor = backgroundColor;
-        this.outlineColor = outlineColor;
-        this.caretColor = caretColor;
-        this.normalTextColor = normalTextColor;
-        this.disabledTextColor = disabledTextColor;
-        this.selectionBackgroundColor = selectionBackgroundColor;
-        this.selectionTextColor = selectionTextColor;
-        this.placeholderColor = placeholderColor;
+        this.rounded = Styles.Input.ROUNDED;
+        this.outlineThickness = Styles.Input.OUTLINE_THICKNESS;
+        this.backgroundColor = Styles.Input.BACKGROUND_COLOR;
+        this.outlineColor = Styles.Input.OUTLINE_COLOR;
+        this.caretColor = Styles.Input.CARET_COLOR;
+        this.normalTextColor = Styles.Input.TEXT_COLOR;
+        this.disabledTextColor = Styles.Input.DISABLED_TEXT;
+        this.selectionBackgroundColor = Styles.Input.SELECTION_BACKGROUND;
+        this.selectionTextColor = Styles.Input.SELECTION_TEXT;
+        this.placeholderColor = Styles.Input.PLACEHOLDER_TEXT;
     }
 
     @Override
@@ -1211,150 +1211,6 @@ public class InputWidget extends AbstractWidget
     public void addFocusChangeListener(Consumer<Boolean> listener)
     {
         this.onFocusChangeCallbacks.add(listener);
-    }
-
-    /* Builder */
-
-    public static Builder builder(int x, int y, int width, int height)
-    {
-        return new Builder(x, y, width, height);
-    }
-
-    public static final class Builder
-    {
-        private final int x;
-        private final int y;
-        private final int width;
-        private int height;
-        private RoundedCorners rounded = RoundedCorners.all();
-        private float outlineThickness = Styles.Input.OUTLINE_THICKNESS;
-        private Color backgroundColor = Styles.Input.BACKGROUND_COLOR;
-        private Color outlineColor = Styles.Input.OUTLINE_COLOR;
-        private Color caretColor = Styles.Input.CARET_COLOR;
-        private Color normalTextColor = Styles.Input.TEXT_COLOR;
-        private Color disabledTextColor = Styles.Input.DISABLED_TEXT;
-        private Color selectionBackgroundColor = Styles.Input.SELECTION_BACKGROUND;
-        private Color selectionTextColor = Styles.Input.SELECTION_TEXT;
-        private Color placeholderColor = Styles.Input.PLACEHOLDER_TEXT;
-        private String placeholder = "";
-        private int maxLength = 256;
-        private Predicate<String> validator = null;
-
-        public Builder(int x, int y, int width, int height)
-        {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-
-        public Builder height(int height)
-        {
-            this.height = height;
-            return this;
-        }
-
-        public Builder rounded(RoundedCorners rounded)
-        {
-            this.rounded = rounded;
-            return this;
-        }
-
-        public Builder outlineThickness(int outlineThickness)
-        {
-            this.outlineThickness = outlineThickness;
-            return this;
-        }
-
-        public Builder backgroundColor(Color backgroundColor)
-        {
-            this.backgroundColor = backgroundColor;
-            return this;
-        }
-
-        public Builder outlineColor(Color outlineColor)
-        {
-            this.outlineColor = outlineColor;
-            return this;
-        }
-
-        public Builder caretColor(Color caretColor)
-        {
-            this.caretColor = caretColor;
-            return this;
-        }
-
-        public Builder normalTextColor(Color normalTextColor)
-        {
-            this.normalTextColor = normalTextColor;
-            return this;
-        }
-
-        public Builder disabledTextColor(Color disabledTextColor)
-        {
-            this.disabledTextColor = disabledTextColor;
-            return this;
-        }
-
-        public Builder selectionBackgroundColor(Color selectionBackgroundColor)
-        {
-            this.selectionBackgroundColor = selectionBackgroundColor;
-            return this;
-        }
-
-        public Builder selectionTextColor(Color selectionTextColor)
-        {
-            this.selectionTextColor = selectionTextColor;
-            return this;
-        }
-
-        public Builder placeholderColor(Color placeholderColor)
-        {
-            this.placeholderColor = placeholderColor;
-            return this;
-        }
-
-        public Builder placeholder(String placeholder)
-        {
-            this.placeholder = placeholder;
-            return this;
-        }
-
-        public Builder maxLength(int maxLength)
-        {
-            this.maxLength = maxLength;
-            return this;
-        }
-
-        public Builder validator(Predicate<String> validator)
-        {
-            this.validator = validator;
-            return this;
-        }
-
-        public InputWidget build()
-        {
-            InputWidget widget = new InputWidget(
-                    x,
-                    y,
-                    width,
-                    height,
-                    rounded,
-                    outlineThickness,
-                    backgroundColor,
-                    outlineColor,
-                    caretColor,
-                    normalTextColor,
-                    disabledTextColor,
-                    selectionBackgroundColor,
-                    selectionTextColor,
-                    placeholderColor
-            );
-            widget.setPlaceholder(placeholder);
-            widget.setMaxLength(maxLength);
-            widget.setValidator(validator);
-            return widget;
-        }
     }
 
     /* Inner Classes */

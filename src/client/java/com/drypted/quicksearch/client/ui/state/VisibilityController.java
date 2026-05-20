@@ -29,8 +29,8 @@ public final class VisibilityController
         setHotbarWidgetVisible(visible);
         setVisible(this.searchResultsWidget, visible);
 
-        if (visible) this.inputWidget.setRounded(RoundedCorners.fromVerticalSides(true, false));
-        else this.inputWidget.setRounded(RoundedCorners.all());
+        // if (visible) this.inputWidget.setRounded(RoundedCorners.fromVerticalSides(true, false));
+        // else this.inputWidget.setRounded(RoundedCorners.all());
     }
 
     public void setHotbarWidgetVisible(boolean visible)

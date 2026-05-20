@@ -39,21 +39,22 @@ public class HotbarSlotWidget extends AbstractWidget
 
     private boolean pressed = false;
 
-    public HotbarSlotWidget(int hotbarIndex, int x, int y, int width, int height, int iconPadding, RoundedCorners roundedCorners, float outlineThickness, float hotbarKeyTextScale, Color backgroundColor, Color textColor, Color focusedColor, Color outlineColor, Color highlightedColor, Color clickedColor, Consumer<MouseButtonClick> onClickCallback)
+    public HotbarSlotWidget(int hotbarIndex, int x, int y, int width, int height)
     {
         super(x, y, width, height, Component.empty());
         this.hotbarIndex = hotbarIndex;
-        this.iconPadding = iconPadding;
-        this.roundedCorners = roundedCorners;
-        this.outlineThickness = outlineThickness;
-        this.hotbarKeyTextScale = hotbarKeyTextScale;
-        this.backgroundColor = backgroundColor;
-        this.textColor = textColor;
-        this.outlineColor = outlineColor;
-        this.focusedColor = focusedColor;
-        this.highlightedColor = highlightedColor;
-        this.clickedColor = clickedColor;
-        this.onClickCallback = onClickCallback;
+        this.iconPadding = Styles.Hotbar.ICON_PADDING;
+        this.roundedCorners = Styles.Hotbar.ROUNDED;
+        this.outlineThickness = Styles.Hotbar.OUTLINE_THICKNESS;
+        this.hotbarKeyTextScale = Styles.Hotbar.TEXT_SCALE;
+        this.backgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
+        this.textColor = Styles.Hotbar.HELP_TEXT_COLOR;
+        this.outlineColor = Styles.Hotbar.TOOLTIP_OUTLINE_COLOR;
+        this.focusedColor = Styles.Hotbar.FOCUSED_COLOR;
+        this.highlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
+        this.clickedColor = Styles.Hotbar.SLOT_PRESSED_COLOR;
+        this.onClickCallback = (mouseButtonClick) -> {
+        };
 
         this.hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
                 .getString()
@@ -180,133 +181,6 @@ public class HotbarSlotWidget extends AbstractWidget
     public int getHotbarIndex()
     {
         return hotbarIndex;
-    }
-
-    /* Builder */
-
-    public static Builder builder(int hotbarIndex, int x, int y, int width, int height)
-    {
-        return new Builder(hotbarIndex, x, y, width, height);
-    }
-
-    public static class Builder
-    {
-        private final int hotbarIndex;
-        private final int x;
-        private final int y;
-        private final int width;
-        private final int height;
-
-        private int iconPadding = 2;
-        private RoundedCorners roundedCorners = RoundedCorners.all();
-        private float outlineThickness = Styles.Hotbar.OUTLINE_THICKNESS;
-        private float hotbarTextScale = 0.8f;
-        private Color backgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
-        private Color textColor = Styles.Hotbar.HELP_TEXT_COLOR;
-        private Color unfocusedColor = Styles.Hotbar.TOOLTIP_OUTLINE_COLOR;
-        private Color focusedColor = Styles.Hotbar.FOCUSED_COLOR;
-        private Color highlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
-        private Color clickedColor = Styles.Hotbar.SLOT_PRESSED_COLOR;
-
-        private Consumer<MouseButtonClick> onClickCallback = (mouseButtonClick) -> {
-        };
-
-        public Builder(int hotbarIndex, int x, int y, int width, int height)
-        {
-            this.hotbarIndex = hotbarIndex;
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-
-        public Builder iconPadding(int iconPadding)
-        {
-            this.iconPadding = iconPadding;
-            return this;
-        }
-
-        public Builder isRounded(RoundedCorners roundedCorners)
-        {
-            this.roundedCorners = roundedCorners;
-            return this;
-        }
-
-        public Builder outlineThickness(int outlineThickness)
-        {
-            this.outlineThickness = outlineThickness;
-            return this;
-        }
-
-        public Builder hotbarTextScale(float hotbarTextScale)
-        {
-            this.hotbarTextScale = hotbarTextScale;
-            return this;
-        }
-
-        public Builder backgroundColor(Color backgroundColor)
-        {
-            this.backgroundColor = backgroundColor;
-            return this;
-        }
-
-        public Builder textColor(Color textColor)
-        {
-            this.textColor = textColor;
-            return this;
-        }
-
-        public Builder unfocusedColor(Color unfocusedColor)
-        {
-            this.unfocusedColor = unfocusedColor;
-            return this;
-        }
-
-        public Builder focusedColor(Color focusedColor)
-        {
-            this.focusedColor = focusedColor;
-            return this;
-        }
-
-        public Builder highlightedColor(Color highlightedColor)
-        {
-            this.highlightedColor = highlightedColor;
-            return this;
-        }
-
-        public Builder clickedColor(Color clickedColor)
-        {
-            this.clickedColor = clickedColor;
-            return this;
-        }
-
-        public Builder onClickCallback(Consumer<MouseButtonClick> onClickCallback)
-        {
-            this.onClickCallback = onClickCallback;
-            return this;
-        }
-
-        public HotbarSlotWidget build()
-        {
-            return new HotbarSlotWidget(
-                    hotbarIndex,
-                    x,
-                    y, //
-                    width,
-                    height,
-                    iconPadding,
-                    roundedCorners,
-                    outlineThickness,
-                    hotbarTextScale,
-                    backgroundColor,
-                    textColor,
-                    focusedColor,
-                    unfocusedColor,
-                    highlightedColor,
-                    clickedColor,
-                    onClickCallback
-            );
-        }
     }
 
     @Override

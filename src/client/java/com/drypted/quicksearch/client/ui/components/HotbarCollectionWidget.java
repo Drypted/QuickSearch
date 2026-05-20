@@ -63,10 +63,10 @@ public class HotbarCollectionWidget extends AbstractWidget
 
         for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
-            final HotbarSlotWidget hotbarWidget = HotbarSlotWidget.builder(
+            final HotbarSlotWidget hotbarWidget = new HotbarSlotWidget(
                     i, //
                     (int) Math.ceil(cursor), startY, (int) Math.ceil(iconSize), (int) Math.ceil(iconSize)
-            ).build();
+            );
             hotbarWidget.onClick(mouseButtonClick -> {
                 ItemsResultData item = hotbarWidget.getSearchResultData();
                 if (item == null) return;

@@ -35,9 +35,9 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private final @Nullable String title;
     private final @Nullable String subtitle;
 
-    private final int paddingX;
-    private final int paddingY;
-    private final boolean isRounded;
+    private int paddingX;
+    private int paddingY;
+    private boolean isRounded;
     private final float outlineThickness;
     private Color backgroundColor;
     private Color textColor;
@@ -54,27 +54,28 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
     };
 
-    private ResultDataWidget(int x, int y, @Nullable ItemStack icon, @Nullable String title, @Nullable String subtitle, int width, int paddingX, int paddingY, boolean isRounded, float outlineThickness, Color backgroundColor, Color textColor, Color hoverColor, Color clickColor, Color selectedColor, Color outlineColor)
+    public ResultDataWidget(int x, int y, @Nullable ItemStack icon, @Nullable String title, @Nullable String subtitle)
     {
-        super(x, y, width, 0, Component.empty());
+        super(x, y, 0, 0, Component.empty());
         this.icon = icon;
         this.title = title;
         this.subtitle = subtitle;
-        this.paddingX = paddingX;
-        this.paddingY = paddingY;
-        this.isRounded = isRounded;
-        this.outlineThickness = outlineThickness;
-        this.backgroundColor = backgroundColor;
-        this.textColor = textColor;
-        this.hoverColor = hoverColor;
-        this.clickColor = clickColor;
-        this.selectedColor = selectedColor;
-        this.outlineColor = outlineColor;
+        this.paddingX = Styles.ResultData.PADDING_X;
+        this.paddingY = Styles.ResultData.PADDING_Y;
+        this.isRounded = Styles.ResultData.ROUNDED;
+        this.outlineThickness = Styles.ResultData.OUTLINE_THICKNESS;
+        this.backgroundColor = Styles.ResultData.BACKGROUND_COLOR;
+        this.textColor = Styles.ResultData.TEXT_COLOR;
+        this.hoverColor = Styles.ResultData.HOVER_OUTLINE_COLOR;
+        this.clickColor = Styles.ResultData.CLICKED_OUTLINE_COLOR;
+        this.selectedColor = Styles.ResultData.SELECTED_OUTLINE_COLOR;
+        this.outlineColor = Colors.CLEAR;
 
-        //        this.setHeight((2 * paddingY) + Math.max(
-        //                ICON_PADDING,
-        //                getFont().lineHeight + SUBTITLE_SPACING + (int) (getFont().lineHeight * SUBTITLE_SCALE)
-        //        ));
+        recalculateHeight();
+    }
+
+    private void recalculateHeight()
+    {
         boolean shouldRenderIcon = this.icon != null && !this.icon.isEmpty() && this.icon.getItem() != Items.AIR;
         boolean shouldRenderTitle = this.title != null && !this.title.isEmpty();
         boolean shouldRenderSubtitle = this.subtitle != null && !this.subtitle.isEmpty();
@@ -243,9 +244,25 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
 
     /* GETTERS & SETTERS */
 
+    public void onClick(BiConsumer<MouseButtonClick, Boolean> onClick)
+    {
+        this.onClickCallback = onClick;
+    }
+
     public void setOnClickCallback(BiConsumer<MouseButtonClick, Boolean> onClickCallback)
     {
         this.onClickCallback = onClickCallback;
+    }
+
+    public void setPaddingX(int paddingX)
+    {
+        this.paddingX = paddingX;
+    }
+
+    public void setPaddingY(int paddingY)
+    {
+        this.paddingY = paddingY;
+        recalculateHeight();
     }
 
     public Color getBackgroundColor()
@@ -333,169 +350,5 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     @Override
     protected void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput)
     {
-    }
-
-    /* BUILDER */
-
-    public static Builder builder(int x, int y, @Nullable ItemStack icon, @Nullable String title, @Nullable String subtitle)
-    {
-        return new Builder(x, y, icon, title, subtitle);
-    }
-
-    public static class Builder
-    {
-        private final int x;
-        private final int y;
-        private final @Nullable ItemStack icon;
-        private final @Nullable String title;
-        private final @Nullable String subtitle;
-
-        private int width = 0;
-        private int paddingX = 7;
-        private int paddingY = 6;
-        private boolean isRounded = true;
-        private Color backgroundColor = Styles.ResultData.BACKGROUND_COLOR;
-        private Color textColor = Styles.ResultData.TEXT_COLOR;
-        private Color hoverColor = Styles.ResultData.HOVER_OUTLINE_COLOR;
-        private Color clickColor = Styles.ResultData.CLICKED_OUTLINE_COLOR;
-        private Color selectedColor = Styles.ResultData.SELECTED_OUTLINE_COLOR;
-        private Color outlineColor = Colors.CLEAR;
-        private boolean pressed = false;
-        private boolean showOutline = false;
-        private float outlineThickness = Styles.ResultData.OUTLINE_THICKNESS;
-
-        private boolean disabled = false;
-
-        private BiConsumer<MouseButtonClick, Boolean> onClick = (e, p) -> {
-        };
-
-        private Builder(int x, int y, @Nullable ItemStack icon, @Nullable String title, @Nullable String subtitle)
-        {
-            this.x = x;
-            this.y = y;
-            this.icon = icon;
-            this.title = title;
-            this.subtitle = subtitle;
-        }
-
-        public Builder width(int width)
-        {
-            this.width = width;
-            return this;
-        }
-
-        public Builder paddingX(int paddingX)
-        {
-            this.paddingX = paddingX;
-            return this;
-        }
-
-        public Builder paddingY(int paddingY)
-        {
-            this.paddingY = paddingY;
-            return this;
-        }
-
-        public Builder isRounded(boolean isRounded)
-        {
-            this.isRounded = isRounded;
-            return this;
-        }
-
-        public Builder bgColor(Color bgColor)
-        {
-            this.backgroundColor = bgColor;
-            return this;
-        }
-
-        public Builder fgColor(Color fgColor)
-        {
-            this.textColor = fgColor;
-            return this;
-        }
-
-        public Builder hoverColor(Color hoverColor)
-        {
-            this.hoverColor = hoverColor;
-            return this;
-        }
-
-        public Builder clickColor(Color clickColor)
-        {
-            this.clickColor = clickColor;
-            return this;
-        }
-
-        public Builder selectedColor(Color selectedColor)
-        {
-            this.selectedColor = selectedColor;
-            return this;
-        }
-
-        public Builder outlineColor(Color outlineColor)
-        {
-            this.outlineColor = outlineColor;
-            return this;
-        }
-
-        public Builder pressed(boolean pressed)
-        {
-            this.pressed = pressed;
-            return this;
-        }
-
-        public Builder showOutline(boolean showOutline)
-        {
-            this.showOutline = showOutline;
-            return this;
-        }
-
-        public Builder outlineThickness(int outlineThickness)
-        {
-            this.outlineThickness = outlineThickness;
-            return this;
-        }
-
-        public Builder onClick(BiConsumer<MouseButtonClick, Boolean> onClick)
-        {
-            this.onClick = onClick;
-            return this;
-        }
-
-        public Builder disabled(boolean disabled)
-        {
-            this.disabled = disabled;
-            return this;
-        }
-
-        public ResultDataWidget build()
-        {
-            ResultDataWidget widget = new ResultDataWidget(
-                    x,
-                    y,
-                    icon,
-                    title,
-                    subtitle,
-                    width,
-                    paddingX,
-                    paddingY,
-                    isRounded,
-                    outlineThickness,
-                    backgroundColor,
-                    textColor,
-                    hoverColor,
-                    clickColor,
-                    selectedColor,
-                    outlineColor
-            );
-
-            widget.setOnClickCallback(onClick);
-            widget.setOutlineEnabled(showOutline);
-            widget.pressed = this.pressed;
-            widget.setDisabled(this.disabled);
-            if (this.width > 0) widget.setWidth(this.width);
-
-            return widget;
-        }
     }
 }

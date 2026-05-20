@@ -97,16 +97,15 @@ public final class ResultPresenter
                 }
             }
 
-            ResultDataWidget widget = ResultDataWidget.builder(
+            ResultDataWidget widget = new ResultDataWidget(
                             0,
                             0,
                             result.getIcon(),
                             result.getName(),
                             result.getSerializedDefinition()
-                    )
-                    .width(searchResultsWidget.getChildWidth())
-                    .onClick((mBC, dC) -> clickHandlers.onItemClicked(result))
-                    .build();
+                    );
+            widget.setWidth(searchResultsWidget.getChildWidth());
+            widget.onClick((mBC, dC) -> clickHandlers.onItemClicked(result));
 
             this.searchResultsWidget.addChildRow(widget);
 
@@ -142,12 +141,11 @@ public final class ResultPresenter
 
         for (Command result : results)
         {
-            ResultDataWidget widget = ResultDataWidget.builder(0, 0, null, result.getName(), result.getDescription())
-                    .width(searchResultsWidget.getChildWidth())
-                    .disabled(true)
-                    .paddingX(10)
-                    .onClick((mBC, dC) -> clickHandlers.onCommandClicked(result))
-                    .build();
+            ResultDataWidget widget = new ResultDataWidget(0, 0, null, result.getName(), result.getDescription());
+            widget.setWidth(searchResultsWidget.getChildWidth());
+            widget.setDisabled(true);
+            widget.setPaddingX(10);
+            widget.onClick((mBC, dC) -> clickHandlers.onCommandClicked(result));
 
             this.searchResultsWidget.addChildRow(widget);
         }
@@ -161,10 +159,9 @@ public final class ResultPresenter
     {
         clearResults();
 
-        ResultDataWidget usageWidget = ResultDataWidget.builder(0, 0, null, command.getUsage(), null)
-                .width(searchResultsWidget.getChildWidth())
-                .disabled(true)
-                .build();
+        ResultDataWidget usageWidget = new ResultDataWidget(0, 0, null, command.getUsage(), null);
+        usageWidget.setWidth(searchResultsWidget.getChildWidth());
+        usageWidget.setDisabled(true);
 
         this.searchResultsWidget.addChildRow(usageWidget);
 
@@ -190,12 +187,11 @@ public final class ResultPresenter
 
         for (final String suggestion : suggestions)
         {
-            ResultDataWidget suggestionWidget = ResultDataWidget.builder(0, 0, null, null, suggestion)
-                    .width(searchResultsWidget.getChildWidth())
-                    .paddingX(7)
-                    .paddingY(4)
-                    .onClick((mBC, dC) -> clickHandlers.onCommandSuggestionClick(suggestion))
-                    .build();
+            ResultDataWidget suggestionWidget = new ResultDataWidget(0, 0, null, null, suggestion);
+            suggestionWidget.setWidth(searchResultsWidget.getChildWidth());
+            suggestionWidget.setPaddingX(7);
+            suggestionWidget.setPaddingY(4);
+            suggestionWidget.onClick((mBC, dC) -> clickHandlers.onCommandSuggestionClick(suggestion));
 
             this.searchResultsWidget.addChildRow(suggestionWidget);
         }

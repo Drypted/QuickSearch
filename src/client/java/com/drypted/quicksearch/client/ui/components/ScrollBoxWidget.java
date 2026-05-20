@@ -32,7 +32,7 @@ public class ScrollBoxWidget extends AbstractWidget
     private final int margin;
     private final int spacing;
     private final float outlineThickness;
-    private final boolean showScrollerAlways;
+    private boolean showScrollerAlways;
     private final Color bgColor;
     private final Color outlineColor;
     private final Color scrollbarColor;
@@ -46,18 +46,18 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private Consumer<Boolean> onFocus;
 
-    public ScrollBoxWidget(int x, int y, int width, int height, int margin, int spacing, float outlineThickness, RoundedCorners rounded, boolean showScrollerAlways, Color bgColor, Color outlineColor, Color scrollbarColor, Color scrollerColor)
+    public ScrollBoxWidget(int x, int y, int width, int height)
     {
         super(x, y, width, height, Component.empty());
-        this.margin = margin;
-        this.outlineThickness = outlineThickness;
-        this.showScrollerAlways = showScrollerAlways;
-        this.rounded = rounded;
-        this.bgColor = bgColor;
-        this.spacing = spacing;
-        this.outlineColor = outlineColor;
-        this.scrollbarColor = scrollbarColor;
-        this.scrollerColor = scrollerColor;
+        this.margin = Styles.ScrollBox.MARGIN;
+        this.spacing = Styles.ScrollBox.SPACING;
+        this.outlineThickness = Styles.ScrollBox.OUTLINE_THICKNESS;
+        this.rounded = Styles.ScrollBox.ROUNDED;
+        this.showScrollerAlways = false;
+        this.bgColor = Styles.ScrollBox.BACKGROUND_COLOR;
+        this.outlineColor = Styles.ScrollBox.OUTLINE_COLOR;
+        this.scrollbarColor = Styles.ScrollBox.SCROLLBAR_COLOR;
+        this.scrollerColor = Styles.ScrollBox.SCROLLER_COLOR;
     }
 
     /* Children */
@@ -552,116 +552,14 @@ public class ScrollBoxWidget extends AbstractWidget
 
     /* Getters And Setters */
 
+    public void setShowScrollerAlways(boolean showScrollerAlways)
+    {
+        this.showScrollerAlways = showScrollerAlways;
+    }
+
     public void setOnFocusCallback(Consumer<Boolean> onFocus)
     {
         this.onFocus = onFocus;
-    }
-
-    /* Builder */
-
-    public static Builder builder(int x, int y, int width, int height)
-    {
-        return new Builder(x, y, width, height);
-    }
-
-    public static final class Builder
-    {
-        private final int x;
-        private final int y;
-        private final int width;
-        private final int height;
-        private int margin = 3;
-        private int spacing = margin; // by default, spacing = margin
-        private float outlineThickness = Styles.ScrollBox.OUTLINE_THICKNESS;
-        private RoundedCorners rounded = RoundedCorners.fromVerticalSides(false, true);
-        private boolean showScrollerAlways = false;
-
-        private Color bgColor = Styles.ScrollBox.BACKGROUND_COLOR;
-        private Color outlineColor = Styles.ScrollBox.OUTLINE_COLOR;
-        private Color scrollbarColor = Styles.ScrollBox.SCROLLBAR_COLOR;
-        private Color scrollerColor = Styles.ScrollBox.SCROLLER_COLOR;
-
-        private Builder(int x, int y, int width, int height)
-        {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-
-        public Builder margin(int margin)
-        {
-            this.margin = margin;
-            return this;
-        }
-
-        public Builder spacing(int spacing)
-        {
-            this.spacing = spacing;
-            return this;
-        }
-
-        public Builder outlineThickness(int outlineThickness)
-        {
-            this.outlineThickness = outlineThickness;
-            return this;
-        }
-
-
-        public Builder rounded(RoundedCorners rounded)
-        {
-            this.rounded = rounded;
-            return this;
-        }
-
-        public Builder showScrollerAlways(boolean showScrollerAlways)
-        {
-            this.showScrollerAlways = showScrollerAlways;
-            return this;
-        }
-
-        public Builder bgColor(Color color)
-        {
-            this.bgColor = color;
-            return this;
-        }
-
-        public Builder outlineColor(Color color)
-        {
-            this.outlineColor = color;
-            return this;
-        }
-
-        public Builder scrollbarColor(Color color)
-        {
-            this.scrollbarColor = color;
-            return this;
-        }
-
-        public Builder scrollerColor(Color color)
-        {
-            this.scrollerColor = color;
-            return this;
-        }
-
-        public ScrollBoxWidget build()
-        {
-            return new ScrollBoxWidget(
-                    x,
-                    y,
-                    width,
-                    height,
-                    margin,
-                    spacing,
-                    outlineThickness,
-                    rounded,
-                    showScrollerAlways,
-                    bgColor,
-                    outlineColor,
-                    scrollbarColor,
-                    scrollerColor
-            );
-        }
     }
 
     private record WidgetEntry(AbstractWidget widget, int id)
