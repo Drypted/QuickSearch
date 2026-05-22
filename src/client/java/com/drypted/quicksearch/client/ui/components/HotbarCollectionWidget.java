@@ -26,7 +26,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     public static final int HOTBAR_SLOTS = 9;
 
     private static final int HELP_TEXT_MARGIN = 16;
-    private static final int  HELP_TEXT_HEIGHT = 14;
+    private static final int HELP_TEXT_HEIGHT = 14;
 
     private static final int CLOSE_BUTTON_PADDING = 4;
     private static final int CLOSE_BUTTON_SIZE = HELP_TEXT_HEIGHT - (CLOSE_BUTTON_PADDING * 2) - 1;
@@ -87,7 +87,11 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     public static HotbarCollectionWidget create(int startX, int width, int endY)
     {
-        return new HotbarCollectionWidget(startX, width, endY);
+        return new HotbarCollectionWidget(
+                startX,
+                width,
+                endY
+        );
     }
 
     /* RENDERING */
@@ -145,7 +149,8 @@ public class HotbarCollectionWidget extends AbstractWidget
         final float textHeight = Minecraft.getInstance().font.lineHeight * scale;
 
         final int posX = (int) (mouseX - (textWidth - CLOSE_BUTTON_TOOLTIP_PADDING_X) / 2.0f);
-        final int posY = this.getY() - (int) textHeight - CLOSE_BUTTON_TOOLTIP_PADDING_Y - CLOSE_BUTTON_TOOLTIP_OFFSET_Y;
+        final int posY =
+                this.getY() - (int) textHeight - CLOSE_BUTTON_TOOLTIP_PADDING_Y - CLOSE_BUTTON_TOOLTIP_OFFSET_Y;
 
         RenderCommon.drawLabel(
                 guiGraphics,
@@ -185,9 +190,9 @@ public class HotbarCollectionWidget extends AbstractWidget
         hotbarSlotWidgets.forEach(widget -> widget.setHighlighted(false));
         // get slot index and set show bind to true for that widget
         hotbarSlotWidgets.stream()
-                .filter(widget -> widget.getHotbarIndex() == slotIndex)
-                .findFirst()
-                .ifPresent(widget -> widget.setHighlighted(true));
+                         .filter(widget -> widget.getHotbarIndex() == slotIndex)
+                         .findFirst()
+                         .ifPresent(widget -> widget.setHighlighted(true));
     }
 
     private void unhighlightAllSlots()
@@ -241,17 +246,11 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     /* STATICS */
 
-    private static boolean isShiftPressed(int modifiers)
-    {
-        return (modifiers & GLFW.GLFW_MOD_SHIFT) != 0;
-    }
+    private static boolean isShiftPressed(int modifiers) { return (modifiers & GLFW.GLFW_MOD_SHIFT) != 0; }
 
     /* GETTERS */
 
-    public ArrayList<HotbarSlotWidget> getWidgets()
-    {
-        return hotbarSlotWidgets;
-    }
+    public ArrayList<HotbarSlotWidget> getWidgets() { return hotbarSlotWidgets; }
 
     /* FOCUS & ONCLICK */
 
@@ -290,10 +289,7 @@ public class HotbarCollectionWidget extends AbstractWidget
             this.text = text;
         }
 
-        public String getText()
-        {
-            return text;
-        }
+        public String getText() { return text; }
     }
 
     /* OVERRIDES */

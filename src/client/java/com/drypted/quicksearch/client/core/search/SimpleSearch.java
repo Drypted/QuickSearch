@@ -32,9 +32,9 @@ public final class SimpleSearch<T extends Searchable>
         }
 
         return items.stream() //
-                .filter(item -> isMatch(item, unsanitizedQuery)) //
-                .limit(maxResults) //
-                .collect(Collectors.toList());
+                    .filter(item -> isMatch(item, unsanitizedQuery)) //
+                    .limit(maxResults) //
+                    .collect(Collectors.toList());
     }
 
     private static <T extends Searchable> boolean isMatch(T item, String unsanitizedQuery)

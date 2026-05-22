@@ -1,8 +1,8 @@
 package com.drypted.quicksearch.client.ui.handlers.mode;
 
 import com.drypted.quicksearch.client.core.input.CommandInputParser;
-import com.drypted.quicksearch.client.ui.state.ResultPresenter;
 import com.drypted.quicksearch.client.ui.components.InputWidget;
+import com.drypted.quicksearch.client.ui.state.ResultPresenter;
 
 /// <summary>
 /// Determines whether the user is inputting a command or an item query and routes the mode to the appropriate handler.
@@ -14,7 +14,8 @@ public final class ModeSelector
     private final CommandsModeHandler commandsModeHandler;
     private final ItemModeHandler itemModeHandler;
 
-    public ModeSelector(InputWidget inputWidget, ResultPresenter resultPresenter, CommandsModeHandler commandsModeHandler, ItemModeHandler itemModeHandler)
+    public ModeSelector(InputWidget inputWidget, ResultPresenter resultPresenter,
+                        CommandsModeHandler commandsModeHandler, ItemModeHandler itemModeHandler)
     {
         this.inputWidget = inputWidget;
         this.resultPresenter = resultPresenter;

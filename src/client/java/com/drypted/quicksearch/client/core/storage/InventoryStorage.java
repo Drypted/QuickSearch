@@ -16,10 +16,7 @@ public class InventoryStorage extends PresetStorage<NonNullList<ItemStack>>
     private InventoryStorage() { }
 
     @Override
-    protected String getFileName()
-    {
-        return "inventories.json";
-    }
+    protected String getFileName() { return "inventories.json"; }
 
     @Override
     protected Codec<NonNullList<ItemStack>> getCodec()

@@ -55,15 +55,10 @@ public class CommandsHandler
 
     /* PUBLIC COMMAND INTERFACE */
 
-    public static @Nullable Command getRawCommand(String name)
-    {
-        return REGISTRY.getRawCommand(name);
-    }
+    public static @Nullable Command getRawCommand(String name) { return REGISTRY.getRawCommand(name); }
 
     public static CommandFeedback execute(String name, String[] args, LocalPlayer player)
-    {
-        return REGISTRY.execute(name, args, player);
-    }
+    { return REGISTRY.execute(name, args, player); }
 
     /**
      * Returns argument suggestions for the currently active command based on what the user has typed.
@@ -75,6 +70,9 @@ public class CommandsHandler
      */
     public static List<String> getArgSuggestions(String commandName, String[] args)
     {
-        return REGISTRY.getArgSuggestions(commandName, args);
+        return REGISTRY.getArgSuggestions(
+                commandName,
+                args
+        );
     }
 }

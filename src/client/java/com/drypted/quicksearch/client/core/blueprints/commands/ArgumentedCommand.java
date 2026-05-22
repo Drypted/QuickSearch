@@ -26,16 +26,10 @@ public abstract class ArgumentedCommand implements Command
     /**
      * @return The ordered list of argument type definitions for this command.
      */
-    public List<ArgumentType<?>> getArgumentTypes()
-    {
-        return argumentTypes;
-    }
+    public List<ArgumentType<?>> getArgumentTypes() { return argumentTypes; }
 
     @Override
-    public boolean requiresArgs()
-    {
-        return !argumentTypes.isEmpty();
-    }
+    public boolean requiresArgs() { return !argumentTypes.isEmpty(); }
 
     /**
      * Builds the usage string, e.g. {@code /head <username>}
@@ -44,8 +38,8 @@ public abstract class ArgumentedCommand implements Command
     {
         if (argumentTypes.isEmpty()) return "/" + getName();
         return "/" + getName() + " " + argumentTypes.stream()
-                .map(ArgumentType::getUsageHint)
-                .collect(Collectors.joining(" "));
+                                                    .map(ArgumentType::getUsageHint)
+                                                    .collect(Collectors.joining(" "));
     }
 
     @Override

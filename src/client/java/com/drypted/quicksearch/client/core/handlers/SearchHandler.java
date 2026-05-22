@@ -126,15 +126,9 @@ public class SearchHandler
 
     /* GETTERS & SETTERS */
 
-    public static List<ItemsResultData> getGameItems()
-    {
-        return GameItems;
-    }
+    public static List<ItemsResultData> getGameItems() { return GameItems; }
 
-    public static SmartSearch<ItemsResultData> getSmartSearchInstance()
-    {
-        return smartSearch;
-    }
+    public static SmartSearch<ItemsResultData> getSmartSearchInstance() { return smartSearch; }
 
     /* HELPERS CLASSES & ENUMS */
 
@@ -154,9 +148,9 @@ public class SearchHandler
     {
         if (input == null) return "";
         return input.strip() // remove leading/trailing whitespace
-                .toLowerCase() // case-insensitive
-                .replace('_', ' ') // treat underscores as spaces
-                .replaceAll("\\s+", " "); // collapse multiple spaces into one
+                    .toLowerCase() // case-insensitive
+                    .replace('_', ' ') // treat underscores as spaces
+                    .replaceAll("\\s+", " "); // collapse multiple spaces into one
     }
 
     public enum SearchMode

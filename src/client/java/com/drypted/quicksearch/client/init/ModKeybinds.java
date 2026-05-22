@@ -47,7 +47,12 @@ public class ModKeybinds
 
     private static KeyMapping getKeyMapping(String id, int glfwKey)
     {
-        return new KeyMapping("key.quicksearch." + id, InputConstants.Type.KEYSYM, glfwKey, QUICK_SEARCH_KEY_CATEGORY);
+        return new KeyMapping(
+                "key.quicksearch." + id,
+                InputConstants.Type.KEYSYM,
+                glfwKey,
+                QUICK_SEARCH_KEY_CATEGORY
+        );
     }
 
     public static void registerClientCallback()

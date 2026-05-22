@@ -26,16 +26,10 @@ public class DeleteHotbarCommand extends ArgumentedCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "hdel";
-    }
+    public String getName() { return "hdel"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Delete a saved hotbar combination";
-    }
+    public String getDescription() { return "Delete a saved hotbar combination"; }
 
 
     @Override

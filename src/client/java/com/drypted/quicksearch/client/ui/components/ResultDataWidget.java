@@ -216,10 +216,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
 
     /* State Methods */
 
-    public boolean isPressed()
-    {
-        return pressed;
-    }
+    public boolean isPressed() { return pressed; }
 
     @Override
     public void select(boolean selected)
@@ -265,60 +262,42 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         recalculateHeight();
     }
 
-    public Color getBackgroundColor()
-    {
-        return backgroundColor;
-    }
+    public Color getBackgroundColor() { return backgroundColor; }
 
     public void setBackgroundColor(Color backgroundColor)
     {
         this.backgroundColor = backgroundColor;
     }
 
-    public Color getTextColor()
-    {
-        return textColor;
-    }
+    public Color getTextColor() { return textColor; }
 
     public void setTextColor(Color textColor)
     {
         this.textColor = textColor;
     }
 
-    public Color getHoverColor()
-    {
-        return hoverColor;
-    }
+    public Color getHoverColor() { return hoverColor; }
 
     public void setHoverColor(Color hoverColor)
     {
         this.hoverColor = hoverColor;
     }
 
-    public Color getClickColor()
-    {
-        return clickColor;
-    }
+    public Color getClickColor() { return clickColor; }
 
     public void setClickColor(Color clickColor)
     {
         this.clickColor = clickColor;
     }
 
-    public Color getOutlineColor()
-    {
-        return outlineColor;
-    }
+    public Color getOutlineColor() { return outlineColor; }
 
     public void setOutlineColor(Color outlineColor)
     {
         this.outlineColor = outlineColor;
     }
 
-    public Color getSelectedColor()
-    {
-        return selectedColor;
-    }
+    public Color getSelectedColor() { return selectedColor; }
 
     public void setSelectedColor(Color selectedColor)
     {
@@ -330,10 +309,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         this.showOutline = enabled;
     }
 
-    public boolean isDisabled()
-    {
-        return disabled;
-    }
+    public boolean isDisabled() { return disabled; }
 
     public void setDisabled(boolean disabled)
     {
@@ -342,10 +318,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
 
     /* STATICS */
 
-    private static Font getFont()
-    {
-        return Minecraft.getInstance().font;
-    }
+    private static Font getFont() { return Minecraft.getInstance().font; }
 
     @Override
     protected void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput)

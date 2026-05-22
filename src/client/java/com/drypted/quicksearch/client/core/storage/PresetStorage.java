@@ -71,7 +71,12 @@ public abstract class PresetStorage<T>
         if (element == null) return Optional.empty();
 
         return getCodec().parse(OPS, element)
-                .resultOrPartial(err -> LOGGER.warn("[{}] Failed to parse preset '{}': {}", getFileName(), name, err));
+                         .resultOrPartial(err -> LOGGER.warn(
+                                 "[{}] Failed to parse preset '{}': {}",
+                                 getFileName(),
+                                 name,
+                                 err
+                         ));
     }
 
     /**

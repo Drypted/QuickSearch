@@ -18,16 +18,10 @@ public class HotbarStorage extends PresetStorage<Hotbar>
     private HotbarStorage() { }
 
     @Override
-    protected String getFileName()
-    {
-        return "hotbars.json";
-    }
+    protected String getFileName() { return "hotbars.json"; }
 
     @Override
-    protected Codec<Hotbar> getCodec()
-    {
-        return Hotbar.CODEC;
-    }
+    protected Codec<Hotbar> getCodec() { return Hotbar.CODEC; }
 
     public void saveFrom(String name, Inventory inventory, RegistryAccess registryAccess) throws IOException
     {

@@ -2,16 +2,16 @@ package com.drypted.quicksearch.client.ui;
 
 import com.drypted.quicksearch.client.QuickSearchClient;
 import com.drypted.quicksearch.client.core.input.CommandInputParser;
-import com.drypted.quicksearch.client.ui.handlers.mode.CommandsModeHandler;
-import com.drypted.quicksearch.client.ui.handlers.mode.ItemModeHandler;
-import com.drypted.quicksearch.client.ui.handlers.mode.ModeSelector;
-import com.drypted.quicksearch.client.ui.state.ResultPresenter;
-import com.drypted.quicksearch.client.ui.handlers.SubmitHandler;
 import com.drypted.quicksearch.client.init.ModKeybinds;
 import com.drypted.quicksearch.client.ui.components.HotbarCollectionWidget;
 import com.drypted.quicksearch.client.ui.components.HotbarSlotWidget;
 import com.drypted.quicksearch.client.ui.components.InputWidget;
 import com.drypted.quicksearch.client.ui.components.ScrollBoxWidget;
+import com.drypted.quicksearch.client.ui.handlers.SubmitHandler;
+import com.drypted.quicksearch.client.ui.handlers.mode.CommandsModeHandler;
+import com.drypted.quicksearch.client.ui.handlers.mode.ItemModeHandler;
+import com.drypted.quicksearch.client.ui.handlers.mode.ModeSelector;
+import com.drypted.quicksearch.client.ui.state.ResultPresenter;
 import com.drypted.quicksearch.client.ui.state.VisibilityController;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -178,7 +178,7 @@ public class QuickSearchScreen extends Screen
             {
                 HotbarSlotWidget hotbarWidget = this.hotbarCollectionWidget.getWidgets().get(i);
                 if (hotbarWidget != null && kEv.key() == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
-                        .getValue())
+                                                                                                 .getValue())
                 {
                     this.hotbarCollectionWidget.onHotbarKeyPressed(hotbarWidget, kEv.modifiers());
                     return true;
@@ -218,20 +218,11 @@ public class QuickSearchScreen extends Screen
     } // don't render any background
 
     @Override
-    public boolean isPauseScreen()
-    {
-        return false;
-    }
+    public boolean isPauseScreen() { return false; }
 
     /* Helpers */
 
-    private boolean isHotbarEnabledInConfig()
-    {
-        return QuickSearchClient.getConfig().hotbar.showHotbarSlots;
-    }
+    private boolean isHotbarEnabledInConfig() { return QuickSearchClient.getConfig().hotbar.showHotbarSlots; }
 
-    private boolean isUserInputCommand()
-    {
-        return CommandInputParser.isCommandInput(inputWidget.getText());
-    }
+    private boolean isUserInputCommand() { return CommandInputParser.isCommandInput(inputWidget.getText()); }
 }

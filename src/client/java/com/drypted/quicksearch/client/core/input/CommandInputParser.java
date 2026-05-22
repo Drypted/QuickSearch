@@ -13,10 +13,7 @@ public final class CommandInputParser
 
     private CommandInputParser() { }
 
-    public static boolean isCommandInput(String text)
-    {
-        return text != null && text.startsWith("/");
-    }
+    public static boolean isCommandInput(String text) { return text != null && text.startsWith("/"); }
 
     public static boolean hasStartedArguments(String text)
     {

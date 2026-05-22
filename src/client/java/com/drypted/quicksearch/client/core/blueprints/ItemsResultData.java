@@ -66,10 +66,7 @@ public final class ItemsResultData implements Searchable
 
     /* PUBLIC HELPERS */
 
-    public boolean isEmpty()
-    {
-        return this == EMPTY;
-    }
+    public boolean isEmpty() { return this == EMPTY; }
 
     public boolean containsText(String text)
     {
@@ -78,10 +75,7 @@ public final class ItemsResultData implements Searchable
                 identifier.getPath().toLowerCase().contains(lowerText);
     }
 
-    public String getGiveCommand()
-    {
-        return String.format("give @p %s %d", getSerializedDefinition(), maxStackSize);
-    }
+    public String getGiveCommand() { return String.format("give @p %s %d", getSerializedDefinition(), maxStackSize); }
 
     public String getHotbarReplaceCommand(int hotbarSlot)
     {
@@ -95,30 +89,15 @@ public final class ItemsResultData implements Searchable
 
     /* GETTERS */
 
-    public ItemStack getIcon()
-    {
-        return icon;
-    }
+    public ItemStack getIcon() { return icon; }
 
-    public String getName()
-    {
-        return name;
-    }
+    public String getName() { return name; }
 
-    public Identifier getIdentifier()
-    {
-        return identifier;
-    }
+    public Identifier getIdentifier() { return identifier; }
 
-    public ItemInput getDefinition()
-    {
-        return definition;
-    }
+    public ItemInput getDefinition() { return definition; }
 
-    public int getMaxStackSize()
-    {
-        return maxStackSize;
-    }
+    public int getMaxStackSize() { return maxStackSize; }
 
     public String getSerializedDefinition()
     {
@@ -141,14 +120,8 @@ public final class ItemsResultData implements Searchable
 
     /* SEARCHABLE IMPLEMENTATION */
     @Override
-    public String getPrimaryQuery()
-    {
-        return this.getName();
-    }
+    public String getPrimaryQuery() { return this.getName(); }
 
     @Override
-    public String getSecondaryQuery()
-    {
-        return this.getIdentifier().getPath().toLowerCase();
-    }
+    public String getSecondaryQuery() { return this.getIdentifier().getPath().toLowerCase(); }
 }

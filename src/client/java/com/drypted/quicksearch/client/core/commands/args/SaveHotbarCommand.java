@@ -17,16 +17,10 @@ public class SaveHotbarCommand extends ArgumentedCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "hsave";
-    }
+    public String getName() { return "hsave"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Save the current hotbar combination";
-    }
+    public String getDescription() { return "Save the current hotbar combination"; }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)

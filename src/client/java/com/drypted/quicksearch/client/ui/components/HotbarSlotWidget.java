@@ -58,8 +58,8 @@ public class HotbarSlotWidget extends AbstractWidget
         };
 
         this.hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
-                .getString()
-                .toUpperCase();
+                                                                                    .getString()
+                                                                                    .toUpperCase();
     }
 
     @Override
@@ -131,10 +131,7 @@ public class HotbarSlotWidget extends AbstractWidget
 
     /* Getters and Setters */
 
-    public ItemsResultData getSearchResultData()
-    {
-        return itemsResultData;
-    }
+    public ItemsResultData getSearchResultData() { return itemsResultData; }
 
     public void setSearchResultData(ItemsResultData itemsResultData)
     {
@@ -146,40 +143,28 @@ public class HotbarSlotWidget extends AbstractWidget
         this.onClickCallback = onClickCallback;
     }
 
-    public boolean shouldShowBind()
-    {
-        return showBind;
-    }
+    public boolean shouldShowBind() { return showBind; }
 
     public void setShowBind(boolean showBind)
     {
         this.showBind = showBind;
     }
 
-    public boolean isPressed()
-    {
-        return pressed;
-    }
+    public boolean isPressed() { return pressed; }
 
     public void setPressed(boolean pressed)
     {
         this.pressed = pressed;
     }
 
-    public boolean isHighlighted()
-    {
-        return highlighted;
-    }
+    public boolean isHighlighted() { return highlighted; }
 
     public void setHighlighted(boolean highlighted)
     {
         this.highlighted = highlighted;
     }
 
-    public int getHotbarIndex()
-    {
-        return hotbarIndex;
-    }
+    public int getHotbarIndex() { return hotbarIndex; }
 
     @Override
     protected void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput)

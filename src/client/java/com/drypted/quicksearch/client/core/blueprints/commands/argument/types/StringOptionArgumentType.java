@@ -60,9 +60,6 @@ public class StringOptionArgumentType implements ArgumentType<String>
     }
 
     @Override
-    public String getUsageHint()
-    {
-        return "<name>";
-    }
+    public String getUsageHint() { return "<name>"; }
 }
 

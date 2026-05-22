@@ -19,7 +19,8 @@ public final class ResultPresenter
     private final ClickHandlers clickHandlers;
     private @Nullable ItemsResultData submitItemResult;
 
-    public ResultPresenter(InputWidget inputWidget, ScrollBoxWidget searchResultsWidget, VisibilityController visibilityController)
+    public ResultPresenter(InputWidget inputWidget, ScrollBoxWidget searchResultsWidget,
+                           VisibilityController visibilityController)
     {
         this.inputWidget = inputWidget;
         this.searchResultsWidget = searchResultsWidget;
@@ -27,10 +28,7 @@ public final class ResultPresenter
         this.clickHandlers = new ClickHandlers(inputWidget);
     }
 
-    public @Nullable ItemsResultData getSubmitItemResult()
-    {
-        return submitItemResult;
-    }
+    public @Nullable ItemsResultData getSubmitItemResult() { return submitItemResult; }
 
     private void setSubmitItemResult(@Nullable ItemsResultData submitItemResult)
     {
@@ -98,12 +96,12 @@ public final class ResultPresenter
             }
 
             ResultDataWidget widget = new ResultDataWidget(
-                            0,
-                            0,
-                            result.getIcon(),
-                            result.getName(),
-                            result.getSerializedDefinition()
-                    );
+                    0,
+                    0,
+                    result.getIcon(),
+                    result.getName(),
+                    result.getSerializedDefinition()
+            );
             widget.setWidth(searchResultsWidget.getChildWidth());
             widget.onClick((mBC, dC) -> clickHandlers.onItemClicked(result));
 
@@ -133,7 +131,8 @@ public final class ResultPresenter
             Command topResult = results.getFirst();
             String commandWithSlash = "/" + topResult.getName();
             if (commandWithSlash.toLowerCase()
-                    .startsWith(currentText.toLowerCase()) && !commandWithSlash.equalsIgnoreCase(currentText))
+                                .startsWith(currentText.toLowerCase()) &&
+                    !commandWithSlash.equalsIgnoreCase(currentText))
             {
                 inputWidget.setSuggestion(commandWithSlash);
             }

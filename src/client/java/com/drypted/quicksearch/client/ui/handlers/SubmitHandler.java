@@ -52,7 +52,7 @@ public final class SubmitHandler
         {
             player.displayClientMessage(
                     Component.literal(error.getSeverity().getName() + ": " + error.getMessage())
-                            .withStyle(error.getSeverity().getChatColor()), false
+                             .withStyle(error.getSeverity().getChatColor()), false
             );
         }
 

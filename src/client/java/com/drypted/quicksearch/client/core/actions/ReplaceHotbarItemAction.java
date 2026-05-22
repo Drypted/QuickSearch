@@ -23,7 +23,8 @@ public class ReplaceHotbarItemAction extends Action
         ReplaceHotbarItemAction.run(player, item.getDefinition(), item.getName(), item.getMaxStackSize(), slot);
     }
 
-    public static void run(LocalPlayer player, @Nullable ItemInput item, String displayName, int maxStackSize, int slotIndex)
+    public static void run(LocalPlayer player, @Nullable ItemInput item, String displayName, int maxStackSize,
+                           int slotIndex)
     {
         ItemStack stack = null;
         try

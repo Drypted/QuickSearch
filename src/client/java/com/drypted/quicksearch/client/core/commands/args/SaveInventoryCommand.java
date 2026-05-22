@@ -16,16 +16,10 @@ public class SaveInventoryCommand extends ArgumentedCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "isave";
-    }
+    public String getName() { return "isave"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Save the current inventory";
-    }
+    public String getDescription() { return "Save the current inventory"; }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)

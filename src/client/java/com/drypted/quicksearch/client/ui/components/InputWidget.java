@@ -313,21 +313,14 @@ public class InputWidget extends AbstractWidget
 
     /* Helper Methods */
 
-    private int getTextX()
-    {
-        return this.getX() + TEXT_PADDING_X;
-    }
+    private int getTextX() { return this.getX() + TEXT_PADDING_X; }
 
-    private int getTextY()
-    {
-        return this.getY() + (this.height - FONT.lineHeight) / 2 + TEXT_PADDING_Y;
-    }
+    private int getTextY() { return this.getY() + (this.height - FONT.lineHeight) / 2 + TEXT_PADDING_Y; }
 
     private int getTextAreaWidth()
     {
-        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING)
-                             ? (this.height - INDICATOR_PADDING_RIGHT + INDICATOR_PADDING_RIGHT)
-                             : 0;
+        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ? (this.height - INDICATOR_PADDING_RIGHT +
+                                                                         INDICATOR_PADDING_RIGHT) : 0;
         return this.getWidth() - (TEXT_PADDING_X * 2) - indicatorSpace;
     }
 
@@ -359,7 +352,8 @@ public class InputWidget extends AbstractWidget
     {
         if (!this.isFocused() || isDisabled) return false;
 
-        boolean ctrl = (keyEvent.modifiers() & GLFW.GLFW_MOD_CONTROL) != 0 || (keyEvent.modifiers() & GLFW.GLFW_MOD_SUPER) != 0;
+        boolean ctrl = (keyEvent.modifiers() & GLFW.GLFW_MOD_CONTROL) != 0 ||
+                (keyEvent.modifiers() & GLFW.GLFW_MOD_SUPER) != 0;
         boolean shift = (keyEvent.modifiers() & GLFW.GLFW_MOD_SHIFT) != 0;
 
         // Accept suggestion with Tab (only if cursor is at end and no selection)
@@ -481,8 +475,8 @@ public class InputWidget extends AbstractWidget
 
     private boolean suggestionIsCompletion()
     {
-        return !text.isEmpty() && suggestion.toLowerCase()
-                .startsWith(text.toLowerCase()) && !suggestion.equalsIgnoreCase(text);
+        return !text.isEmpty() && suggestion.toLowerCase().startsWith(text.toLowerCase()) &&
+                !suggestion.equalsIgnoreCase(text);
     }
 
     /* Cursor Movement */
@@ -1022,10 +1016,7 @@ public class InputWidget extends AbstractWidget
 
     /* Getters and Setters */
 
-    public String getText()
-    {
-        return text;
-    }
+    public String getText() { return text; }
 
     public void setText(String text)
     {
@@ -1036,15 +1027,9 @@ public class InputWidget extends AbstractWidget
         notifyTextChanged();
     }
 
-    public String getSuggestion()
-    {
-        return suggestion;
-    }
+    public String getSuggestion() { return suggestion; }
 
-    public boolean hasSuggestion()
-    {
-        return this.shouldShowSuggestion();
-    }
+    public boolean hasSuggestion() { return this.shouldShowSuggestion(); }
 
     public void setSuggestion(String suggestion)
     {
@@ -1056,20 +1041,14 @@ public class InputWidget extends AbstractWidget
         suggestion = "";
     }
 
-    public SearchStatus getSearchStatus()
-    {
-        return searchStatus;
-    }
+    public SearchStatus getSearchStatus() { return searchStatus; }
 
     public void setSearchStatus(SearchStatus searchStatus)
     {
         this.searchStatus = searchStatus;
     }
 
-    public boolean isDisabled()
-    {
-        return isDisabled;
-    }
+    public boolean isDisabled() { return isDisabled; }
 
     public void setDisabled(boolean disabled)
     {
@@ -1080,30 +1059,21 @@ public class InputWidget extends AbstractWidget
         }
     }
 
-    public boolean isReadOnly()
-    {
-        return isReadOnly;
-    }
+    public boolean isReadOnly() { return isReadOnly; }
 
     public void setReadOnly(boolean readOnly)
     {
         this.isReadOnly = readOnly;
     }
 
-    public String getPlaceholder()
-    {
-        return placeholder;
-    }
+    public String getPlaceholder() { return placeholder; }
 
     public void setPlaceholder(String placeholder)
     {
         this.placeholder = placeholder == null ? "" : placeholder;
     }
 
-    public int getMaxLength()
-    {
-        return maxLength;
-    }
+    public int getMaxLength() { return maxLength; }
 
     public void setMaxLength(int maxLength)
     {
@@ -1120,15 +1090,9 @@ public class InputWidget extends AbstractWidget
         notifyTextChanged(); // Re-validate current text
     }
 
-    public float getOutlineThickness()
-    {
-        return outlineThickness;
-    }
+    public float getOutlineThickness() { return outlineThickness; }
 
-    public RoundedCorners getRounded()
-    {
-        return rounded;
-    }
+    public RoundedCorners getRounded() { return rounded; }
 
     public void setRounded(RoundedCorners rounded)
     {
@@ -1137,15 +1101,9 @@ public class InputWidget extends AbstractWidget
 
     /* ERROR */
 
-    public Predicate<String> getValidator()
-    {
-        return validator;
-    }
+    public Predicate<String> getValidator() { return validator; }
 
-    public boolean hasError()
-    {
-        return hasError;
-    }
+    public boolean hasError() { return hasError; }
 
     public void showError(InputError error)
     {
@@ -1159,15 +1117,12 @@ public class InputWidget extends AbstractWidget
         this.hasError = false;
     }
 
-    public @Nullable InputError getError()
-    {
-        return error;
-    }
+    public @Nullable InputError getError() { return error; }
 
     private boolean shouldShowError()
     {
-        return this.hasError && this.error != null && this.error.getMessage() != null && !this.error.getMessage()
-                .isEmpty();
+        return this.hasError && this.error != null && this.error.getMessage() != null &&
+                !this.error.getMessage().isEmpty();
     }
 
     /* Public Methods */
@@ -1181,16 +1136,14 @@ public class InputWidget extends AbstractWidget
         notifyTextChanged();
     }
 
-    public boolean hasText()
-    {
-        return !this.text.isEmpty();
-    }
+    public boolean hasText() { return !this.text.isEmpty(); }
 
     /* Utils */
 
     private boolean shouldShowSuggestion()
     {
-        return QuickSearchClient.getConfig().search.defaultCompletionType != ModConfig.DefaultCompletionType.NONE // not disabled
+        return QuickSearchClient.getConfig().search.defaultCompletionType != ModConfig.DefaultCompletionType.NONE
+                // not disabled
                 && !suggestion.isEmpty() // not empty
                 && cursorPos == text.length() // cursor at end
                 && !hasSelection()  // not selecting

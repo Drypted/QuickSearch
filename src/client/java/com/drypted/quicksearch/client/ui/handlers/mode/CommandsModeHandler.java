@@ -3,8 +3,8 @@ package com.drypted.quicksearch.client.ui.handlers.mode;
 import com.drypted.quicksearch.client.core.blueprints.commands.Command;
 import com.drypted.quicksearch.client.core.handlers.CommandsHandler;
 import com.drypted.quicksearch.client.core.input.CommandInputParser;
-import com.drypted.quicksearch.client.ui.state.ResultPresenter;
 import com.drypted.quicksearch.client.ui.components.InputWidget;
+import com.drypted.quicksearch.client.ui.state.ResultPresenter;
 
 public final class CommandsModeHandler
 {

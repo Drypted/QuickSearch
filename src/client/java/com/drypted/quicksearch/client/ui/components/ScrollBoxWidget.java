@@ -123,15 +123,9 @@ public class ScrollBoxWidget extends AbstractWidget
         return (int) (height + margin + outlineThickness);
     }
 
-    private double scrollRate()
-    {
-        return 10.0;
-    }
+    private double scrollRate() { return 10.0; }
 
-    private int maxScrollAmount()
-    {
-        return Math.max(0, contentHeight() - height);
-    }
+    private int maxScrollAmount() { return Math.max(0, contentHeight() - height); }
 
     private boolean scrollbarVisible()
     {
@@ -184,7 +178,8 @@ public class ScrollBoxWidget extends AbstractWidget
 
     private boolean isOverScrollbar(double mouseX, double mouseY)
     {
-        return mouseX >= scrollBarX() && mouseX <= scrollBarX() + SCROLLBAR_WIDTH && mouseY >= getY() && mouseY < getBottom();
+        return mouseX >= scrollBarX() && mouseX <= scrollBarX() + SCROLLBAR_WIDTH && mouseY >= getY() &&
+                mouseY < getBottom();
     }
 
     private void updateScrollPosition(double mouseY)

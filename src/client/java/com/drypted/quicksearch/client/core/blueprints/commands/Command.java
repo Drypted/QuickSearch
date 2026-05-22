@@ -19,10 +19,7 @@ public interface Command extends Searchable
     CommandFeedback execute(String[] args, LocalPlayer player);
 
     /// Shown when user types the command
-    default String getUsage()
-    {
-        return "/" + getName();
-    }
+    default String getUsage() { return "/" + getName(); }
 
     /**
      * Provide argument suggestions based on the currently typed arguments.
@@ -31,22 +28,13 @@ public interface Command extends Searchable
      *
      * @return A list of suggestion strings for the current argument slot
      */
-    default List<String> getSuggestions(String[] args)
-    {
-        return List.of();
-    }
+    default List<String> getSuggestions(String[] args) { return List.of(); }
 
     /* SEARCHABLE DEFAULT IMPLEMENTATION */
 
     @Override
-    default String getPrimaryQuery()
-    {
-        return getName();
-    }
+    default String getPrimaryQuery() { return getName(); }
 
     @Override
-    default String getSecondaryQuery()
-    {
-        return getDescription();
-    }
+    default String getSecondaryQuery() { return getDescription(); }
 }

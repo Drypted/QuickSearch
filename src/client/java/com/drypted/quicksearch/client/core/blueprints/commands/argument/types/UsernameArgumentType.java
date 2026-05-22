@@ -35,15 +35,9 @@ public class UsernameArgumentType implements ArgumentType<String>
     }
 
     @Override
-    public List<String> getSuggestions(String partial)
-    {
-        return List.of();
-    }
+    public List<String> getSuggestions(String partial) { return List.of(); }
 
     @Override
-    public String getUsageHint()
-    {
-        return "<username>";
-    }
+    public String getUsageHint() { return "<username>"; }
 }
 

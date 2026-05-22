@@ -178,24 +178,24 @@ public class SmartSearch<T extends Searchable>
 
         // Step 2: Score candidates and filter out poor matches
         return candidateItemIndices.stream()
-                .map(itemIndex -> {
-                    T item = searchableItems.get(itemIndex);
-                    ItemScoreResult scoreResult = calculateItemScore(item, sanitizedQuery);
+                                   .map(itemIndex -> {
+                                       T item = searchableItems.get(itemIndex);
+                                       ItemScoreResult scoreResult = calculateItemScore(item, sanitizedQuery);
 
-                    // Filter out items with no match (score >= 1000)
-                    if (scoreResult.totalScore() >= 1000)
-                    {
-                        return null;
-                    }
+                                       // Filter out items with no match (score >= 1000)
+                                       if (scoreResult.totalScore() >= 1000)
+                                       {
+                                           return null;
+                                       }
 
-                    return new SearchResultWithScore<>(item, scoreResult.totalScore(), itemIndex);
-                })
-                .filter(Objects::nonNull)
-                // Step 3: Sort by score (lower is better), then by original position for stability
-                .sorted(Comparator.comparingInt(SearchResultWithScore<T>::score)
-                                .thenComparingInt(SearchResultWithScore::originalIndex))
-                .limit(maximumResults > 0 ? maximumResults : Integer.MAX_VALUE)
-                .map(SearchResultWithScore::item);
+                                       return new SearchResultWithScore<>(item, scoreResult.totalScore(), itemIndex);
+                                   })
+                                   .filter(Objects::nonNull)
+                                   // Step 3: Sort by score (lower is better), then by original position for stability
+                                   .sorted(Comparator.comparingInt(SearchResultWithScore<T>::score)
+                                                     .thenComparingInt(SearchResultWithScore::originalIndex))
+                                   .limit(maximumResults > 0 ? maximumResults : Integer.MAX_VALUE)
+                                   .map(SearchResultWithScore::item);
     }
 
     /* INDEX BUILDING */
@@ -857,7 +857,8 @@ public class SmartSearch<T extends Searchable>
     {
         int needlePosition = 0;
 
-        for (int haystackPosition = 0; haystackPosition < haystack.length() && needlePosition < needle.length(); haystackPosition++)
+        for (int haystackPosition = 0;
+             haystackPosition < haystack.length() && needlePosition < needle.length(); haystackPosition++)
         {
             if (haystack.charAt(haystackPosition) == needle.charAt(needlePosition))
             {

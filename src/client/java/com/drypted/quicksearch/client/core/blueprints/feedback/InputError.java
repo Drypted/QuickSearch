@@ -8,18 +8,9 @@ public interface InputError
 
     InputFeedbackType getSeverity();
 
-    default Color getColor()
-    {
-        return getSeverity().getColor();
-    }
+    default Color getColor() { return getSeverity().getColor(); }
 
-    default boolean haltsExecution()
-    {
-        return getSeverity().haltsExecution();
-    }
+    default boolean haltsExecution() { return getSeverity().haltsExecution(); }
 
-    default boolean isNotNone()
-    {
-        return getSeverity() != InputFeedbackType.NONE;
-    }
+    default boolean isNotNone() { return getSeverity() != InputFeedbackType.NONE; }
 }

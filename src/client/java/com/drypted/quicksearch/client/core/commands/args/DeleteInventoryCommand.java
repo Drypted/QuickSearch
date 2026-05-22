@@ -26,16 +26,10 @@ public class DeleteInventoryCommand extends ArgumentedCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "idel";
-    }
+    public String getName() { return "idel"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Delete a saved inventory";
-    }
+    public String getDescription() { return "Delete a saved inventory"; }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)

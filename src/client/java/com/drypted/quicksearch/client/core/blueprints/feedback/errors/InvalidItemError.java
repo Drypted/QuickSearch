@@ -8,14 +8,8 @@ import com.drypted.quicksearch.client.ui.components.InputWidget;
 public class InvalidItemError implements InputError
 {
     @Override
-    public String getMessage()
-    {
-        return "Invalid Item";
-    }
+    public String getMessage() { return "Invalid Item"; }
 
     @Override
-    public InputFeedbackType getSeverity()
-    {
-        return InputFeedbackType.ERROR;
-    }
+    public InputFeedbackType getSeverity() { return InputFeedbackType.ERROR; }
 }

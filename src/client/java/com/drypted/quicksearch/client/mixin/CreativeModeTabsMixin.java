@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class CreativeModeTabsMixin
 {
     @Inject(method = "buildAllTabContents", at = @At("TAIL"))
-    private static void rebuildCreativeModeItems(CreativeModeTab.ItemDisplayParameters itemDisplayParameters, CallbackInfo ci)
+    private static void rebuildCreativeModeItems(CreativeModeTab.ItemDisplayParameters itemDisplayParameters,
+                                                 CallbackInfo ci)
     {
         SearchHandler.rebuildGameItems();
     }

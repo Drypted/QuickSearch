@@ -20,16 +20,10 @@ public class GetPlayerHeadCommand extends ArgumentedCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "head";
-    }
+    public String getName() { return "head"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Get the head of a player by username";
-    }
+    public String getDescription() { return "Get the head of a player by username"; }
 
 
     @Override
@@ -39,7 +33,7 @@ public class GetPlayerHeadCommand extends ArgumentedCommand
         if (argsError.haltsExecution()) return argsError;
         else if (argsError.isNotNone()) player.displayClientMessage(
                 Component.literal(argsError.getSeverity().getName() + ": " + argsError.getMessage()) //
-                        .withStyle(ChatFormatting.GOLD), false
+                         .withStyle(ChatFormatting.GOLD), false
         );
 
         // fetch player head

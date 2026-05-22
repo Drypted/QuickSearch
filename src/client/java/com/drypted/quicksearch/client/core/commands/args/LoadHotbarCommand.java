@@ -33,16 +33,10 @@ public class LoadHotbarCommand extends ArgumentedCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "hload";
-    }
+    public String getName() { return "hload"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Load a saved hotbar combination";
-    }
+    public String getDescription() { return "Load a saved hotbar combination"; }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)

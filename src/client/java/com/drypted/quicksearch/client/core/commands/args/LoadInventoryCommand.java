@@ -33,16 +33,10 @@ public class LoadInventoryCommand extends ArgumentedCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "iload";
-    }
+    public String getName() { return "iload"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Load a saved inventory";
-    }
+    public String getDescription() { return "Load a saved inventory"; }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)

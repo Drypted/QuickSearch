@@ -40,15 +40,9 @@ public class StringArgumentType implements ArgumentType<String>
     }
 
     @Override
-    public List<String> getSuggestions(String partial)
-    {
-        return List.of();
-    }
+    public List<String> getSuggestions(String partial) { return List.of(); }
 
     @Override
-    public String getUsageHint()
-    {
-        return usageHint;
-    }
+    public String getUsageHint() { return usageHint; }
 }
 

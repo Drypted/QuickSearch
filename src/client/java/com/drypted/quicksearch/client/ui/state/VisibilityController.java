@@ -1,6 +1,5 @@
 package com.drypted.quicksearch.client.ui.state;
 
-import com.drypted.quicksearch.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.quicksearch.client.ui.components.HotbarCollectionWidget;
 import com.drypted.quicksearch.client.ui.components.InputWidget;
 import com.drypted.quicksearch.client.ui.components.ScrollBoxWidget;
@@ -16,7 +15,9 @@ public final class VisibilityController
     private final @Nullable HotbarCollectionWidget hotbarCollectionWidget;
     private final BooleanSupplier isHotbarEnabled;
 
-    public VisibilityController(InputWidget inputWidget, ScrollBoxWidget searchResultsWidget, @Nullable HotbarCollectionWidget hotbarCollectionWidget, BooleanSupplier isHotbarEnabled)
+    public VisibilityController(InputWidget inputWidget, ScrollBoxWidget searchResultsWidget,
+                                @Nullable HotbarCollectionWidget hotbarCollectionWidget,
+                                BooleanSupplier isHotbarEnabled)
     {
         this.inputWidget = inputWidget;
         this.searchResultsWidget = searchResultsWidget;

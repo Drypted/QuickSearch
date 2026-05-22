@@ -31,10 +31,7 @@ public final class RenderCommon
         GlobalAlphaModifier = Mth.clamp(globalAlphaModifier, 0.0, 1.0);
     }
 
-    public static double getGlobalAlphaModifier()
-    {
-        return GlobalAlphaModifier;
-    }
+    public static double getGlobalAlphaModifier() { return GlobalAlphaModifier; }
 
     /**
      * Fills a rectangle with optional rounded corners and outline.
@@ -50,7 +47,9 @@ public final class RenderCommon
      * @param backgroundColor Background color
      * @param outlineColor    Outline color
      */
-    public static void drawRectangle(GuiGraphics g, float startPosX, float startPosY, float endPosX, float endPosY, RoundedCorners corners, float insetThickness, boolean renderOutline, Color backgroundColor, Color outlineColor)
+    public static void drawRectangle(GuiGraphics g, float startPosX, float startPosY, float endPosX, float endPosY,
+                                     RoundedCorners corners, float insetThickness, boolean renderOutline,
+                                     Color backgroundColor, Color outlineColor)
     {
         drawRectangle(
                 g,
@@ -72,7 +71,9 @@ public final class RenderCommon
      *
      * @param outlineSides `OutlinedSides` specifying which sides reserve outline thickness
      */
-    public static void drawRectangle(GuiGraphics g, float startPosX, float startPosY, float endPosX, float endPosY, RoundedCorners corners, float insetThickness, OutlinedSides outlineSides, boolean renderOutline, Color backgroundColor, Color outlineColor)
+    public static void drawRectangle(GuiGraphics g, float startPosX, float startPosY, float endPosX, float endPosY,
+                                     RoundedCorners corners, float insetThickness, OutlinedSides outlineSides,
+                                     boolean renderOutline, Color backgroundColor, Color outlineColor)
     {
         insetThickness = Math.max(0f, insetThickness);
 
@@ -206,7 +207,8 @@ public final class RenderCommon
      * Submits an arbitrary float-coordinate quad to the GUI render pipeline. Vertices are in order: top-left,
      * top-right, bottom-right, bottom-left.
      */
-    private static void drawFloatQuad(GuiGraphics g, float ax, float ay, float bx, float by, float cx, float cy, float dx, float dy, int color)
+    private static void drawFloatQuad(GuiGraphics g, float ax, float ay, float bx, float by, float cx, float cy,
+                                      float dx, float dy, int color)
     {
         Matrix3x2fc pose = new Matrix3x2f(g.pose());
         ScreenRectangle scissor = g.scissorStack.peek();
@@ -237,7 +239,8 @@ public final class RenderCommon
         });
     }
 
-    private static ScreenRectangle computeBounds(Matrix3x2fc pose, float ax, float ay, float bx, float by, float cx, float cy, float dx, float dy, ScreenRectangle scissor)
+    private static ScreenRectangle computeBounds(Matrix3x2fc pose, float ax, float ay, float bx, float by, float cx,
+                                                 float cy, float dx, float dy, ScreenRectangle scissor)
     {
         Vector2f pa = pose.transformPosition(ax, ay, new Vector2f());
         Vector2f pb = pose.transformPosition(bx, by, new Vector2f());
@@ -251,9 +254,9 @@ public final class RenderCommon
 
         ScreenRectangle rect = new ScreenRectangle(
                 Mth.floor(minX),
-                                                   Mth.floor(minY),
-                                                   Mth.ceil(maxX - minX),
-                                                   Mth.ceil(maxY - minY)
+                Mth.floor(minY),
+                Mth.ceil(maxX - minX),
+                Mth.ceil(maxY - minY)
         );
         return scissor != null ? scissor.intersection(rect) : rect;
     }
@@ -305,7 +308,8 @@ public final class RenderCommon
      * @param color         color of the dots
      * @param currentTimeMs Current time in milliseconds for animation
      */
-    public static void drawThreeDotPulseSpinner(GuiGraphics guiGraphics, int posX, int posY, int size, Color color, long currentTimeMs)
+    public static void drawThreeDotPulseSpinner(GuiGraphics guiGraphics, int posX, int posY, int size, Color color,
+                                                long currentTimeMs)
     {
         final int dotCount = 3;
         final int animationCycle = 900; // milliseconds for one complete cycle
@@ -346,7 +350,8 @@ public final class RenderCommon
      * @param color         color of the dots
      * @param currentTimeMs Current time in milliseconds for animation
      */
-    public static void drawThreeDotBouncePulseSpinner(GuiGraphics guiGraphics, int posX, int posY, int size, Color color, long currentTimeMs)
+    public static void drawThreeDotBouncePulseSpinner(GuiGraphics guiGraphics, int posX, int posY, int size,
+                                                      Color color, long currentTimeMs)
     {
         final int dotCount = 3;
         final int animationCycle = 800;
@@ -399,7 +404,8 @@ public final class RenderCommon
      * @param drawShadow   Whether to draw a shadow
      * @param shadowOffset Offset of the shadow in pixels (allows floats)
      */
-    public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color, int thickness, boolean drawShadow, float shadowOffset)
+    public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color,
+                             int thickness, boolean drawShadow, float shadowOffset)
     {
         color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
 
@@ -420,7 +426,9 @@ public final class RenderCommon
 
     /* LABEL */
 
-    public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int paddingX, int paddingY, RoundedCorners rounded, Color backgroundColor, Color outlineColor, Color textColor)
+    public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int paddingX,
+                                 int paddingY, RoundedCorners rounded, Color backgroundColor, Color outlineColor,
+                                 Color textColor)
     {
         drawLabel(
                 g,
@@ -438,7 +446,9 @@ public final class RenderCommon
         );
     }
 
-    public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int paddingX, int paddingY, RoundedCorners rounded, OutlinedSides outlineSides, Color backgroundColor, Color outlineColor, Color textColor)
+    public static void drawLabel(GuiGraphics g, String text, int posX, int posY, float scale, int paddingX,
+                                 int paddingY, RoundedCorners rounded, OutlinedSides outlineSides,
+                                 Color backgroundColor, Color outlineColor, Color textColor)
     {
         final int fontWidth = (int) ((float) Minecraft.getInstance().font.width(text) * scale);
         final int fontHeight = (int) ((float) Minecraft.getInstance().font.lineHeight * scale);
@@ -461,7 +471,9 @@ public final class RenderCommon
         RenderCommon.drawScaledText(g, text, scale, posX, posY, textColor);
     }
 
-    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color outlineColor, Color textColor)
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX,
+                                          int endY, RoundedCorners corners, float insetThickness, Color backgroundColor,
+                                          Color outlineColor, Color textColor)
     {
         drawLabelWithScale(
                 g,
@@ -481,7 +493,10 @@ public final class RenderCommon
         );
     }
 
-    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, OutlinedSides outlineSides, Color backgroundColor, Color outlineColor, Color textColor)
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX,
+                                          int endY, RoundedCorners corners, float insetThickness,
+                                          OutlinedSides outlineSides, Color backgroundColor, Color outlineColor,
+                                          Color textColor)
     {
         drawLabelWithScale(
                 g,
@@ -501,7 +516,9 @@ public final class RenderCommon
         );
     }
 
-    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, Color backgroundColor, Color outlineColor, Color textColor, boolean drawShadow)
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX,
+                                          int endY, RoundedCorners corners, float insetThickness, Color backgroundColor,
+                                          Color outlineColor, Color textColor, boolean drawShadow)
     {
         drawLabelWithScale(
                 g,
@@ -521,7 +538,10 @@ public final class RenderCommon
         );
     }
 
-    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX, int endY, RoundedCorners corners, float insetThickness, OutlinedSides outlineSides, Color backgroundColor, Color outlineColor, Color textColor, boolean drawShadow)
+    public static void drawLabelWithScale(GuiGraphics g, String text, float scale, int startX, int startY, int endX,
+                                          int endY, RoundedCorners corners, float insetThickness,
+                                          OutlinedSides outlineSides, Color backgroundColor, Color outlineColor,
+                                          Color textColor, boolean drawShadow)
     {
         // background
         RenderCommon.drawRectangle(
@@ -550,7 +570,8 @@ public final class RenderCommon
         RenderCommon.drawScaledText(g, text, scale, textPosX, textPosY, textColor, drawShadow);
     }
 
-    public static void drawLabelInBox(GuiGraphics g, String text, int padding, int startX, int startY, int endX, int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
+    public static void drawLabelInBox(GuiGraphics g, String text, int padding, int startX, int startY, int endX,
+                                      int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
     {
         RenderCommon.drawRectangle(g, startX, startY, endX, endY, corners, 1, true, backgroundColor, backgroundColor);
 
@@ -615,7 +636,8 @@ public final class RenderCommon
      * @param thickness Thickness of the line in pixels
      * @param color     color of the line
      */
-    public static void drawHorizontalLine(GuiGraphics g, int startPosX, int endPosX, int posY, int thickness, Color color)
+    public static void drawHorizontalLine(GuiGraphics g, int startPosX, int endPosX, int posY, int thickness,
+                                          Color color)
     {
         color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
 
@@ -664,7 +686,8 @@ public final class RenderCommon
         drawScaledItemFactor(g, stack, x, y, scale);
     }
 
-    public static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color, boolean drawShadow)
+    public static void drawScaledText(GuiGraphics g, String text, float scale, int x, int y, Color color,
+                                      boolean drawShadow)
     {
         color = color.withAlpha((int) (color.getAlpha() * GlobalAlphaModifier));
 
@@ -688,7 +711,8 @@ public final class RenderCommon
      * @param thickness   Thickness of the line in pixels
      * @param color       color of the line
      */
-    private static void drawThickLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness, Color color)
+    private static void drawThickLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness,
+                                      Color color)
     {
         if (thickness <= 0) return;
 
@@ -718,7 +742,8 @@ public final class RenderCommon
      * Fills a convex quadrilateral with float precision using the GUI render pipeline. Vertices in order: (x1,y1),
      * (x2,y2), (x3,y3), (x4,y4) — must be convex and wound correctly.
      */
-    private static void fillQuad(GuiGraphics guiGraphics, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int color)
+    private static void fillQuad(GuiGraphics guiGraphics, float x1, float y1, float x2, float y2, float x3, float y3,
+                                 float x4, float y4, int color)
     {
         drawFloatQuad(guiGraphics, x1, y1, x2, y2, x3, y3, x4, y4, color);
     }
@@ -757,7 +782,8 @@ public final class RenderCommon
     /**
      * Draws a thick line using Bresenham sampling and a square brush.
      */
-    private static void drawRasterLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness, Color color)
+    private static void drawRasterLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int thickness,
+                                       Color color)
     {
         if (thickness <= 0) return;
 
@@ -820,7 +846,8 @@ public final class RenderCommon
      * @param thickness   Thickness of the X lines in pixels
      * @param drawShadow  Whether to draw a shadow
      */
-    public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color, int thickness, boolean drawShadow)
+    public static void drawX(GuiGraphics guiGraphics, int startX, int startY, int endX, int endY, Color color,
+                             int thickness, boolean drawShadow)
     {
         drawX(guiGraphics, startX, startY, endX, endY, color, thickness, drawShadow, 0.5F);
     }

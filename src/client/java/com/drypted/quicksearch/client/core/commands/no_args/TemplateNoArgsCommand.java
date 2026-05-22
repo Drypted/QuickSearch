@@ -8,28 +8,16 @@ import net.minecraft.network.chat.Component;
 public class TemplateNoArgsCommand implements Command
 {
     @Override
-    public boolean requiresArgs()
-    {
-        return false;
-    }
+    public boolean requiresArgs() { return false; }
 
     @Override
-    public String getName()
-    {
-        return "no_args";
-    }
+    public String getName() { return "no_args"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Test No Args commands.";
-    }
+    public String getDescription() { return "Test No Args commands."; }
 
     @Override
-    public CommandFeedback validateArgs(String[] args)
-    {
-        return CommandFeedback.NO_ERROR;
-    }
+    public CommandFeedback validateArgs(String[] args) { return CommandFeedback.NO_ERROR; }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)

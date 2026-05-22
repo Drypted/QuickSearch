@@ -23,10 +23,7 @@ public enum InputFeedbackType
     }
 
     /// Critical Errors should halt execution
-    public boolean haltsExecution()
-    {
-        return haltsExecution;
-    }
+    public boolean haltsExecution() { return haltsExecution; }
 
     public Color getColor()
     {

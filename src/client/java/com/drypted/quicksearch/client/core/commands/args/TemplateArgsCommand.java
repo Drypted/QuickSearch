@@ -15,16 +15,10 @@ public class TemplateArgsCommand extends ArgumentedCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "args";
-    }
+    public String getName() { return "args"; }
 
     @Override
-    public String getDescription()
-    {
-        return "Test With Args commands.";
-    }
+    public String getDescription() { return "Test With Args commands."; }
 
     @Override
     public CommandFeedback execute(String[] args, LocalPlayer player)
