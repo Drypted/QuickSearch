@@ -48,8 +48,6 @@ public final class Styles
 
     public static final class Input
     {
-        // outline
-        public static final float OUTLINE_THICKNESS = Styles.THIN;
         // box colors
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND;
         public static final Color OUTLINE_COLOR = Styles.OUTLINE;
@@ -69,28 +67,37 @@ public final class Styles
         public static final Color LOADER_COLOR = Color.fromInt(0xFF_3B82F6);
         // shape
         public static final RoundedCorners ROUNDED = RoundedCorners.none();
-        // layout
-        public static final int PADDING_X = 6;
-        public static final int PADDING_Y = 1;
-        public static final int MAX_LENGTH = 256;
+        // props
+        public static final float OUTLINE_THICKNESS = Styles.THIN;
+        public static final int TEXT_PADDING_X = 6;
+        public static final int TEXT_PADDING_Y = 1;
+        public static final int INDICATOR_PADDING_RIGHT = 4;
+        public static final int CARET_BLINK_TIME = 500;
+        public static final int ERROR_TOOLTIP_HEIGHT = 11;
+        public static final int ERROR_TOOLTIP_SPACING = 2;
     }
 
     public static final class ResultData
     {
-        // outline
-        public static final float OUTLINE_THICKNESS = Styles.THIN;
-        // box colors
+        // colors
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND.withAlpha(64);
+        public static final Color OUTLINE_COLOR = Styles.OUTLINE;
         public static final Color TEXT_COLOR = Styles.TEXT;
-        // indicator colors
-        public static final Color SELECTED_OUTLINE_COLOR = Colors.WHITE.withAlpha(128);
-        public static final Color CLICKED_OUTLINE_COLOR = Colors.WHITE.withAlpha(154);
-        public static final Color HOVER_OUTLINE_COLOR = Colors.WHITE.withAlpha(64);
-        // shape
+
+        public static final Color SELECTED_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(128);
+        public static final Color SELECTED_BACKGROUND_COLOR = SELECTED_OUTLINE_COLOR;
+
+        public static final Color CLICKED_OUTLINE_COLOR = SELECTED_OUTLINE_COLOR;
+        public static final Color CLICKED_BACKGROUND_COLOR = Styles.OUTLINE.withAlpha(92);
+
+        public static final Color HOVER_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(64);
+        public static final Color HOVER_BACKGROUND_COLOR = HOVER_OUTLINE_COLOR;
+
+        // props
         public static final boolean ROUNDED = false;
-        // layout
         public static final int PADDING_X = 7;
         public static final int PADDING_Y = 6;
+        public static final float OUTLINE_THICKNESS = Styles.THIN;
     }
 
     public static final class ScrollBox
@@ -105,7 +112,7 @@ public final class Styles
         public static final Color SCROLLER_COLOR = Styles.OUTLINE;
         // shape
         public static final RoundedCorners ROUNDED = RoundedCorners.none();
-        // layout
+        // props
         public static final int MARGIN = 3;
         public static final int SPACING = 3;
         public static final int SCROLLBAR_WIDTH = 6;

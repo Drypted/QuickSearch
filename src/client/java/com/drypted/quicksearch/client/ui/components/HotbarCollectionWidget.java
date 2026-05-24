@@ -40,14 +40,15 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     private final ArrayList<HotbarSlotWidget> hotbarSlotWidgets = new ArrayList<>(HOTBAR_SLOTS);
     private @Nullable HotbarSlotWidget selectedHotbarWidget = null;
+    private int activeMouseModifiers = 0;
 
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
 
     private final float outlineThickness = Styles.Hotbar.HELP_TEXT_OUTLINE_THICKNESS;
 
-    private final Color HotarInstructionSlotHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
-    private final Color HotbarInstructionSlotFocusedColor = Styles.Hotbar.FOCUSED_COLOR;
+    private final Color HotarInstructionHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
+    private final Color HotbarInstructionFocusedColor = Styles.Hotbar.FOCUSED_COLOR;
     private final Color HotbarInstructionTextColor = Styles.Hotbar.HELP_TEXT_COLOR;
     private final Color HotbarInstructionOutlineColor = Styles.Hotbar.HELP_TEXT_OUTLINE;
     private final Color CloseButtonColor = Styles.Hotbar.HELP_TEXT_CLOSE_BUTTON_COLOR;
@@ -68,11 +69,11 @@ public class HotbarCollectionWidget extends AbstractWidget
                     i, //
                     (int) Math.ceil(cursor), startY, (int) Math.ceil(iconSize), (int) Math.ceil(iconSize)
             );
-            hotbarWidget.onClick(mouseButtonClick -> {
+            hotbarWidget.setOnClick(mouseButtonClick -> {
                 ItemsResultData item = hotbarWidget.getSearchResultData();
                 if (item == null) return;
 
-                onHotbarKeyPressed(hotbarWidget, 0);
+                onHotbarKeyPressed(hotbarWidget, this.activeMouseModifiers);
             });
             this.hotbarSlotWidgets.add(hotbarWidget);
             cursor += iconSize + HOTBAR_SLOT_PADDING;
@@ -87,11 +88,7 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     public static HotbarCollectionWidget create(int startX, int width, int endY)
     {
-        return new HotbarCollectionWidget(
-                startX,
-                width,
-                endY
-        );
+        return new HotbarCollectionWidget(startX, width, endY);
     }
 
     /* RENDERING */
@@ -113,7 +110,7 @@ public class HotbarCollectionWidget extends AbstractWidget
                     this.getY() + HELP_TEXT_HEIGHT,
                     RoundedCorners.all(),
                     this.outlineThickness,
-                    this.anySlotHighlighted ? HotarInstructionSlotHighlightedColor : HotbarInstructionSlotFocusedColor,
+                    this.anySlotHighlighted ? HotarInstructionHighlightedColor : HotbarInstructionFocusedColor,
                     HotbarInstructionOutlineColor,
                     HotbarInstructionTextColor
             );
@@ -264,6 +261,27 @@ public class HotbarCollectionWidget extends AbstractWidget
     }
 
     @Override
+    public boolean mouseClicked(@NonNull MouseButtonEvent mEv, boolean doubleClick)
+    {
+        if (this.isOverCloseButton(mEv.x(), mEv.y()))
+        {
+            return true;
+        }
+
+        for (HotbarSlotWidget widget : hotbarSlotWidgets)
+        {
+            if (!isOverSlot(widget, mEv.x(), mEv.y())) continue;
+
+            this.activeMouseModifiers = mEv.modifiers();
+            final boolean consumed = widget.mouseClicked(mEv, doubleClick);
+            this.activeMouseModifiers = 0;
+            return consumed;
+        }
+
+        return super.mouseClicked(mEv, doubleClick);
+    }
+
+    @Override
     public boolean mouseReleased(MouseButtonEvent mEv)
     {
         if (this.isOverCloseButton(mEv.x(), mEv.y()))
@@ -275,6 +293,16 @@ public class HotbarCollectionWidget extends AbstractWidget
         return super.mouseReleased(mEv);
     }
 
+    private boolean isOverSlot(@NonNull HotbarSlotWidget widget, double mouseX, double mouseY)
+    {
+        final int startX = widget.getX();
+        final int startY = widget.getY();
+        final int endX = startX + widget.getWidth();
+        final int endY = startY + widget.getHeight();
+
+        return mouseX >= startX && mouseX <= endX && mouseY >= startY && mouseY <= endY;
+    }
+
     /* PRIVATE HELPERS */
 
     private enum HotbarHelpText
@@ -284,10 +312,7 @@ public class HotbarCollectionWidget extends AbstractWidget
 
         private final String text;
 
-        HotbarHelpText(String text)
-        {
-            this.text = text;
-        }
+        HotbarHelpText(String text) { this.text = text; }
 
         public String getText() { return text; }
     }

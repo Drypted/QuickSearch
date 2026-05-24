@@ -20,6 +20,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.lwjgl.glfw.GLFW;
 
 public class QuickSearchScreen extends Screen
 {
@@ -88,7 +89,8 @@ public class QuickSearchScreen extends Screen
             this.hotbarCollectionWidget = HotbarCollectionWidget.create(
                     searchBarX,
                     searchBarWidth,
-                    searchBarY - HotbarCollectionWidget.HOTBAR_SLOT_PADDING
+                    searchBarY -
+                            HotbarCollectionWidget.HOTBAR_SLOT_PADDING
             );
             this.addRenderableWidget(hotbarCollectionWidget);
         }
@@ -160,6 +162,7 @@ public class QuickSearchScreen extends Screen
                 return true;
             }
 
+            // clear text if focused and has text
             if (inputWidget.isFocused() && inputWidget.hasText())
             {
                 inputWidget.clearText();
@@ -167,18 +170,27 @@ public class QuickSearchScreen extends Screen
                 visibilityController.setItemResultsVisible(false);
                 return true;
             }
+
+            // close by default
             this.onClose();
             return true;
         }
 
-        // only allow key when hotbar is focused
+        final boolean inputFocused = this.inputWidget != null && this.inputWidget.isFocused();
+        if (!inputFocused && isAlphaNumericKey(kEv) && !isModifierKey(kEv) && !isHotbarKey(kEv))
+        {
+            this.setFocused(this.inputWidget);
+            this.inputWidget.setFocused(true);
+            // stops hotbar route; since focus transferred
+        }
+
+        // hotbar route; requires focus
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null && hotbarCollectionWidget.isFocused())
         {
             for (int i = 0; i < HOTBAR_SLOTS; i++)
             {
                 HotbarSlotWidget hotbarWidget = this.hotbarCollectionWidget.getWidgets().get(i);
-                if (hotbarWidget != null && kEv.key() == this.minecraft.options.keyHotbarSlots[i].getDefaultKey()
-                                                                                                 .getValue())
+                if (hotbarWidget != null && this.minecraft.options.keyHotbarSlots[i].matches(kEv))
                 {
                     this.hotbarCollectionWidget.onHotbarKeyPressed(hotbarWidget, kEv.modifiers());
                     return true;
@@ -201,13 +213,15 @@ public class QuickSearchScreen extends Screen
     @Override
     public boolean mouseClicked(@NonNull MouseButtonEvent mEv, boolean doubleClick)
     {
-        if (!super.mouseClicked(mEv, doubleClick))
+        final boolean consumed = super.mouseClicked(mEv, doubleClick);
+        if (!consumed)
         {
             // click outside, close spotlight
             this.onClose();
             return true;
         }
-        return super.mouseClicked(mEv, doubleClick);
+
+        return true;
     }
 
     /* Overrides for settings */
@@ -223,6 +237,35 @@ public class QuickSearchScreen extends Screen
     /* Helpers */
 
     private boolean isHotbarEnabledInConfig() { return QuickSearchClient.getConfig().hotbar.showHotbarSlots; }
+
+    private boolean isHotbarKey(@NonNull KeyEvent kEv)
+    {
+        for (int i = 0; i < HOTBAR_SLOTS; i++)
+        {
+            if (this.minecraft.options.keyHotbarSlots[i].matches(kEv))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isAlphaNumericKey(@NonNull KeyEvent kEv)
+    {
+        int key = kEv.key();
+        // A-Z: 65-90
+        // a-z: 97-122 (but GLFW uses same codes)
+        // 0-9: 48-57
+        return (key >= 48 && key <= 57) || (key >= 65 && key <= 90);
+    }
+
+    private static boolean isModifierKey(@NonNull KeyEvent kEv)
+    {
+        int key = kEv.key();
+        return key == GLFW.GLFW_KEY_LEFT_SHIFT || key == GLFW.GLFW_KEY_RIGHT_SHIFT ||
+                key == GLFW.GLFW_KEY_LEFT_CONTROL || key == GLFW.GLFW_KEY_RIGHT_CONTROL ||
+                key == GLFW.GLFW_KEY_LEFT_ALT || key == GLFW.GLFW_KEY_RIGHT_ALT;
+    }
 
     private boolean isUserInputCommand() { return CommandInputParser.isCommandInput(inputWidget.getText()); }
 }

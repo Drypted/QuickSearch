@@ -2,7 +2,6 @@ package com.drypted.quicksearch.client.ui.components;
 
 import com.drypted.quicksearch.client.core.blueprints.ui.ScrollBoxWidgetEntry;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.Color;
-import com.drypted.quicksearch.client.core.blueprints.ui.common.Colors;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.MouseButtonClick;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.quicksearch.client.ui.renderer.RenderCommon;
@@ -40,11 +39,14 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private boolean isRounded;
     private final float outlineThickness;
     private Color backgroundColor;
-    private Color textColor;
-    private Color hoverColor;
-    private Color clickColor;
-    private Color selectedColor;
     private Color outlineColor;
+    private Color selectedBackgroundColor;
+    private Color selectedOutlineColor;
+    private Color clickedBackgroundColor;
+    private Color clickedOutlineColor;
+    private Color hoverBackgroundColor;
+    private Color hoverOutlineColor;
+    private Color textColor;
     private boolean pressed;
     private boolean selected;
     private boolean showOutline;
@@ -65,11 +67,14 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         this.isRounded = Styles.ResultData.ROUNDED;
         this.outlineThickness = Styles.ResultData.OUTLINE_THICKNESS;
         this.backgroundColor = Styles.ResultData.BACKGROUND_COLOR;
+        this.outlineColor = Styles.ResultData.OUTLINE_COLOR;
+        this.selectedBackgroundColor = Styles.ResultData.SELECTED_BACKGROUND_COLOR;
+        this.selectedOutlineColor = Styles.ResultData.SELECTED_OUTLINE_COLOR;
+        this.clickedBackgroundColor = Styles.ResultData.CLICKED_BACKGROUND_COLOR;
+        this.clickedOutlineColor = Styles.ResultData.CLICKED_OUTLINE_COLOR;
+        this.hoverBackgroundColor = Styles.ResultData.HOVER_BACKGROUND_COLOR;
+        this.hoverOutlineColor = Styles.ResultData.HOVER_OUTLINE_COLOR;
         this.textColor = Styles.ResultData.TEXT_COLOR;
-        this.hoverColor = Styles.ResultData.HOVER_OUTLINE_COLOR;
-        this.clickColor = Styles.ResultData.CLICKED_OUTLINE_COLOR;
-        this.selectedColor = Styles.ResultData.SELECTED_OUTLINE_COLOR;
-        this.outlineColor = Colors.CLEAR;
 
         recalculateHeight();
     }
@@ -97,13 +102,32 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         final int endPosX = startPosX + width;
         final int endPosY = startPosY + height;
 
-        Color outlineColor;
-        if (showOutline) outlineColor = this.getOutlineColor();
-        else if (this.pressed) outlineColor = clickColor;
-        else if (this.isHovered) outlineColor = hoverColor;
-        else outlineColor = backgroundColor;
+        Color effectiveBackgroundColor = this.backgroundColor;
+        Color effectiveOutlineColor = this.outlineColor;
 
-        boolean renderOutline = this.isHovered() || this.isPressed() || this.isFocused();
+        if (this.pressed)
+        {
+            effectiveBackgroundColor = this.clickedBackgroundColor;
+            effectiveOutlineColor = this.clickedOutlineColor;
+        }
+        else if (this.selected)
+        {
+            effectiveBackgroundColor = this.selectedBackgroundColor;
+            effectiveOutlineColor = this.selectedOutlineColor;
+        }
+        else if (this.isHovered)
+        {
+            effectiveBackgroundColor = this.hoverBackgroundColor;
+            effectiveOutlineColor = this.hoverOutlineColor;
+        }
+
+        if (showOutline && !this.pressed && !this.isHovered && !this.selected)
+        {
+            effectiveOutlineColor = this.getOutlineColor();
+        }
+
+        boolean renderOutline =
+                this.showOutline || this.isHovered() || this.isPressed() || this.isFocused() || this.selected;
 
         RenderCommon.drawRectangle(
                 g,
@@ -113,9 +137,9 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
                 endPosY,
                 RoundedCorners.fromSingle(this.isRounded),
                 this.outlineThickness,
-                this.selected || renderOutline,
-                this.backgroundColor,
-                (this.selected && !this.isPressed()) ? selectedColor : outlineColor
+                renderOutline,
+                effectiveBackgroundColor,
+                effectiveOutlineColor
         );
 
         g.enableScissor(
@@ -276,18 +300,32 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         this.textColor = textColor;
     }
 
-    public Color getHoverColor() { return hoverColor; }
+    public Color getHoverColor() { return hoverOutlineColor; }
 
     public void setHoverColor(Color hoverColor)
     {
-        this.hoverColor = hoverColor;
+        this.hoverOutlineColor = hoverColor;
     }
 
-    public Color getClickColor() { return clickColor; }
+    public Color getHoverBackgroundColor() { return hoverBackgroundColor; }
+
+    public void setHoverBackgroundColor(Color hoverBackgroundColor)
+    {
+        this.hoverBackgroundColor = hoverBackgroundColor;
+    }
+
+    public Color getClickColor() { return clickedOutlineColor; }
 
     public void setClickColor(Color clickColor)
     {
-        this.clickColor = clickColor;
+        this.clickedOutlineColor = clickColor;
+    }
+
+    public Color getClickedBackgroundColor() { return clickedBackgroundColor; }
+
+    public void setClickedBackgroundColor(Color clickedBackgroundColor)
+    {
+        this.clickedBackgroundColor = clickedBackgroundColor;
     }
 
     public Color getOutlineColor() { return outlineColor; }
@@ -297,11 +335,18 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         this.outlineColor = outlineColor;
     }
 
-    public Color getSelectedColor() { return selectedColor; }
+    public Color getSelectedColor() { return selectedOutlineColor; }
 
     public void setSelectedColor(Color selectedColor)
     {
-        this.selectedColor = selectedColor;
+        this.selectedOutlineColor = selectedColor;
+    }
+
+    public Color getSelectedBackgroundColor() { return selectedBackgroundColor; }
+
+    public void setSelectedBackgroundColor(Color selectedBackgroundColor)
+    {
+        this.selectedBackgroundColor = selectedBackgroundColor;
     }
 
     public void setOutlineEnabled(boolean enabled)

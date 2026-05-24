@@ -32,7 +32,7 @@ public class HotbarSlotWidget extends AbstractWidget
     private final Color highlightedColor;
     private final Color clickedColor;
 
-    private Consumer<MouseButtonClick> onClickCallback;
+    private Consumer<MouseButtonClick> onClickCallback = (m) -> { };
 
     private ItemsResultData itemsResultData = ItemsResultData.EMPTY;
     private boolean showBind = false;
@@ -54,8 +54,6 @@ public class HotbarSlotWidget extends AbstractWidget
         this.focusedColor = Styles.Hotbar.FOCUSED_COLOR;
         this.highlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
         this.clickedColor = Styles.Hotbar.SLOT_PRESSED_COLOR;
-        this.onClickCallback = (mouseButtonClick) -> {
-        };
 
         this.hotbarKey = Minecraft.getInstance().options.keyHotbarSlots[hotbarIndex].getTranslatedKeyMessage()
                                                                                     .getString()
@@ -138,7 +136,7 @@ public class HotbarSlotWidget extends AbstractWidget
         this.itemsResultData = itemsResultData;
     }
 
-    public void onClick(Consumer<MouseButtonClick> onClickCallback)
+    public void setOnClick(Consumer<MouseButtonClick> onClickCallback)
     {
         this.onClickCallback = onClickCallback;
     }

@@ -88,10 +88,6 @@ public final class ResultPresenter
                 if (widget != null)
                 {
                     widget.setSearchResultData(result);
-                    widget.onClick(mouseButtonClick -> {
-                        clickHandlers.onItemClicked(result);
-                        widget.setFocused(true);
-                    });
                 }
             }
 

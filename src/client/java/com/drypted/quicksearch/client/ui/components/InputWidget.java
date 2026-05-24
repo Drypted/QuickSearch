@@ -31,12 +31,6 @@ import java.util.function.Predicate;
 public class InputWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
-    private static final int TEXT_PADDING_X = 6;
-    private static final int TEXT_PADDING_Y = 1;
-    private static final int INDICATOR_PADDING_RIGHT = 4;
-    private static final int CARET_BLINK_TIME = 500;
-    private static final int ERROR_TOOLTIP_HEIGHT = 11;
-    private static final int ERROR_TOOLTIP_SPACING = 2;
 
     // Visual configuration
     private final float outlineThickness;
@@ -85,6 +79,13 @@ public class InputWidget extends AbstractWidget
 
     private final Color LoaderColor = Styles.Input.LOADER_COLOR;
 
+    private final int textPaddingX;
+    private final int textPaddingY;
+    private final int indicatorPaddingRight;
+    private final int caretBlinkTime;
+    private final int errorTooltipHeight;
+    private final int errorTooltipSpacing;
+
     public InputWidget(int x, int y, int width, int height)
     {
         super(x, y, width, height, Component.empty());
@@ -98,6 +99,12 @@ public class InputWidget extends AbstractWidget
         this.selectionBackgroundColor = Styles.Input.SELECTION_BACKGROUND;
         this.selectionTextColor = Styles.Input.SELECTION_TEXT;
         this.placeholderColor = Styles.Input.PLACEHOLDER_TEXT;
+        this.textPaddingX = Styles.Input.TEXT_PADDING_X;
+        this.textPaddingY = Styles.Input.TEXT_PADDING_Y;
+        this.indicatorPaddingRight = Styles.Input.INDICATOR_PADDING_RIGHT;
+        this.caretBlinkTime = Styles.Input.CARET_BLINK_TIME;
+        this.errorTooltipHeight = Styles.Input.ERROR_TOOLTIP_HEIGHT;
+        this.errorTooltipSpacing = Styles.Input.ERROR_TOOLTIP_SPACING;
     }
 
     @Override
@@ -239,9 +246,9 @@ public class InputWidget extends AbstractWidget
                     error.getMessage(),
                     0.65f,
                     this.getX(),
-                    this.getY() - ERROR_TOOLTIP_HEIGHT - ERROR_TOOLTIP_SPACING,
+                    this.getY() - errorTooltipHeight - errorTooltipSpacing,
                     this.getX() + this.getWidth(),
-                    this.getY() - ERROR_TOOLTIP_SPACING,
+                    this.getY() - errorTooltipSpacing,
                     RoundedCorners.all(),
                     1,
                     this.error.getColor(),
@@ -297,9 +304,9 @@ public class InputWidget extends AbstractWidget
 
     private void drawLoadingAtEnd(GuiGraphics guiGraphics)
     {
-        int size = this.height - (2 * INDICATOR_PADDING_RIGHT);
-        int loadingX = this.getX() + this.getWidth() - INDICATOR_PADDING_RIGHT - size;
-        int loadingY = this.getY() + INDICATOR_PADDING_RIGHT;
+        int size = this.height - (2 * indicatorPaddingRight);
+        int loadingX = this.getX() + this.getWidth() - indicatorPaddingRight - size;
+        int loadingY = this.getY() + indicatorPaddingRight;
 
         RenderCommon.drawThreeDotPulseSpinner(
                 guiGraphics,
@@ -313,21 +320,21 @@ public class InputWidget extends AbstractWidget
 
     /* Helper Methods */
 
-    private int getTextX() { return this.getX() + TEXT_PADDING_X; }
+    private int getTextX() { return this.getX() + textPaddingX; }
 
-    private int getTextY() { return this.getY() + (this.height - FONT.lineHeight) / 2 + TEXT_PADDING_Y; }
+    private int getTextY() { return this.getY() + (this.height - FONT.lineHeight) / 2 + textPaddingY; }
 
     private int getTextAreaWidth()
     {
-        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ? (this.height - INDICATOR_PADDING_RIGHT +
-                                                                         INDICATOR_PADDING_RIGHT) : 0;
-        return this.getWidth() - (TEXT_PADDING_X * 2) - indicatorSpace;
+        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ? (this.height - indicatorPaddingRight +
+                                                                         indicatorPaddingRight) : 0;
+        return this.getWidth() - (textPaddingX * 2) - indicatorSpace;
     }
 
     private boolean shouldDrawCaret()
     {
         long elapsed = System.currentTimeMillis() - caretTime;
-        return (elapsed / CARET_BLINK_TIME) % 2 == 0;
+        return (elapsed / caretBlinkTime) % 2 == 0;
     }
 
     /* Text Editing */
@@ -542,7 +549,7 @@ public class InputWidget extends AbstractWidget
 
     private void setCursorPosition(int pos, boolean selecting)
     {
-        pos = Math.max(0, Math.min(text.length(), pos));
+        pos = Math.clamp(pos, 0, text.length());
 
         if (selecting)
         {
@@ -792,7 +799,7 @@ public class InputWidget extends AbstractWidget
 
         // Clamp scroll offset
         int maxScroll = Math.max(0, FONT.width(text) - textAreaWidth);
-        scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
+        scrollOffset = Math.clamp(scrollOffset, 0, maxScroll);
     }
 
     private void resetCaretBlink()
@@ -886,7 +893,7 @@ public class InputWidget extends AbstractWidget
     {
         if (text.isEmpty()) return;
 
-        pos = Math.max(0, Math.min(text.length() - 1, pos));
+        pos = Math.clamp(pos, 0, text.length() - 1);
 
         int start = pos;
         int end = pos;
