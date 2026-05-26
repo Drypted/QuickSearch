@@ -1,7 +1,7 @@
 package com.drypted.quicksearch.client.ui.components;
 
 import com.drypted.quicksearch.client.QuickSearchClient;
-import com.drypted.quicksearch.client.config.ModConfig;
+import com.drypted.quicksearch.client.config.ModConfig.CompletionType;
 import com.drypted.quicksearch.client.core.blueprints.feedback.InputError;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.Color;
 import com.drypted.quicksearch.client.core.blueprints.ui.common.RoundedCorners;
@@ -373,14 +373,7 @@ public class InputWidget extends AbstractWidget
                 return true;
             }
 
-            // shift to complete whole query
-            if (shift)
-            {
-                setText(suggestion);
-                return true;
-            }
-
-            switch (QuickSearchClient.getConfig().search.defaultCompletionType)
+            if (shift) switch (QuickSearchClient.getConfig().search.shiftCompletionType)
             {
                 case NONE -> { }
                 case SINGLE_WORD ->
@@ -399,11 +392,28 @@ public class InputWidget extends AbstractWidget
                     // Complete the entire suggestion
                     setText(suggestion);
                 }
-                case null, default ->
+            }
+            else switch (QuickSearchClient.getConfig().search.normalCompletionType)
+            {
+                case NONE -> { }
+                case SINGLE_WORD ->
                 {
-                    // pass
+                    String remaining = suggestion.substring(text.length());
+                    if (!remaining.isEmpty())
+                    {
+                        // insert the next word + space (if any word after this one)
+                        insertText(remaining.contains(" ")
+                                   ? remaining.substring(0, remaining.indexOf(" ") + 1)
+                                   : remaining);
+                    }
+                }
+                case WHOLE_QUERY ->
+                {
+                    // Complete the entire suggestion
+                    setText(suggestion);
                 }
             }
+
             clearSuggestion(); // Clear suggestion after accepting
             return true;
         }
@@ -1149,7 +1159,7 @@ public class InputWidget extends AbstractWidget
 
     private boolean shouldShowSuggestion()
     {
-        return QuickSearchClient.getConfig().search.defaultCompletionType != ModConfig.DefaultCompletionType.NONE
+        return QuickSearchClient.getConfig().search.normalCompletionType != CompletionType.NONE
                 // not disabled
                 && !suggestion.isEmpty() // not empty
                 && cursorPos == text.length() // cursor at end

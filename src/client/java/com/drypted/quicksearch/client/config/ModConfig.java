@@ -41,7 +41,10 @@ public class ModConfig implements ConfigData
         public int maxResults = 50;
         @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         @ConfigEntry.Gui.Tooltip
-        public DefaultCompletionType defaultCompletionType = DefaultCompletionType.SINGLE_WORD;
+        public CompletionType normalCompletionType = CompletionType.WHOLE_QUERY;
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        @ConfigEntry.Gui.Tooltip
+        public CompletionType shiftCompletionType = CompletionType.SINGLE_WORD;
     }
 
     public static class Notifications implements ConfigData
@@ -50,7 +53,7 @@ public class ModConfig implements ConfigData
         @ConfigEntry.Gui.Tooltip public boolean showReplace = true;
     }
 
-    public enum DefaultCompletionType
+    public enum CompletionType
     {
         NONE,
         SINGLE_WORD,

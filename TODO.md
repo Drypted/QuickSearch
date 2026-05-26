@@ -1,26 +1,11 @@
-# SOLID Refactor Backlog
+# TODO
 
-## Completed
-
-- Extract command input parsing from `SpotlightScreen` into a dedicated parser service.
-- Extract item index rebuilding from `SearchHandler` into a dedicated index builder.
-- Extract command registration/search/dispatch internals from `CommandsHandler` into `CommandRegistry`.
-- Split `SpotlightScreen` into dedicated collaborators:
-	- Query routing: `SpotlightQueryRouter`, `SpotlightCommandQueryRouter`, `SpotlightItemQueryRouter`.
-	- Result presentation: `SpotlightResultPresenter`, `SpotlightVisibilityController`, `SpotlightViewState`.
-	- Submit flow: `SpotlightSubmitHandler`, `SpotlightSubmitCommandHandler`, `SpotlightSubmitItemHandler`.
-	- Click/suggestion handlers: `SpotlightItemResultClickHandler`, `SpotlightCommandResultClickHandler`, `SpotlightSuggestionApplyHandler`.
-
-## In Progress
-
-- Continue reducing static handler dependencies behind interfaces for DIP.
-
-## Planned
-
-- Replace static `SearchHandler` facade with injected search/index services.
-- Separate hotbar widget interaction logic from rendering in `HotbarCollectionWidget`.
-- Introduce thin facades for player inventory actions to reduce direct Minecraft API coupling in UI classes.
-
-## Existing Notes
-
-- Show "enter" hint, when item search result is selected.
+- [X] Tab for full completion & Shift + Tab for word completion
+- [ ] Cmd/Ctrl Backspace to remove all text
+- [ ] Tweak Result Data Color to work with Commands
+- [ ] Only Change Outline for commands result data
+- [ ] Tooltip redesign for errors and warnings; Black Background color with outline changing only
+- [ ] Tweak text color for commands suggestions
+- [ ] Onboarding tooltips for completion
+- [ ] Indicators for completion
+- [ ] Click to select search Result

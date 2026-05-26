@@ -45,16 +45,16 @@ public class HotbarCollectionWidget extends AbstractWidget
     private HotbarHelpText hotbarInstructionText = HotbarHelpText.UNSELECTED;
     private boolean anySlotHighlighted = false;
 
-    private final float outlineThickness = Styles.Hotbar.HELP_TEXT_OUTLINE_THICKNESS;
+    private final float outlineThickness = Styles.Hotbar.HELP_TOOLTIP_OUTLINE_THICKNESS;
 
-    private final Color HotarInstructionHighlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
-    private final Color HotbarInstructionFocusedColor = Styles.Hotbar.FOCUSED_COLOR;
-    private final Color HotbarInstructionTextColor = Styles.Hotbar.HELP_TEXT_COLOR;
-    private final Color HotbarInstructionOutlineColor = Styles.Hotbar.HELP_TEXT_OUTLINE;
-    private final Color CloseButtonColor = Styles.Hotbar.HELP_TEXT_CLOSE_BUTTON_COLOR;
-    private final Color TooltipBackgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
-    private final Color TooltipOutlineColor = Styles.Hotbar.TOOLTIP_OUTLINE_COLOR;
-    private final Color TooltipTextColor = Styles.Hotbar.TOOLTIP_TEXT_COLOR;
+    private final Color HotarInstructionHighlightedColor = Styles.Hotbar.HELP_TOOLTIP_HIGHLIGHTED_COLOR;
+    private final Color HotbarInstructionColor = Styles.Hotbar.HELP_TOOLTIP_FOCUSED_COLOR;
+    private final Color HotbarInstructionTextColor = Styles.Hotbar.HELP_TOOLTIP_TEXT_COLOR;
+    private final Color HotbarInstructionOutlineColor = Styles.Hotbar.HELP_TOOLTIP_OUTLINE_COLOR;
+    private final Color CloseButtonColor = Styles.Hotbar.HELP_TOOLTIP_CLOSE_BUTTON_COLOR;
+    private final Color TooltipBackgroundColor = Styles.Hotbar.HELP_CLOSE_TOOLTIP_BACKGROUND_COLOR;
+    private final Color TooltipOutlineColor = Styles.Hotbar.HELP_CLOSE_TOOLTIP_OUTLINE_COLOR;
+    private final Color TooltipTextColor = Styles.Hotbar.HELP_CLOSE_TOOLTIP_TEXT_COLOR;
 
     public HotbarCollectionWidget(int startX, int width, int endY)
     {
@@ -110,7 +110,7 @@ public class HotbarCollectionWidget extends AbstractWidget
                     this.getY() + HELP_TEXT_HEIGHT,
                     RoundedCorners.all(),
                     this.outlineThickness,
-                    this.anySlotHighlighted ? HotarInstructionHighlightedColor : HotbarInstructionFocusedColor,
+                    this.anySlotHighlighted ? HotarInstructionHighlightedColor : HotbarInstructionColor,
                     HotbarInstructionOutlineColor,
                     HotbarInstructionTextColor
             );

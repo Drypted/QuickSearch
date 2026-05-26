@@ -26,19 +26,27 @@ public final class Styles
     {
         // outline
         public static final float OUTLINE_THICKNESS = Styles.THIN;
-        public static final float HELP_TEXT_OUTLINE_THICKNESS = Styles.THIN;
-        // slot outline colors
-        public static final Color FOCUSED_COLOR = Styles.BACKGROUND;
-        public static final Color SLOT_PRESSED_COLOR = Styles.BACKGROUND.withAlpha(192);
-        public static final Color SLOT_HIGHLIGHTED_COLOR = Styles.BACKGROUND.withAlpha(128);
-        // help text colors
-        public static final Color HELP_TEXT_OUTLINE = Styles.OUTLINE;
-        public static final Color HELP_TEXT_COLOR = Styles.BACKGROUND.getReadableTextColor(7f);
-        public static final Color HELP_TEXT_CLOSE_BUTTON_COLOR = Styles.ERROR_COLOR;
-        // tooltip colors
-        public static final Color TOOLTIP_BACKGROUND_COLOR = Styles.BACKGROUND;
-        public static final Color TOOLTIP_TEXT_COLOR = TOOLTIP_BACKGROUND_COLOR.getReadableTextColor(4.5f);
-        public static final Color TOOLTIP_OUTLINE_COLOR = Styles.OUTLINE;
+        public static final float HELP_TOOLTIP_OUTLINE_THICKNESS = Styles.THIN;
+        // slot key-label colors
+        public static final Color SLOT_LABEL_BACKGROUND_COLOR = Styles.BACKGROUND;
+        public static final Color SLOT_LABEL_TEXT_COLOR = Styles.BACKGROUND.getReadableTextColor(7f);
+        public static final Color SLOT_LABEL_OUTLINE_COLOR = Styles.OUTLINE;
+        // slot state colors
+        public static final Color SLOT_FOCUSED_COLOR = Styles.BACKGROUND;
+        public static final Color SLOT_PRESSED_COLOR = ResultData.CLICKED_BACKGROUND_COLOR;
+        public static final Color SLOT_HIGHLIGHTED_COLOR = ResultData.SELECTED_BACKGROUND_COLOR;
+        // help tooltip state colors
+        public static final Color HELP_TOOLTIP_FOCUSED_COLOR = SLOT_FOCUSED_COLOR;
+        public static final Color HELP_TOOLTIP_HIGHLIGHTED_COLOR = SLOT_HIGHLIGHTED_COLOR;
+        // help tooltip colors
+        public static final Color HELP_TOOLTIP_OUTLINE_COLOR = Styles.OUTLINE;
+        public static final Color HELP_TOOLTIP_TEXT_COLOR = Styles.BACKGROUND.getReadableTextColor(7f);
+        public static final Color HELP_TOOLTIP_CLOSE_BUTTON_COLOR = Styles.ERROR_COLOR;
+        // close-button tooltip colors
+        public static final Color HELP_CLOSE_TOOLTIP_BACKGROUND_COLOR = Styles.BACKGROUND;
+        public static final Color HELP_CLOSE_TOOLTIP_TEXT_COLOR = //
+                HELP_CLOSE_TOOLTIP_BACKGROUND_COLOR.getReadableTextColor(4.5f);
+        public static final Color HELP_CLOSE_TOOLTIP_OUTLINE_COLOR = Styles.OUTLINE;
         // shape
         public static final RoundedCorners ROUNDED = RoundedCorners.none();
         // layout
@@ -81,7 +89,7 @@ public final class Styles
     {
         // colors
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND.withAlpha(64);
-        public static final Color OUTLINE_COLOR = Styles.OUTLINE;
+        public static final Color OUTLINE_COLOR = Styles.OUTLINE.withAlpha(128);
         public static final Color TEXT_COLOR = Styles.TEXT;
 
         public static final Color SELECTED_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(128);
@@ -90,7 +98,7 @@ public final class Styles
         public static final Color CLICKED_OUTLINE_COLOR = SELECTED_OUTLINE_COLOR;
         public static final Color CLICKED_BACKGROUND_COLOR = Styles.OUTLINE.withAlpha(92);
 
-        public static final Color HOVER_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(64);
+        public static final Color HOVER_OUTLINE_COLOR = OUTLINE_COLOR;
         public static final Color HOVER_BACKGROUND_COLOR = HOVER_OUTLINE_COLOR;
 
         // props

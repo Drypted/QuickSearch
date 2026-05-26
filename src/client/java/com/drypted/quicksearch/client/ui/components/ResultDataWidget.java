@@ -121,14 +121,6 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
             effectiveOutlineColor = this.hoverOutlineColor;
         }
 
-        if (showOutline && !this.pressed && !this.isHovered && !this.selected)
-        {
-            effectiveOutlineColor = this.getOutlineColor();
-        }
-
-        boolean renderOutline =
-                this.showOutline || this.isHovered() || this.isPressed() || this.isFocused() || this.selected;
-
         RenderCommon.drawRectangle(
                 g,
                 startPosX,
@@ -137,7 +129,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
                 endPosY,
                 RoundedCorners.fromSingle(this.isRounded),
                 this.outlineThickness,
-                renderOutline,
+                true,
                 effectiveBackgroundColor,
                 effectiveOutlineColor
         );
@@ -327,8 +319,6 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     {
         this.clickedBackgroundColor = clickedBackgroundColor;
     }
-
-    public Color getOutlineColor() { return outlineColor; }
 
     public void setOutlineColor(Color outlineColor)
     {

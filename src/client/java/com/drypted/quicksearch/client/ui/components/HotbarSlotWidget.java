@@ -48,10 +48,10 @@ public class HotbarSlotWidget extends AbstractWidget
         this.roundedCorners = Styles.Hotbar.ROUNDED;
         this.outlineThickness = Styles.Hotbar.OUTLINE_THICKNESS;
         this.hotbarKeyTextScale = Styles.Hotbar.TEXT_SCALE;
-        this.backgroundColor = Styles.Hotbar.TOOLTIP_BACKGROUND_COLOR;
-        this.textColor = Styles.Hotbar.HELP_TEXT_COLOR;
-        this.outlineColor = Styles.Hotbar.TOOLTIP_OUTLINE_COLOR;
-        this.focusedColor = Styles.Hotbar.FOCUSED_COLOR;
+        this.backgroundColor = Styles.Hotbar.SLOT_LABEL_BACKGROUND_COLOR;
+        this.textColor = Styles.Hotbar.SLOT_LABEL_TEXT_COLOR;
+        this.outlineColor = Styles.Hotbar.SLOT_LABEL_OUTLINE_COLOR;
+        this.focusedColor = Styles.Hotbar.SLOT_FOCUSED_COLOR;
         this.highlightedColor = Styles.Hotbar.SLOT_HIGHLIGHTED_COLOR;
         this.clickedColor = Styles.Hotbar.SLOT_PRESSED_COLOR;
 
