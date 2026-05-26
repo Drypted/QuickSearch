@@ -89,17 +89,17 @@ public final class Styles
     {
         // colors
         public static final Color BACKGROUND_COLOR = Styles.BACKGROUND.withAlpha(64);
-        public static final Color OUTLINE_COLOR = Styles.OUTLINE.withAlpha(128);
+        public static final Color OUTLINE_COLOR = Styles.BACKGROUND.withAlpha(164);
         public static final Color TEXT_COLOR = Styles.TEXT;
 
-        public static final Color SELECTED_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(128);
+        public static final Color SELECTED_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(108);
         public static final Color SELECTED_BACKGROUND_COLOR = SELECTED_OUTLINE_COLOR;
 
         public static final Color CLICKED_OUTLINE_COLOR = SELECTED_OUTLINE_COLOR;
         public static final Color CLICKED_BACKGROUND_COLOR = Styles.OUTLINE.withAlpha(92);
 
-        public static final Color HOVER_OUTLINE_COLOR = OUTLINE_COLOR;
-        public static final Color HOVER_BACKGROUND_COLOR = HOVER_OUTLINE_COLOR;
+        public static final Color HOVER_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(92);
+        public static final Color HOVER_BACKGROUND_COLOR = Styles.OUTLINE.withAlpha(64);
 
         // props
         public static final boolean ROUNDED = false;

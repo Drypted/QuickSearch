@@ -121,6 +121,9 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
             effectiveOutlineColor = this.hoverOutlineColor;
         }
 
+        // toned down bg color if disabled
+        effectiveBackgroundColor = disabled ? effectiveBackgroundColor.withHalfOpacity() : effectiveBackgroundColor;
+
         RenderCommon.drawRectangle(
                 g,
                 startPosX,
@@ -157,10 +160,12 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
         // title
         int titleX = iconX + (shouldRenderIcon ? (ICON_SIZE + ICON_PADDING) : 0);
         int titleY = startPosY + paddingY;
-        Color _textColor = this.isDisabled() ? textColor.withLightness(textColor.getLightness() / 2) : textColor;
+        Color effectivetextColor = this.isDisabled()
+                                   ? textColor.withLightness(textColor.getLightness() * (3.25f / 4))
+                                   : textColor;
 
         boolean shouldRenderTitle = this.title != null && !this.title.isEmpty();
-        if (shouldRenderTitle) g.drawString(getFont(), this.title, titleX, titleY, _textColor.asInt(), false);
+        if (shouldRenderTitle) g.drawString(getFont(), this.title, titleX, titleY, effectivetextColor.asInt(), false);
 
         // subtitle
         boolean shouldRenderSubtitle = this.subtitle != null && !this.subtitle.isEmpty();
@@ -171,7 +176,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
             // add spacing if title is also rendered
             if (shouldRenderTitle) subtitleY += getFont().lineHeight + SUBTITLE_SPACING;
 
-            RenderCommon.drawScaledText(g, this.subtitle, SUBTITLE_SCALE, titleX, subtitleY, _textColor, false);
+            RenderCommon.drawScaledText(g, this.subtitle, SUBTITLE_SCALE, titleX, subtitleY, effectivetextColor, false);
         }
 
         // show bind, will be used to quick nav; disabled for now
