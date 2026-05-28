@@ -9,3 +9,4 @@
 - [ ] Onboarding tooltips for completion
 - [ ] Indicators for completion
 - [ ] Click to select search Result
+- [ ] Fix Scaling

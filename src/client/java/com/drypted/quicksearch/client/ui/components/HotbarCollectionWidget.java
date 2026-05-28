@@ -37,6 +37,7 @@ public class HotbarCollectionWidget extends AbstractWidget
     private static final int CLOSE_BUTTON_TOOLTIP_PADDING_X = 8;
     private static final int CLOSE_BUTTON_TOOLTIP_PADDING_Y = 3;
     private static final int CLOSE_BUTTON_TOOLTIP_OFFSET_Y = 1;
+    private static final int MIN_HELP_TEXT_WIDTH = 225;
 
     private final ArrayList<HotbarSlotWidget> hotbarSlotWidgets = new ArrayList<>(HOTBAR_SLOTS);
     private @Nullable HotbarSlotWidget selectedHotbarWidget = null;
@@ -69,7 +70,7 @@ public class HotbarCollectionWidget extends AbstractWidget
                     i, //
                     (int) Math.ceil(cursor), startY, (int) Math.ceil(iconSize), (int) Math.ceil(iconSize)
             );
-            hotbarWidget.setOnClick(mouseButtonClick -> {
+            hotbarWidget.setOnClickStart(mouseButtonClick -> {
                 ItemsResultData item = hotbarWidget.getSearchResultData();
                 if (item == null) return;
 
@@ -100,22 +101,33 @@ public class HotbarCollectionWidget extends AbstractWidget
 
         if (QuickSearchClient.getConfig().hotbar.showHotbarHelpText && this.isFocused())
         {
+            int startX = this.getX();
+            int endX = this.getRight();
+            if (this.getWidth() < MIN_HELP_TEXT_WIDTH)
+            {
+                // is size is smaller, expand to minimum size
+                int diff = MIN_HELP_TEXT_WIDTH - this.getWidth();
+                startX -= diff / 2;
+                endX += diff / 2;
+            }
+            Color backgroundColor = this.anySlotHighlighted ? HotarInstructionHighlightedColor : HotbarInstructionColor;
+            Color textColor = HotbarInstructionTextColor;
             RenderCommon.drawLabelWithScale(
                     guiGraphics,
                     hotbarInstructionText.getText(),
                     0.75f,
-                    this.getX(),
+                    startX,
                     this.getY(),
-                    this.getRight(),
+                    endX,
                     this.getY() + HELP_TEXT_HEIGHT,
                     RoundedCorners.all(),
                     this.outlineThickness,
-                    this.anySlotHighlighted ? HotarInstructionHighlightedColor : HotbarInstructionColor,
+                    backgroundColor,
                     HotbarInstructionOutlineColor,
-                    HotbarInstructionTextColor
+                    textColor
             );
 
-            drawCloseButton(guiGraphics);
+            drawCloseButton(guiGraphics, startX);
 
             if (this.isOverCloseButton(mouseX, mouseY))
             {
@@ -126,9 +138,9 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     /* Close Button */
 
-    private void drawCloseButton(GuiGraphics guiGraphics)
+    private void drawCloseButton(GuiGraphics guiGraphics, int xPos)
     {
-        final int startX = this.getX() + CLOSE_BUTTON_PADDING;
+        final int startX = xPos + CLOSE_BUTTON_PADDING;
         final int startY = this.getY() + CLOSE_BUTTON_PADDING;
         final int endX = startX + CLOSE_BUTTON_SIZE;
         final int endY = startY + CLOSE_BUTTON_SIZE;
@@ -204,6 +216,7 @@ public class HotbarCollectionWidget extends AbstractWidget
 
     public void onHotbarKeyPressed(HotbarSlotWidget widget, int modifiers)
     {
+        hotbarSlotWidgets.forEach(w -> w.setPressed(false));
         widget.setPressed(true);
 
         // if shift pressed, select hotbar slot only
@@ -236,11 +249,6 @@ public class HotbarCollectionWidget extends AbstractWidget
         }
     }
 
-    public void onAnyKeyReleased()
-    {
-        this.hotbarSlotWidgets.forEach(widget -> widget.setPressed(false));
-    }
-
     /* STATICS */
 
     private static boolean isShiftPressed(int modifiers) { return (modifiers & GLFW.GLFW_MOD_SHIFT) != 0; }
@@ -257,7 +265,15 @@ public class HotbarCollectionWidget extends AbstractWidget
         super.setFocused(focused);
         if (!focused) this.selectedHotbarWidget = null;
 
-        hotbarSlotWidgets.forEach(w -> w.setShowBind(focused));
+        hotbarSlotWidgets.forEach(w -> { //
+            w.setShowBind(focused);
+            if (focused) // clear prev state on focus
+            {
+                w.setPressed(false);
+                w.setHighlighted(false);
+                this.anySlotHighlighted = false;
+            }
+        });
     }
 
     @Override
@@ -275,10 +291,11 @@ public class HotbarCollectionWidget extends AbstractWidget
             this.activeMouseModifiers = mEv.modifiers();
             final boolean consumed = widget.mouseClicked(mEv, doubleClick);
             this.activeMouseModifiers = 0;
+            super.mouseClicked(mEv, doubleClick);
             return consumed;
         }
 
-        return super.mouseClicked(mEv, doubleClick);
+        return false;
     }
 
     @Override
@@ -289,6 +306,8 @@ public class HotbarCollectionWidget extends AbstractWidget
             QuickSearchClient.getConfig().hotbar.showHotbarHelpText = false;
             QuickSearchClient.saveConfig();
         }
+
+        unpressAllSlots();
 
         return super.mouseReleased(mEv);
     }
@@ -303,12 +322,17 @@ public class HotbarCollectionWidget extends AbstractWidget
         return mouseX >= startX && mouseX <= endX && mouseY >= startY && mouseY <= endY;
     }
 
+    public void unpressAllSlots()
+    {
+        this.hotbarSlotWidgets.forEach(widget -> widget.setPressed(false));
+    }
+
     /* PRIVATE HELPERS */
 
     private enum HotbarHelpText
     {
-        UNSELECTED("key: move to slot, shift + key: select slot"),
-        SELECTED("key: move selected to slot");
+        UNSELECTED("key/click: move to slot, shift + key/click: select slot"),
+        SELECTED("key/click: move selected to slot");
 
         private final String text;
 

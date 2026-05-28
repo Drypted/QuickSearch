@@ -205,7 +205,7 @@ public class QuickSearchScreen extends Screen
     public boolean keyReleased(@NonNull KeyEvent kEv)
     {
         if (isHotbarEnabledInConfig() && this.hotbarCollectionWidget != null)
-            this.hotbarCollectionWidget.onAnyKeyReleased();
+            this.hotbarCollectionWidget.unpressAllSlots();
 
         return super.keyReleased(kEv);
     }

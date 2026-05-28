@@ -32,7 +32,7 @@ public class HotbarSlotWidget extends AbstractWidget
     private final Color highlightedColor;
     private final Color clickedColor;
 
-    private Consumer<MouseButtonClick> onClickCallback = (m) -> { };
+    private Consumer<MouseButtonClick> onClickStartCallback = (m) -> { };
 
     private ItemsResultData itemsResultData = ItemsResultData.EMPTY;
     private boolean showBind = false;
@@ -107,8 +107,7 @@ public class HotbarSlotWidget extends AbstractWidget
                     OutlinedSides.from(true, true, true, false),
                     this.pressed ? this.clickedColor : this.highlighted ? highlightedColor : focusedColor,
                     this.outlineColor,
-                    this.textColor,
-                    false
+                    this.textColor
             );
         }
     }
@@ -118,13 +117,14 @@ public class HotbarSlotWidget extends AbstractWidget
     {
         if (isMouseOver(event.x(), event.y()))
         {
-            if (onClickCallback != null)
+            if (onClickStartCallback != null)
             {
-                onClickCallback.accept(MouseButtonClick.from(event));
+                onClickStartCallback.accept(MouseButtonClick.from(event));
             }
+            super.mouseClicked(event, doubleClick);
             return true;
         }
-        return false;
+        return super.mouseClicked(event, doubleClick);
     }
 
     /* Getters and Setters */
@@ -136,10 +136,7 @@ public class HotbarSlotWidget extends AbstractWidget
         this.itemsResultData = itemsResultData;
     }
 
-    public void setOnClick(Consumer<MouseButtonClick> onClickCallback)
-    {
-        this.onClickCallback = onClickCallback;
-    }
+    public void setOnClickStart(Consumer<MouseButtonClick> action) { this.onClickStartCallback = action; }
 
     public boolean shouldShowBind() { return showBind; }
 
