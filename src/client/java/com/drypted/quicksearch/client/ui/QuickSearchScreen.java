@@ -87,19 +87,16 @@ public class QuickSearchScreen extends Screen
         if (isHotbarEnabledInConfig())
         {
             this.hotbarCollectionWidget = HotbarCollectionWidget.create(
-                    searchBarX,
-                    searchBarWidth,
-                    searchBarY -
-                            HotbarCollectionWidget.HOTBAR_SLOT_PADDING
+                    searchBarX + (searchBarWidth / 2),
+                    searchBarY,
+                    searchBarWidth
             );
             this.addRenderableWidget(hotbarCollectionWidget);
         }
 
         // state and controllers
         this.visibilityController = new VisibilityController(
-                inputWidget,
-                searchResultsWidget,
-                hotbarCollectionWidget,
+                inputWidget, searchResultsWidget, hotbarCollectionWidget, //
                 this::isHotbarEnabledInConfig
         );
 

@@ -22,8 +22,12 @@ import java.util.ArrayList;
 
 public class HotbarCollectionWidget extends AbstractWidget
 {
-    public static final int HOTBAR_SLOT_PADDING = 2;
+    private static final int HOTBAR_WIDTH = 200;
+
     public static final int HOTBAR_SLOTS = 9;
+    private static final int SLOT_SIZE = 20;
+    public static final int MIN_SLOT_SPACING = 2;
+    public static final int MAX_SLOT_SPACING = 12;
 
     private static final int HELP_TEXT_MARGIN = 16;
     private static final int HELP_TEXT_HEIGHT = 14;
@@ -57,19 +61,34 @@ public class HotbarCollectionWidget extends AbstractWidget
     private final Color TooltipOutlineColor = Styles.Hotbar.HELP_CLOSE_TOOLTIP_OUTLINE_COLOR;
     private final Color TooltipTextColor = Styles.Hotbar.HELP_CLOSE_TOOLTIP_TEXT_COLOR;
 
-    public HotbarCollectionWidget(int startX, int width, int endY)
+    public HotbarCollectionWidget(int centerX, int searchBarY, int width)
     {
         super(0, 0, 0, 0, Component.empty());
-        final float iconSize = (width - HOTBAR_SLOT_PADDING * (HOTBAR_SLOTS + 1)) / (float) HOTBAR_SLOTS;
-        final int startY = (int) Math.ceil(endY - iconSize);
-        float cursor = startX + HOTBAR_SLOT_PADDING;
+        final int startY = searchBarY - SLOT_SIZE;
+
+        distributeHotbarSlots(centerX, width, startY);
+
+        // setting bounds
+        this.setX(centerX - (width / 2));
+        this.setY(startY - HELP_TEXT_MARGIN - HELP_TEXT_HEIGHT);
+        this.setWidth(width);
+        this.setHeight(searchBarY - (startY - HELP_TEXT_MARGIN - HELP_TEXT_HEIGHT));
+    }
+
+    private void distributeHotbarSlots(int centerX, int width, int startY)
+    {
+        final int slotsWidth = SLOT_SIZE * HOTBAR_SLOTS;
+        final int remainingWidth = width - slotsWidth;
+        int spacing = remainingWidth / (HOTBAR_SLOTS - 1);
+        spacing = Math.clamp(spacing, MIN_SLOT_SPACING, MAX_SLOT_SPACING);
+        final int usedWidth = slotsWidth + (spacing * (HOTBAR_SLOTS - 1));
+
+        int cursor = centerX - (usedWidth / 2);
 
         for (int i = 0; i < HOTBAR_SLOTS; i++)
         {
-            final HotbarSlotWidget hotbarWidget = new HotbarSlotWidget(
-                    i, //
-                    (int) Math.ceil(cursor), startY, (int) Math.ceil(iconSize), (int) Math.ceil(iconSize)
-            );
+            // extra 1 pixel for intersection
+            final HotbarSlotWidget hotbarWidget = new HotbarSlotWidget(i, cursor, startY + 1, SLOT_SIZE, SLOT_SIZE);
             hotbarWidget.setOnClickStart(mouseButtonClick -> {
                 ItemsResultData item = hotbarWidget.getSearchResultData();
                 if (item == null) return;
@@ -77,19 +96,13 @@ public class HotbarCollectionWidget extends AbstractWidget
                 onHotbarKeyPressed(hotbarWidget, this.activeMouseModifiers);
             });
             this.hotbarSlotWidgets.add(hotbarWidget);
-            cursor += iconSize + HOTBAR_SLOT_PADDING;
+            cursor += SLOT_SIZE + spacing;
         }
-
-        // settings bounds
-        this.setX(startX);
-        this.setY(startY - HELP_TEXT_MARGIN - HELP_TEXT_HEIGHT);
-        this.setWidth(width);
-        this.setHeight(endY - (startY - HELP_TEXT_MARGIN - HELP_TEXT_HEIGHT));
     }
 
-    public static HotbarCollectionWidget create(int startX, int width, int endY)
+    public static HotbarCollectionWidget create(int centerX, int searchBarY, int width)
     {
-        return new HotbarCollectionWidget(startX, width, endY);
+        return new HotbarCollectionWidget(centerX, searchBarY, width);
     }
 
     /* RENDERING */

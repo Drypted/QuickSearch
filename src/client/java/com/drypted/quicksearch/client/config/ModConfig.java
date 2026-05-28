@@ -20,7 +20,7 @@ public class ModConfig implements ConfigData
 
         @ConfigEntry.BoundedDiscrete(min = 100, max = 800)
         @ConfigEntry.Gui.Tooltip
-        public int searchBarWidth = 200;
+        public int searchBarWidth = 225;
         @ConfigEntry.BoundedDiscrete(min = 50, max = 400)
         @ConfigEntry.Gui.Tooltip
         public int resultsBoxHeight = 100;
