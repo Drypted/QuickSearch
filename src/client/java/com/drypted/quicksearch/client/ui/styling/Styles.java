@@ -14,7 +14,9 @@ public final class Styles
 
     // common
     private static final Color BACKGROUND = Colors.BLACK.withAlpha(128);
-    private static final Color OUTLINE = Colors.WHITE;
+    private static final Color BACKGROUND_HIGHLIGHTED = Colors.WHITE;
+    private static final Color OUTLINE = Colors.BLACK;
+
     private static final Color TEXT = BACKGROUND.getReadableTextColor(4.5f);
     private static final Color DISABLED_TEXT = BACKGROUND.getReadableTextColor(3.0f).withHalfOpacity();
 
@@ -48,7 +50,7 @@ public final class Styles
                 HELP_CLOSE_TOOLTIP_BACKGROUND_COLOR.getReadableTextColor(4.5f);
         public static final Color HELP_CLOSE_TOOLTIP_OUTLINE_COLOR = Styles.OUTLINE;
         // shape
-        public static final RoundedCorners ROUNDED = RoundedCorners.none();
+        public static final RoundedCorners ROUNDED = RoundedCorners.fromVerticalSides(true, false);
         // layout
         public static final int ICON_PADDING = 3;
         public static final float TEXT_SCALE = 0.8f;
@@ -92,14 +94,14 @@ public final class Styles
         public static final Color OUTLINE_COLOR = Styles.BACKGROUND.withAlpha(164);
         public static final Color TEXT_COLOR = Styles.TEXT;
 
-        public static final Color SELECTED_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(108);
+        public static final Color SELECTED_OUTLINE_COLOR = Styles.BACKGROUND_HIGHLIGHTED.withAlpha(108);
         public static final Color SELECTED_BACKGROUND_COLOR = SELECTED_OUTLINE_COLOR;
 
         public static final Color CLICKED_OUTLINE_COLOR = SELECTED_OUTLINE_COLOR;
-        public static final Color CLICKED_BACKGROUND_COLOR = Styles.OUTLINE.withAlpha(92);
+        public static final Color CLICKED_BACKGROUND_COLOR = Styles.BACKGROUND_HIGHLIGHTED.withAlpha(92);
 
-        public static final Color HOVER_OUTLINE_COLOR = Styles.OUTLINE.withAlpha(92);
-        public static final Color HOVER_BACKGROUND_COLOR = Styles.OUTLINE.withAlpha(64);
+        public static final Color HOVER_OUTLINE_COLOR = Styles.BACKGROUND_HIGHLIGHTED.withAlpha(92);
+        public static final Color HOVER_BACKGROUND_COLOR = Styles.BACKGROUND_HIGHLIGHTED.withAlpha(64);
 
         // props
         public static final boolean ROUNDED = false;
@@ -117,7 +119,7 @@ public final class Styles
         public static final Color OUTLINE_COLOR = Styles.OUTLINE;
         // scrollbar colors
         public static final Color SCROLLBAR_COLOR = Styles.BACKGROUND;
-        public static final Color SCROLLER_COLOR = Styles.OUTLINE;
+        public static final Color SCROLLER_COLOR = Colors.BLACK.withLightness(0.8f);
         // shape
         public static final RoundedCorners ROUNDED = RoundedCorners.none();
         // props
