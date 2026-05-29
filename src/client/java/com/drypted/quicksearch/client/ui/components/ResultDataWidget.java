@@ -53,8 +53,7 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     private boolean disabled;
 
     // callback
-    private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> {
-    };
+    private BiConsumer<MouseButtonClick, Boolean> onClickCallback = (e, pressed) -> { };
 
     public ResultDataWidget(int x, int y, @Nullable ItemStack icon, @Nullable String title, @Nullable String subtitle)
     {
@@ -81,13 +80,13 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
 
     private void recalculateHeight()
     {
-        boolean shouldRenderIcon = this.icon != null && !this.icon.isEmpty() && this.icon.getItem() != Items.AIR;
-        boolean shouldRenderTitle = this.title != null && !this.title.isEmpty();
-        boolean shouldRenderSubtitle = this.subtitle != null && !this.subtitle.isEmpty();
+        boolean renderIcon = this.icon != null && !this.icon.isEmpty() && this.icon.getItem() != Items.AIR;
+        boolean renderTitle = this.title != null && !this.title.isEmpty();
+        boolean renderSubtitle = this.subtitle != null && !this.subtitle.isEmpty();
         this.setHeight((2 * paddingY) + Math.max(
-                shouldRenderIcon ? ICON_SIZE : 0, //
-                (shouldRenderTitle ? getFont().lineHeight : 0) + //
-                        (shouldRenderSubtitle ? SUBTITLE_SPACING + (int) (getFont().lineHeight * SUBTITLE_SCALE) : 0)
+                renderIcon ? ICON_SIZE : 0, //
+                (renderTitle ? getFont().lineHeight : 0) + //
+                        (renderSubtitle ? SUBTITLE_SPACING + (int) (getFont().lineHeight * SUBTITLE_SCALE) : 0)
         ));
     }
 
@@ -203,20 +202,21 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     @Override
     public void onClick(@NonNull MouseButtonEvent mEv, boolean doubleClick)
     {
-        if (this.isDisabled()) return;
         this.pressed = true;
     }
 
     @Override
     public void onRelease(@NonNull MouseButtonEvent mEv)
     {
-        if (this.isDisabled()) return;
-
         this.pressed = false;
-        MouseButtonClick clickPoint = MouseButtonClick.from(mEv);
-        if (isMouseInButton(clickPoint))
+
+        if (!this.isDisabled())
         {
-            onClickCallback.accept(clickPoint, pressed);
+            MouseButtonClick clickPoint = MouseButtonClick.from(mEv);
+            if (isMouseInButton(clickPoint))
+            {
+                onClickCallback.accept(clickPoint, pressed);
+            }
         }
     }
 
@@ -248,15 +248,13 @@ public class ResultDataWidget extends AbstractWidget implements ScrollBoxWidgetE
     @Override
     public void press()
     {
-        if (this.isDisabled()) return;
         this.pressed = true;
-        onClickCallback.accept(MouseButtonClick.from(getX(), getY()), true);
+        if (!this.isDisabled()) onClickCallback.accept(MouseButtonClick.from(getX(), getY()), true);
     }
 
     @Override
     public void unpress()
     {
-        if (this.isDisabled()) return;
         this.pressed = false;
     }
 

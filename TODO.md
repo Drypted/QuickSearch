@@ -8,5 +8,6 @@
 - [X] Tweak text color for commands suggestions
 - [ ] Onboarding tooltips for completion
 - [ ] Indicators for completion
-- [ ] Click to select search Result
-- [ ] Fix Scaling
+- [X] Click to select search Result
+- [X] Fix Scaling
+- [ ] Change focus without completion

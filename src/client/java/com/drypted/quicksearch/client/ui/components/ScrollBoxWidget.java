@@ -242,9 +242,11 @@ public class ScrollBoxWidget extends AbstractWidget
     {
         this.scrolling = false;
 
-        for (WidgetEntry entry : new ArrayList<>(children))
+        for (int i = 0; i < children.size(); i++)
         {
-            entry.widget.mouseReleased(mEv);
+            AbstractWidget entry = children.get(i).widget;
+            entry.mouseReleased(mEv);
+            if (entry.isMouseOver(mEv.x(), mEv.y())) selectChildByIndex(i);
         }
         return false;
     }
@@ -380,7 +382,7 @@ public class ScrollBoxWidget extends AbstractWidget
                 outlineThickness,
                 true,
                 scrollerColor,
-                outlineColor
+                scrollerColor
         );
         // line
         RenderCommon.drawRectangle(
@@ -501,6 +503,25 @@ public class ScrollBoxWidget extends AbstractWidget
         {
             selectable.select(isSelected);
         }
+    }
+
+    /**
+     * Selects a child by index and deselects all others.
+     */
+    public void selectChildByIndex(int index)
+    {
+        if (index < 0 || index >= children.size()) return;
+
+        // Deselect all children
+        for (int i = 0; i < children.size(); i++)
+        {
+            updateSelectionState(i, false);
+        }
+
+        // Select the target child
+        updateSelectionState(index, true);
+        selectedIndex = index;
+        scrollChildToView(index);
     }
 
     private void scrollChildToView(int index)

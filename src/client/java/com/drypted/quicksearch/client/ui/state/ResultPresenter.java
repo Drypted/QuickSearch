@@ -99,7 +99,12 @@ public final class ResultPresenter
                     result.getSerializedDefinition()
             );
             widget.setWidth(searchResultsWidget.getChildWidth());
-            widget.onClick((mBC, dC) -> clickHandlers.onItemClicked(result));
+
+            final int itemIndex = matchCount;
+            widget.onClick((mBC, dC) -> {
+                searchResultsWidget.selectChildByIndex(itemIndex);
+                clickHandlers.onItemClicked(result);
+            });
 
             this.searchResultsWidget.addChildRow(widget);
 
@@ -186,7 +191,12 @@ public final class ResultPresenter
             suggestionWidget.setWidth(searchResultsWidget.getChildWidth());
             suggestionWidget.setPaddingX(7);
             suggestionWidget.setPaddingY(4);
-            suggestionWidget.onClick((mBC, dC) -> clickHandlers.onCommandSuggestionClick(suggestion));
+            
+            final int suggestionIndex = 1 + suggestions.indexOf(suggestion); // +1 to account for usage widget
+            suggestionWidget.onClick((mBC, dC) -> {
+                searchResultsWidget.selectChildByIndex(suggestionIndex);
+                clickHandlers.onCommandSuggestionClick(suggestion);
+            });
 
             this.searchResultsWidget.addChildRow(suggestionWidget);
         }
