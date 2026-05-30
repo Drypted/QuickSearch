@@ -250,7 +250,7 @@ public class InputWidget extends AbstractWidget
                     this.getY() - errorTooltipHeight - errorTooltipSpacing,
                     this.getX() + this.getWidth(),
                     this.getY() - errorTooltipSpacing,
-                    RoundedCorners.none(),
+                    RoundedCorners.all(),
                     this.backgroundColor,
                     this.error.getColor(),
                     this.error.getColor()
