@@ -83,8 +83,9 @@ public final class Styles
         public static final int TEXT_PADDING_Y = 1;
         public static final int INDICATOR_PADDING_RIGHT = 4;
         public static final int CARET_BLINK_TIME = 500;
-        public static final int ERROR_TOOLTIP_HEIGHT = 11;
-        public static final int ERROR_TOOLTIP_SPACING = 2;
+        public static final int ERROR_TOOLTIP_HEIGHT = 16;
+        public static final int ERROR_TOOLTIP_PADDING = 4;
+        public static final int ERROR_TOOLTIP_SPACING = 4;
     }
 
     public static final class ResultData

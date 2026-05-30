@@ -8,6 +8,7 @@ import com.drypted.quicksearch.client.core.blueprints.ui.common.RoundedCorners;
 import com.drypted.quicksearch.client.init.ModKeybinds;
 import com.drypted.quicksearch.client.ui.renderer.RenderCommon;
 import com.drypted.quicksearch.client.ui.styling.Styles;
+import com.drypted.quicksearch.client.ui.styling.Styles.Input;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -84,6 +85,7 @@ public class InputWidget extends AbstractWidget
     private final int indicatorPaddingRight;
     private final int caretBlinkTime;
     private final int errorTooltipHeight;
+    private final int errorTooltipPadding;
     private final int errorTooltipSpacing;
 
     public InputWidget(int x, int y, int width, int height)
@@ -104,6 +106,7 @@ public class InputWidget extends AbstractWidget
         this.indicatorPaddingRight = Styles.Input.INDICATOR_PADDING_RIGHT;
         this.caretBlinkTime = Styles.Input.CARET_BLINK_TIME;
         this.errorTooltipHeight = Styles.Input.ERROR_TOOLTIP_HEIGHT;
+        this.errorTooltipPadding = Input.ERROR_TOOLTIP_PADDING;
         this.errorTooltipSpacing = Styles.Input.ERROR_TOOLTIP_SPACING;
     }
 
@@ -193,9 +196,7 @@ public class InputWidget extends AbstractWidget
 
             // Render text
             // Priority: disabled > message > normal
-            Color textColor = isDisabled
-                              ? disabledTextColor
-                              : shouldShowError() ? Objects.requireNonNull(this.error).getColor() : normalTextColor;
+            Color textColor = isDisabled ? disabledTextColor : normalTextColor;
             guiGraphics.drawString(FONT, beforeSelection, textX - scrollOffset, textY, textColor.asInt(), false);
 
             guiGraphics.drawString(
@@ -240,20 +241,19 @@ public class InputWidget extends AbstractWidget
         // Render message
         if (shouldShowError())
         {
-            assert this.error != null;
-            RenderCommon.drawLabelWithScale(
+            assert this.error != null; // checked in shouldShowError()
+            RenderCommon.drawLabelInBox(
                     guiGraphics,
                     error.getMessage(),
-                    0.65f,
+                    this.errorTooltipPadding,
                     this.getX(),
                     this.getY() - errorTooltipHeight - errorTooltipSpacing,
                     this.getX() + this.getWidth(),
                     this.getY() - errorTooltipSpacing,
-                    RoundedCorners.all(),
-                    1,
+                    RoundedCorners.none(),
+                    this.backgroundColor,
                     this.error.getColor(),
-                    this.error.getColor(),
-                    normalTextColor
+                    this.error.getColor()
             );
         }
     }

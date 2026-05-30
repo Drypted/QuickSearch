@@ -571,9 +571,9 @@ public final class RenderCommon
     }
 
     public static void drawLabelInBox(GuiGraphics g, String text, int padding, int startX, int startY, int endX,
-                                      int endY, RoundedCorners corners, Color backgroundColor, Color textColor)
+                                      int endY, RoundedCorners corners, Color backgroundColor, Color outlineColor, Color textColor)
     {
-        RenderCommon.drawRectangle(g, startX, startY, endX, endY, corners, 1, true, backgroundColor, backgroundColor);
+        RenderCommon.drawRectangle(g, startX, startY, endX, endY, corners, 1, true, backgroundColor, outlineColor);
 
         int boxWidth = (endX - startX) - (padding * 2);
         int boxHeight = (endY - startY) - (padding * 2);
