@@ -173,6 +173,24 @@ public class QuickSearchScreen extends Screen
             return true;
         }
 
+        if (ModKeybinds.getFocusHotbarKey().matches(kEv) && isHotbarEnabledInConfig() &&
+                this.hotbarCollectionWidget != null && this.hotbarCollectionWidget.visible)
+        {
+            if (this.hotbarCollectionWidget.isFocused())
+            {
+                this.inputWidget.setDisabled(true);
+                this.setFocused(this.inputWidget);
+                this.inputWidget.setFocused(true);
+                this.inputWidget.setDisabled(false);
+            }
+            else
+            {
+                this.setFocused(this.hotbarCollectionWidget);
+                this.hotbarCollectionWidget.setFocused(true);
+            }
+            return true;
+        }
+
         final boolean inputFocused = this.inputWidget != null && this.inputWidget.isFocused();
         if (!inputFocused && isAlphaNumericKey(kEv) && !isModifierKey(kEv) && !isHotbarKey(kEv))
         {

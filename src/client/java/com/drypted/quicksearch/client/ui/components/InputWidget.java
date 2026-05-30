@@ -32,6 +32,7 @@ import java.util.function.Predicate;
 public class InputWidget extends AbstractWidget
 {
     private static final Font FONT = Minecraft.getInstance().font;
+    private static final String TAB_INDICATOR_LABEL = "Tab";
 
     // Visual configuration
     private final float outlineThickness;
@@ -43,6 +44,13 @@ public class InputWidget extends AbstractWidget
     private final Color selectionBackgroundColor;
     private final Color selectionTextColor;
     private final Color placeholderColor;
+    private final Color ghostTextColor;
+    private final Color ghostTextDimColor;
+    private final Color tabIndicatorBackgroundColor;
+    private final Color tabIndicatorOutlineColor;
+    private final Color tabIndicatorTextColor;
+    private final float tabIndicatorScale;
+    private final int tabIndicatorPaddingX;
 
     private RoundedCorners rounded;
 
@@ -101,6 +109,13 @@ public class InputWidget extends AbstractWidget
         this.selectionBackgroundColor = Styles.Input.SELECTION_BACKGROUND;
         this.selectionTextColor = Styles.Input.SELECTION_TEXT;
         this.placeholderColor = Styles.Input.PLACEHOLDER_TEXT;
+        this.ghostTextColor = Styles.Input.GHOST_TEXT_COLOR;
+        this.ghostTextDimColor = Styles.Input.GHOST_TEXT_DIM_COLOR;
+        this.tabIndicatorBackgroundColor = Styles.Input.TAB_INDICATOR_BACKGROUND;
+        this.tabIndicatorOutlineColor = Styles.Input.TAB_INDICATOR_OUTLINE;
+        this.tabIndicatorTextColor = Styles.Input.TAB_INDICATOR_TEXT;
+        this.tabIndicatorScale = Styles.Input.TAB_INDICATOR_SCALE;
+        this.tabIndicatorPaddingX = Styles.Input.TAB_INDICATOR_PADDING_X;
         this.textPaddingX = Styles.Input.TEXT_PADDING_X;
         this.textPaddingY = Styles.Input.TEXT_PADDING_Y;
         this.indicatorPaddingRight = Styles.Input.INDICATOR_PADDING_RIGHT;
@@ -177,21 +192,25 @@ public class InputWidget extends AbstractWidget
 
             if (shouldShowSuggestion())
             {
-                String ghostText;
+                // independent ghost text completes wholly; completion ghost trims the typed prefix
+                String ghostText = suggestionIsCompletion() ? suggestion.substring(this.text.length()) : suggestion;
 
-                if (suggestionIsCompletion())
-                {
-                    // completion
-                    ghostText = suggestion.substring(text.toLowerCase().length());
-                }
-                else
-                {
-                    // independent ghost text
-                    ghostText = suggestion;
-                }
+                // the leading part the next Tab press would insert keeps full contrast; the
+                // remainder (e.g. words past the first when doing single-word completion) is dimmed
+                int completableLength = Math.clamp(getCompletableGhostLength(ghostText), 0, ghostText.length());
+                String completablePart = ghostText.substring(0, completableLength);
+                String remainderPart = ghostText.substring(completableLength);
 
                 int ghostX = textX + FONT.width(this.text) - scrollOffset;
-                guiGraphics.drawString(FONT, ghostText, ghostX, textY, placeholderColor.asInt(), false);
+                guiGraphics.drawString(FONT, completablePart, ghostX, textY, ghostTextColor.asInt(), false);
+                guiGraphics.drawString(
+                        FONT,
+                        remainderPart,
+                        ghostX + FONT.width(completablePart),
+                        textY,
+                        ghostTextDimColor.asInt(),
+                        false
+                );
             }
 
             // Render text
@@ -236,6 +255,12 @@ public class InputWidget extends AbstractWidget
             case IDLE:
             default:
                 break;
+        }
+
+        // When idle, hint Tab-completion in the same spot the loader would occupy
+        if (shouldShowTabIndicator())
+        {
+            drawTabIndicator(guiGraphics);
         }
 
         // Render message
@@ -318,6 +343,38 @@ public class InputWidget extends AbstractWidget
         );
     }
 
+    private int tabIndicatorWidth()
+    {
+        int textWidth = (int) (FONT.width(TAB_INDICATOR_LABEL) * tabIndicatorScale);
+        return textWidth + (tabIndicatorPaddingX * 2);
+    }
+
+    private void drawTabIndicator(GuiGraphics guiGraphics)
+    {
+        int badgeWidth = tabIndicatorWidth();
+        int badgeHeight = this.height - (2 * indicatorPaddingRight);
+        int endX = this.getX() + this.getWidth() - indicatorPaddingRight;
+        int startX = endX - badgeWidth;
+        int startY = this.getY() + indicatorPaddingRight;
+        int endY = startY + badgeHeight;
+
+        RenderCommon.drawLabelWithScale(
+                guiGraphics,
+                TAB_INDICATOR_LABEL,
+                tabIndicatorScale,
+                startX,
+                startY,
+                endX,
+                endY,
+                RoundedCorners.all(),
+                1,
+                tabIndicatorBackgroundColor,
+                tabIndicatorOutlineColor,
+                tabIndicatorTextColor,
+                false
+        );
+    }
+
     /* Helper Methods */
 
     private int getTextX() { return this.getX() + textPaddingX; }
@@ -326,8 +383,15 @@ public class InputWidget extends AbstractWidget
 
     private int getTextAreaWidth()
     {
-        int indicatorSpace = (searchStatus == SearchStatus.SEARCHING) ? (this.height - indicatorPaddingRight +
-                                                                         indicatorPaddingRight) : 0;
+        int indicatorSpace = 0;
+        if (searchStatus == SearchStatus.SEARCHING)
+        {
+            indicatorSpace = this.height;
+        }
+        else if (shouldShowTabIndicator())
+        {
+            indicatorSpace = tabIndicatorWidth() + (indicatorPaddingRight * 2);
+        }
         return this.getWidth() - (textPaddingX * 2) - indicatorSpace;
     }
 
@@ -478,7 +542,9 @@ public class InputWidget extends AbstractWidget
             }
             case GLFW.GLFW_KEY_BACKSPACE ->
             {
-                handleBackspace(ctrl);
+                // Ctrl/Cmd + Backspace clears the entire field
+                if (ctrl) clearText();
+                else handleBackspace();
                 yield true;
             }
             case GLFW.GLFW_KEY_DELETE ->
@@ -690,7 +756,7 @@ public class InputWidget extends AbstractWidget
         notifyTextChanged();
     }
 
-    private void handleBackspace(boolean byWord)
+    private void handleBackspace()
     {
         if (hasSelection())
         {
@@ -702,17 +768,8 @@ public class InputWidget extends AbstractWidget
 
         if (cursorPos == 0) return;
 
-        if (byWord)
-        {
-            int newPos = findPreviousWordBoundary(cursorPos);
-            text = text.substring(0, newPos) + text.substring(cursorPos);
-            cursorPos = newPos;
-        }
-        else
-        {
-            text = text.substring(0, cursorPos - 1) + text.substring(cursorPos);
-            cursorPos--;
-        }
+        text = text.substring(0, cursorPos - 1) + text.substring(cursorPos);
+        cursorPos--;
 
         updateScrollOffset();
         resetCaretBlink();
@@ -1165,6 +1222,33 @@ public class InputWidget extends AbstractWidget
                 && cursorPos == text.length() // cursor at end
                 && !hasSelection()  // not selecting
                 ;
+    }
+
+    private boolean shouldShowTabIndicator()
+    {
+        return QuickSearchClient.getConfig().search.showCompletionIndicator && this.searchStatus == SearchStatus.IDLE &&
+                this.isFocused() && shouldShowSuggestion();
+    }
+
+    /**
+     * Length of the leading slice of {@code ghostText} that the next Tab press would actually insert, given the
+     * currently held modifiers. The remainder is rendered dimmed as a preview.
+     */
+    private int getCompletableGhostLength(String ghostText)
+    {
+        // independent ghost text (not a prefix completion) is inserted in full on Tab
+        if (!suggestionIsCompletion()) return ghostText.length();
+
+        CompletionType activeType = Minecraft.getInstance().hasShiftDown()
+                                    ? QuickSearchClient.getConfig().search.shiftCompletionType
+                                    : QuickSearchClient.getConfig().search.normalCompletionType;
+
+        return switch (activeType)
+        {
+            case NONE -> 0;
+            case WHOLE_QUERY -> ghostText.length();
+            case SINGLE_WORD -> ghostText.contains(" ") ? ghostText.indexOf(" ") + 1 : ghostText.length();
+        };
     }
 
     /* Callbacks */

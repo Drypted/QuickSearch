@@ -124,7 +124,6 @@ public class HotbarCollectionWidget extends AbstractWidget
                 endX += diff / 2;
             }
             Color backgroundColor = this.anySlotHighlighted ? HotarInstructionHighlightedColor : HotbarInstructionColor;
-            Color textColor = HotbarInstructionTextColor;
             RenderCommon.drawLabelWithScale(
                     guiGraphics,
                     hotbarInstructionText.getText(),
@@ -137,7 +136,7 @@ public class HotbarCollectionWidget extends AbstractWidget
                     this.outlineThickness,
                     backgroundColor,
                     HotbarInstructionOutlineColor,
-                    textColor
+                    HotbarInstructionTextColor
             );
 
             drawCloseButton(guiGraphics, startX);

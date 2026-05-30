@@ -66,6 +66,15 @@ public final class Styles
         public static final Color TEXT_COLOR = Styles.TEXT;
         public static final Color DISABLED_TEXT = Styles.DISABLED_TEXT;
         public static final Color PLACEHOLDER_TEXT = Styles.DISABLED_TEXT;
+        // ghost / completion text colors
+        public static final Color GHOST_TEXT_COLOR = Styles.DISABLED_TEXT;
+        public static final Color GHOST_TEXT_DIM_COLOR = Styles.DISABLED_TEXT.withHalfOpacity();
+        // tab completion indicator badge
+        public static final Color TAB_INDICATOR_BACKGROUND = Styles.BACKGROUND.withHalfOpacity();
+        public static final Color TAB_INDICATOR_OUTLINE = TAB_INDICATOR_BACKGROUND;
+        public static final Color TAB_INDICATOR_TEXT = Styles.BACKGROUND.getReadableTextColor(7f);
+        public static final float TAB_INDICATOR_SCALE = 0.75f;
+        public static final int TAB_INDICATOR_PADDING_X = 4;
         // selection colors
         public static final Color SELECTION_BACKGROUND = Color.fromInt(0xFF_93C5FD);
         public static final Color SELECTION_TEXT = Color.fromInt(0xFF_1E1E1E);

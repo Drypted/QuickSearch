@@ -19,6 +19,7 @@ public class ModKeybinds
     private static KeyMapping openKey;
     private static KeyMapping closeKey;
     private static KeyMapping openCommandKey;
+    private static KeyMapping focusHotbarKey;
 
     // input
     private static KeyMapping inputSubmitKey;
@@ -37,11 +38,13 @@ public class ModKeybinds
         openKey = getKeyMapping("open", GLFW.GLFW_KEY_Y);
         closeKey = getKeyMapping("close", GLFW.GLFW_KEY_ESCAPE);
         openCommandKey = getKeyMapping("open_command", GLFW.GLFW_KEY_U);
+        focusHotbarKey = getKeyMapping("focus_hotbar", GLFW.GLFW_KEY_GRAVE_ACCENT);
         inputSubmitKey = getKeyMapping("input_submit", GLFW.GLFW_KEY_ENTER);
 
         KeyBindingHelper.registerKeyBinding(openKey);
         KeyBindingHelper.registerKeyBinding(closeKey);
         KeyBindingHelper.registerKeyBinding(openCommandKey);
+        KeyBindingHelper.registerKeyBinding(focusHotbarKey);
         KeyBindingHelper.registerKeyBinding(inputSubmitKey);
     }
 
@@ -82,6 +85,8 @@ public class ModKeybinds
     public static KeyMapping getOpenKey() { return openKey; }
 
     public static KeyMapping getOpenCommandKey() { return openCommandKey; }
+
+    public static KeyMapping getFocusHotbarKey() { return focusHotbarKey; }
 
     public static KeyMapping getInputSubmitKey() { return inputSubmitKey; }
 }

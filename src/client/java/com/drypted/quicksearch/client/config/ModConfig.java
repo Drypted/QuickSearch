@@ -45,6 +45,7 @@ public class ModConfig implements ConfigData
         @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         @ConfigEntry.Gui.Tooltip
         public CompletionType shiftCompletionType = CompletionType.SINGLE_WORD;
+        @ConfigEntry.Gui.Tooltip public boolean showCompletionIndicator = true;
     }
 
     public static class Notifications implements ConfigData
