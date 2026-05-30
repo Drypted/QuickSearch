@@ -15,3 +15,6 @@
 - [X] Fix Scaling
 - [X] Change focus without completion
   - [X] Keybind to focus directly on hotbar collection without pressing tab
+
+- [ ] Improve Search Algorithm
+- ![img.png](readme/imgs/img.png)
