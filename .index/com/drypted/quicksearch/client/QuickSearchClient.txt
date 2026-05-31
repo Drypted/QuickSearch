@@ -1,0 +1,12 @@
+Updated: 2026-05-31
+com.drypted.quicksearch.client.QuickSearchClient
+src/client/java/com/drypted/quicksearch/client/QuickSearchClient.java
+
+Client entrypoint (ClientModInitializer). The real initializer for the mod.
+- MOD_ID = "quicksearch"; LOGGER = SLF4J logger named by MOD_ID.
+- onInitializeClient(): registers config then keybinds:
+    AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new)
+    Config = AutoConfig.getConfigHolder(ModConfig.class).getConfig()
+    ModKeybinds.register(); ModKeybinds.registerClientCallback();
+- static ModConfig getConfig()  -> current config instance
+- static void saveConfig()      -> AutoConfig.getConfigHolder(...).save()

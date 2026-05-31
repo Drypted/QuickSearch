@@ -1,0 +1,17 @@
+Updated: 2026-05-31
+com.drypted.quicksearch.client.init.ModKeybinds
+src/client/java/com/drypted/quicksearch/client/init/ModKeybinds.java
+
+Registers key mappings and the tick callback that opens the screen.
+- Category registered via KeyMapping.Category.register(Identifier(MOD_ID,"keymappings")).
+- Keys (default GLFW codes), translation key "key.quicksearch.<id>":
+    open         -> Y      (GLFW_KEY_Y)
+    close        -> Escape  (GLFW_KEY_ESCAPE)
+    open_command -> U      (GLFW_KEY_U)
+    focus_hotbar -> `      (GLFW_KEY_GRAVE_ACCENT)
+    input_submit -> Enter  (GLFW_KEY_ENTER)
+- register(): builds + KeyBindingHelper.registerKeyBinding(...) for each.
+- registerClientCallback(): ClientTickEvents.END_CLIENT_TICK; if config.enabled,
+    on openKey.consumeClick -> SearchHandler.requestCreativeTabRebuild() + setScreen(new QuickSearchScreen(false))
+    on openCommandKey       -> same + new QuickSearchScreen(true)   (true = command mode)
+- Getters expose each KeyMapping + the category (used by UI for key labels).

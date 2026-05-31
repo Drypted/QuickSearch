@@ -1,0 +1,19 @@
+Updated: 2026-05-31
+com.drypted.quicksearch.client.ui.renderer.RenderCommon
+src/client/java/com/drypted/quicksearch/client/ui/renderer/RenderCommon.java
+
+Final util class: all custom GUI primitive drawing for the mod. Pure shape/text/
+item rendering -- NO mosaic code anymore (mosaic feature disabled; see
+.llm/implementation/mosaic.md).
+- GlobalAlphaModifier (0..1): every draw multiplies color alpha by it.
+  setGlobalAlphaModifier / getGlobalAlphaModifier.
+- drawRectangle(...): rounded corners (RoundedCorners) + per-side outline
+  (OutlinedSides) + inset thickness; built from drawQuad/drawFloatQuad which
+  submit GuiElementRenderState with RenderPipelines.GUI, TextureSetup.noTexture(),
+  scissor-aware bounds (computeBounds via Matrix3x2f pose transform).
+- Labels: drawLabel / drawLabelWithScale / drawLabelInBox (auto-fit text in box).
+- Icons/anims: drawTick, drawX, drawThreeDotPulseSpinner,
+  drawThreeDotBouncePulseSpinner.
+- Lines: drawHorizontalLine, drawVerticalLine, plus private Bresenham/raster line.
+- Items: drawScaledItemFactor / drawScaledItemSize (VANILLA_ITEM_SIZE=16).
+- Text: drawScaledText (pose push/translate/scale + font.drawString).

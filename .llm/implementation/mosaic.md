@@ -1,5 +1,19 @@
 # Mosaic Implementation
 
+> **Status (last updated 2026-05-31): DISABLED for now.**
+> The mosaic background feature is currently turned off. The integration code
+> described below is not wired into the live render path: there is no
+> `MosaicBackgroundRenderer` class in `src/`, and `RenderCommon` does not call
+> any mosaic blit. What still exists in the tree:
+> - `src/main/resources/assets/quicksearch/post_effect/mosaic_background.json`
+> - `src/main/resources/assets/quicksearch/shaders/core/mosaic_background.fsh`
+>   (both still reference the legacy `spotlight:` namespace IDs internally)
+> - the `GameRendererAccessor` mixin (`com.drypted.quicksearch.client.mixin`)
+>
+> This document is retained as the design/reference for re-enabling the feature.
+> Paths below predate the `spotlight` -> `quicksearch` rename; treat class/asset
+> locations as `com.drypted.quicksearch.*` / `assets/quicksearch/*`.
+
 ## Overview
 
 The current mosaic background implementation uses a two-stage pipeline:

@@ -1,0 +1,28 @@
+QuickSearch repo source index
+==============================
+
+WHY THIS EXISTS
+  Replaces the old root-level file-descriptions.md. Caches "just enough" per-file
+  facts about THIS repo's own source so repeat tasks don't require re-reading
+  files. Filled incrementally as files are touched (implement-first / index-as-
+  you-go), plus a seed of important central files.
+
+LAYOUT
+  .index/<java/package/path>/<ClassName>.txt
+  example:
+    .index/com/drypted/quicksearch/client/core/handlers/SearchHandler.txt
+  One directory per Java package; one text file per class.
+  (No version subdir -- unlike the decompiled indexes -- because this tracks the
+   live source. Each entry instead carries an "Updated:" date; see below.)
+
+WHAT EACH FILE RECORDS (terse)
+  - Source path (src/client/... or src/main/...) + one-line responsibility
+  - Key public methods/fields actually relevant to tasks
+  - Non-obvious behavior / contracts
+  - First line: "Updated: YYYY-MM-DD" -- bump it whenever the entry is revised so
+    staleness is visible. Refresh the entry when the underlying class changes.
+
+RULES
+  - Plain text only (not markdown). Terse. Only verified facts.
+  - This is a CACHE, not exhaustive docs; absence of a file just means "not
+    indexed yet", not "doesn't exist".

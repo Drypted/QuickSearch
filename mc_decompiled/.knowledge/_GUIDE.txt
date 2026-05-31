@@ -1,0 +1,15 @@
+QuickSearch knowledge notes -- Minecraft internals
+==================================================
+
+Free-form, cross-cutting findings about Minecraft 1.21.11 that are NOT tied to a
+single class (those go in .index/<version>/...). Use for patterns, pipelines,
+gotchas, and version-specific quirks discovered while working.
+
+Examples of topic files:
+  rendering-pipeline.txt   - framebuffer/post-effect/shader flow gotchas
+  codecs.txt               - Codec / DataResult usage patterns
+  creative-tabs.txt        - tab build/rebuild lifecycle notes
+
+RULES
+  - One topic per file, named by topic (kebab-case).
+  - Terse, verified facts only. Plain text. No markdown.

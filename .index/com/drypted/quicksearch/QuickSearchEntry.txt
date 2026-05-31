@@ -1,0 +1,7 @@
+Updated: 2026-05-31
+com.drypted.quicksearch.QuickSearchEntry
+src/main/java/com/drypted/quicksearch/QuickSearchEntry.java
+
+Common (non-client) ModInitializer entrypoint. Intentionally EMPTY --
+onInitialize() does nothing. All real init is client-side in QuickSearchClient.
+Wired via the "main" entrypoint in src/main/resources/fabric.mod.json.

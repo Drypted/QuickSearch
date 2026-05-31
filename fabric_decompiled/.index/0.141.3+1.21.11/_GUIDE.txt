@@ -1,0 +1,25 @@
+QuickSearch decompilation index -- Fabric (API 0.141.3+1.21.11, Loader 0.18.4)
+==============================================================================
+
+WHY THIS EXISTS
+  fabric_decompiled/src/ holds decompiled Fabric API + Fabric Loader sources.
+  This index caches "just enough" verified facts so repeat tasks do not require
+  re-reading the decompiled sources from scratch.
+
+LAYOUT
+  .index/<version>/<java/package/path>/<ClassName>.txt
+  example:
+    .index/0.141.3+1.21.11/net/fabricmc/fabric/api/client/event/lifecycle/v1/ClientTickEvents.txt
+  One directory per Java package; one text file per class that was inspected.
+
+WHAT EACH CLASS FILE RECORDS (terse, only what was actually needed/verified)
+  - Fully-qualified class name + the source path inspected (fabric_decompiled/src/...)
+  - Relevant method/event signatures used (exact names + params)
+  - Callback/functional-interface shapes, registration entrypoints
+  - One-line behavior note when non-obvious
+
+RULES
+  - Add a line ONLY after verifying it in the decompiled source.
+  - Keep it terse. Plain text only. No markdown.
+
+For cross-cutting / non-class-specific notes, use fabric_decompiled/.knowledge/.

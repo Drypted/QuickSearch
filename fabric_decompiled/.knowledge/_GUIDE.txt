@@ -1,0 +1,15 @@
+QuickSearch knowledge notes -- Fabric internals
+===============================================
+
+Free-form, cross-cutting findings about Fabric (API 0.141.3+1.21.11, Loader
+0.18.4) that are NOT tied to a single class (those go in .index/<version>/...).
+Use for patterns, entrypoint conventions, mixin integration gotchas, etc.
+
+Examples of topic files:
+  entrypoints.txt   - fabric.mod.json entrypoint wiring
+  mixins.txt        - mixin/accessor conventions and pitfalls
+  events.txt        - event registration patterns
+
+RULES
+  - One topic per file, named by topic (kebab-case).
+  - Terse, verified facts only. Plain text. No markdown.

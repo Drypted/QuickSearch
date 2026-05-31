@@ -1,0 +1,15 @@
+Updated: 2026-05-31
+com.drypted.quicksearch.client.core.handlers.CommandsHandler
+src/client/java/com/drypted/quicksearch/client/core/handlers/CommandsHandler.java
+
+Static facade over a CommandRegistry (REGISTRY field). Commands registered ONLY
+in the static block, then rebuildCommandIndex().
+- Registered (args) commands: GetPlayerHeadCommand, SaveHotbarCommand,
+  SaveInventoryCommand, LoadHotbarCommand, LoadInventoryCommand,
+  DeleteHotbarCommand, DeleteInventoryCommand. Load/Delete ctors throw IOException
+  and are wrapped in try/catch(IOException ignored).
+- getCommands(userInput, onComplete): REGISTRY.searchByUserInput(userInput).
+- rebuildCommandIndex(): REGISTRY.rebuildIndex() -- call after adding/removing cmds.
+- getRawCommand(name); execute(name, args, LocalPlayer) -> CommandFeedback;
+  getArgSuggestions(commandName, args) -> List<String>.
+Actual registry/search/exec logic lives in CommandRegistry (same package).

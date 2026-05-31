@@ -1,0 +1,18 @@
+Updated: 2026-05-31
+com.drypted.quicksearch.client.core.handlers.SearchHandler
+src/client/java/com/drypted/quicksearch/client/core/handlers/SearchHandler.java
+
+Static singleton-style registry for item search over creative-tab items.
+State: List<ItemsResultData> GameItems; SimpleSearch + SmartSearch instances;
+CompletableFuture<Void> ActiveSearchTask (for cancellation).
+- rebuildGameItems(): GameItems = ItemIndexBuilder.buildGameItems(); rebuilds both
+  SimpleSearch and SmartSearch over them.
+- requestCreativeTabRebuild(): no-op if level/player null; else
+  CreativeModeTabs.tryRebuildTabContents(level.enabledFeatures(),
+  player.canUseGameMasterBlocks(), level.registryAccess()).
+- searchAsync(query, onComplete[, mode]): cancels prior task; blank query -> empty
+  immediately; runs chosen mode off-thread via CompletableFuture.supplyAsync;
+  delivers results on main thread via Minecraft.getInstance().execute(...).
+  Mode from config: fuzzySearch ? SMART : SIMPLE. maxResults from config.search.maxResults.
+- normalizeString(s): strip + lowercase + '_'->' ' + collapse whitespace.
+- enum SearchMode { SIMPLE, SMART }.
